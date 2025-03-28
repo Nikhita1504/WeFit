@@ -3,6 +3,7 @@ import ConnectWallet from "../components/ConnectWallet";
 import DesktopChatbot from "../components/DesktopChatbot";
 import "../styles/DesktopHome.css";
 import image from "../assets/image.png";
+import chatbot from "../assets/chatbot.png"
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -149,7 +150,7 @@ const DesktopHome = () => {
       {/* Floating Chatbot Bubble */}
       <div className="chatbot-bubble" onClick={handleToggleChatbot}>
         <img 
-          src="https://cdn.builder.io/api/v1/image/assets/TEMP/0cafdee42b20fc91416cd612ede1a22e067e02da?placeholderIfAbsent=true&apiKey=1455cb398c424e78afe4261a4bb08b71" 
+          src={chatbot} 
           alt="Chatbot" 
         />
       </div>
