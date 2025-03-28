@@ -1,0 +1,283 @@
+/* Add this CSS rule for the floating chatbot bubble */
+
+.desktop-home {
+  width: 100%;
+  min-height: 100vh;
+  background-image: url("../assets/Desktop.png");
+  background-size: cover;
+  overflow: hidden;
+
+  
+  font-family: "Poppins", sans-serif;
+  
+
+
+}
+/* Add this CSS rule for the floating chatbot bubble */
+.chatbot-bubble {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: rgba(26, 15, 43, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  z-index: 100;
+}
+
+.chatbot-bubble img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+
+.desktop-home__container {
+  max-width: 1475px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 1rem;
+}
+
+.desktop-home__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 37px 0;
+}
+
+.desktop-home__logo-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.desktop-home__logo-image {
+  width: 33px;
+  height: 58px;
+}
+
+.desktop-home__logo-text {
+  color: #ffffff;
+  font-size: 25px;
+  font-weight: 500;
+}
+
+.desktop-home__content {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: start;
+  gap: 88px;
+  padding: 37px 0;
+}
+
+.desktop-home__left-section {
+  display: flex;
+  flex-direction: column;
+  gap: 88px;
+  padding-top: 30px;
+  max-width: 530px;
+  
+}
+
+.desktop-home__welcome {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.desktop-home__title {
+  background: -webkit-linear-gradient(
+    180deg,
+    #8A2387 0%,
+    #E94057 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-size: 50px;
+  font-weight: 600;
+}
+.desktop-home__user-info{
+  height: 63px;
+  width: 63px;
+  border-radius: 100%;
+  background-image: url("../assets/profile.jpg");
+  background-size: cover;
+}
+
+.desktop-home__subtitle {
+  color: #ffffff;
+  font-size: 25px;
+}
+
+.desktop-home__stake-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 100%;
+  max-width: 490px;
+}
+
+.desktop-home__stake-label {
+  color: #f3f3f3;
+  font-size: 21px;
+}
+
+.desktop-home__input-container {
+  background-color: #3a1f67;
+  border-radius: 7px;
+  border: 1px solid #737373;
+  padding: 1rem;
+}
+
+.desktop-home__input {
+  background-color: transparent;
+  color: #ffffff;
+  width: 100%;
+  border: none;
+  outline: none;
+}
+
+.desktop-home__stake-button {
+  background:linear-gradient(270deg, #8A2387 0%, #E94057 100%);
+  color: #ffffff;
+  font-size: 17px;
+  padding: 10px;
+  border-radius: 10px;
+  width: 100%;
+  border: none;
+  cursor: pointer;
+}
+
+.desktop-home__right-section {
+  flex: 1;
+}
+
+
+
+
+.desktop-home__hero-image {
+  width: 100%;
+  max-width: 834px;
+  margin-left: 100px;
+
+  height: auto;
+}
+
+.desktop-home__stats {
+  display: flex;
+  gap: 39px;
+  padding: 30px 0;
+  margin-top: -100px;
+}
+
+.desktop-home__stats-card {
+  display: flex;
+  align-items: center;
+  gap: 33px;
+  background-color: #301f4c;
+  border-radius: 75px;
+  padding: 23px 28px;
+  flex: 1;
+  min-width: 377px;
+}
+
+.desktop-home__stats-icon-container {
+  background-color: #413359;
+  border-radius: 55px;
+  padding: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.desktop-home__stats-icon {
+  width: 124px;
+  height: 124px;
+}
+
+.desktop-home__stats-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.desktop-home__stats-label {
+  color: #ffffff;
+  font-size: 21px;
+}
+
+.desktop-home__stats-value-container {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.desktop-home__stats-value {
+  color: #ffffff;
+  font-size: 45px;
+}
+
+.desktop-home__stats-suffix {
+  color: #ffffff;
+  font-size: 18px;
+}
+
+.desktop-home__progress-bar {
+  width: 138px;
+  height: 8px;
+  background-color: #f2f3f1;
+  border-radius: 43px;
+  position: relative;
+  margin-top: 8px;
+}
+
+.desktop-home__progress-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 93px;
+  height: 8px;
+  background-color: #b057f5;
+  border-radius: 43px;
+}
+@media (max-width: 1200px) {
+  .desktop-home__hero-image{
+    display: none;
+  }
+  .desktop-home__stats {
+    flex-wrap: wrap;
+  }
+  .desktop-home__content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+}
+
+@media (max-width: 991px) {
+  
+
+  
+  .desktop-home__hero-image{
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .desktop-home__title {
+    font-size: 40px;
+  }
+
+  .desktop-home__subtitle {
+    font-size: 20px;
+  }
+
+  .desktop-home__stats {
+    gap: 20px;
+  }
+}
