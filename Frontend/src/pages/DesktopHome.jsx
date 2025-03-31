@@ -16,7 +16,7 @@ import {
 } from "../components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+
 import useStepCount from "../utils/useStepCount";
 import useFitnessData from "../utils/useStepCount";
 import AnimatedCounter from "../components/ui/AnimatedCounter";
@@ -29,7 +29,7 @@ const DesktopHome = () => {
   const navigate = useNavigate();
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
   const { logout, JwtToken } = useAuth();
-  const navigate = useNavigate();
+ 
   const { todaySteps,
     weeklySteps,
     todayCalories,
