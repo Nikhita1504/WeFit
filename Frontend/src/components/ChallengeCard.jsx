@@ -10,8 +10,10 @@ const ChallengeCard = ({
   stakeRangemin,
   stakeRangemax,
   rewardMultiplier,
+  onClick,
 }) => {
   const navigate = useNavigate();
+  
   const getDifficultyStyles = (difficulty) => {
     const baseStyles = "text-white text-xs px-1 py-0.5 rounded-full";
     switch (difficulty.toLowerCase()) {
@@ -19,13 +21,23 @@ const ChallengeCard = ({
         return `${baseStyles} bg-[#00FF84] border border-[#1AFF00]`;
       case "medium":
         return `${baseStyles} bg-[#F37500] border border-[#FFC084]`;
+      case "hard":
+        return `${baseStyles} bg-[#FF0000] border border-[#FF8484]`;
       default:
         return `${baseStyles} bg-gray-500 border border-gray-400`;
     }
   };
 
+  const handleDetailsClick = (e) => {
+    e.stopPropagation();
+    navigate("/details");
+  };
+
   return (
-    <div className="bg-[#1A0F2B] border-2 border-[#301F4C] rounded-[11px] p-6">
+    <div 
+      className="bg-[#1A0F2B] border-2 border-[#301F4C] rounded-[11px] p-6 cursor-pointer hover:border-[#512E8B] transition-colors"
+      onClick={onClick}
+    >
       <div className="flex justify-between items-start mb-5">
         <div>
           <h3 className="text-white text-2xl font-medium mb-2.5">{title}</h3>
@@ -48,7 +60,7 @@ const ChallengeCard = ({
       </div>
 
       <div className="flex justify-end mt-[38px]">
-        <button className="details-btn" onClick={() => navigate("/details")}>
+        <button className="details-btn" onClick={handleDetailsClick}>
           Details
           <ArrowRight className="w-5 h-5" />
         </button>

@@ -2,7 +2,7 @@
 import { useNavigate } from "react-router-dom";
 
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import ConnectWallet from "../components/ConnectWallet";
 import DesktopChatbot from "../components/DesktopChatbot";
@@ -16,7 +16,7 @@ import {
 } from "../components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+
 import useStepCount from "../utils/useStepCount";
 import useFitnessData from "../utils/useStepCount";
 import AnimatedCounter from "../components/ui/AnimatedCounter";
@@ -29,7 +29,8 @@ const DesktopHome = () => {
   const navigate = useNavigate();
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
   const { logout, JwtToken } = useAuth();
-  const navigate = useNavigate();
+  const [isCameraOn, setIsCameraOn] = useState(false);
+
   const { todaySteps,
     weeklySteps,
     todayCalories,
@@ -63,6 +64,46 @@ const DesktopHome = () => {
   //   weeklySteps, 
   //   todayCalories, 
   //   weeklyCalories,]);
+
+
+const [videoStream, setVideoStream] = useState(null);
+const videoRef = useRef(null);
+
+const handleCameraClick = async () => {
+  try {
+    if (!isCameraOn) {
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: "user" } // Front camera
+      });
+      setVideoStream(stream);
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+    } else {
+      // Turn off camera
+      if (videoStream) {
+        videoStream.getTracks().forEach(track => track.stop());
+        setVideoStream(null);
+        if (videoRef.current) {
+          videoRef.current.srcObject = null;
+        }
+      }
+    }
+    setIsCameraOn(!isCameraOn);
+  } catch (err) {
+    console.error("Camera error:", err);
+    alert("Could not access camera. Please enable permissions.");
+  }
+};
+
+// Clean up camera on unmount
+useEffect(() => {
+  return () => {
+    if (videoStream) {
+      videoStream.getTracks().forEach(track => track.stop());
+    }
+  };
+}, [videoStream]);
 
   const chatMessages = [
     {
@@ -207,7 +248,7 @@ const DesktopHome = () => {
                 5K Steps + 30 Push-ups
               </div>
               <div className="flex gap-9 items-center mt-10 w-full max-md:max-w-full">
-                <ProgressCircle todaySteps={weeklySteps} />
+                <ProgressCircle todaySteps={todaySteps} />
                 <div className="flex flex-col flex-1 shrink justify-center self-stretch ">
                   <div className="max-w-full w-[231px]">
                     <div className="text-sm leading-loose text-white">
@@ -223,10 +264,22 @@ const DesktopHome = () => {
                       </div>
                       <div className="flex flex-1 gap-1 items-center self-stretch my-auto bg-gray-700 min-h-[23px] rounded-[100px] w-full">
                         <div className="flex gap-2.5 items-center self-stretch px-2 py-1 my-auto bg-purple-900 min-h-[23px] rounded-[100px] w-[35px]">
-                          <img
-                            src="https://cdn.builder.io/api/v1/image/assets/TEMP/e826333352b18a0edd62a11ce90e0578440fdeb6?placeholderIfAbsent=true&apiKey=1455cb398c424e78afe4261a4bb08b71"
+                        <img
+                            src="https://cdn.builder.io/api/v1/image/assets/TEMP/33266c09e91dbfd9d462bcbee6a56ad979c4cca1?placeholderIfAbsent=true&apiKey=1455cb398c424e78afe4261a4bb08b71"
                             className="object-contain self-stretch my-auto aspect-square w-[18px]"
                           />
+                          {/* <img
+                            src="https://cdn.builder.io/api/v1/image/assets/TEMP/..."
+                            className="object-contain self-stretch my-auto aspect-square w-[18px] cursor-pointer"
+                            onClick={handleCameraClick}
+                          /> */}
+                          {/* <video 
+  ref={videoRef}
+  autoPlay
+  playsInline
+  muted
+  style={{ display: 'none' }}
+/> */}
                         </div>
                         <div className="self-stretch my-auto text-xs leading-6 text-white">
                           Capture
@@ -318,7 +371,7 @@ const DesktopHome = () => {
                     <div className="self-stretch my-auto w-[67px]">
                       <div className="text-sm leading-loose">Calories</div>
                       <div className="text-2xl">
-                        <AnimatedCounter value={weeklyCalories}/>
+                        <AnimatedCounter value={weeklyCalories} />
                       </div>
                     </div>
                   </div>

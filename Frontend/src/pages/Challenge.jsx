@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ConnectWallet from "../components/ConnectWallet";
 import DesktopChatbot from "../components/DesktopChatbot";
 import "../styles/DesktopHome.css";
@@ -12,9 +12,12 @@ import {
 } from "../components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import { FaHistory } from "react-icons/fa";
+import axios from "axios";
 
 const Challenge = () => {
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
+  const [challenges, setChallenges] = useState([]);
+  
   const chatMessages = [
     {
       sender: "bot",
@@ -34,12 +37,25 @@ const Challenge = () => {
     setIsChatbotOpen(!isChatbotOpen);
   };
 
+  const fetchChallenges = async () => {
+    try {
+      const response = await axios.get("http://localhost:3000/api/challenges/get");
+      setChallenges(response.data);
+    } catch (error) {
+      console.error("Error fetching challenges:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchChallenges();
+  }, []);
+
+  
+
   return (
     <div className="desktop-home">
-      
-      
       <div className="desktop-home__container">
-      <header className="desktop-home__header">
+        <header className="desktop-home__header">
           <div className="desktop-home__logo-container">
             <img
               src="https://cdn.builder.io/api/v1/image/assets/TEMP/69e8365158abd202fc7d010edd0471beda6cd6aa?placeholderIfAbsent=true&apiKey=1455cb398c424e78afe4261a4bb08b71"
@@ -52,15 +68,12 @@ const Challenge = () => {
             <ConnectWallet />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Avatar className="h-[63px]  p-3.5 w-[63px] border-4 border-[#512E8B] rounded-full bg-[#413359] cursor-pointer hover:opacity-80 transition-opacity">
+                <Avatar className="h-[63px] p-3.5 w-[63px] border-4 border-[#512E8B] rounded-full bg-[#413359] cursor-pointer hover:opacity-80 transition-opacity">
                   <FaHistory color="white" size={30} />
                 </Avatar>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem
-                  className="cursor-pointer"
-                  
-                >
+                <DropdownMenuItem className="cursor-pointer">
                   previous score
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -83,11 +96,9 @@ const Challenge = () => {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-
         </header>
-     
-        <ChallengeSection />
 
+        <ChallengeSection challenges={challenges} />
       </div>
 
       {/* Floating Chatbot Bubble */}

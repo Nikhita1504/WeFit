@@ -2,34 +2,28 @@ import React, { useState } from "react";
 import ChallengeCard from "./ChallengeCard";
 import "../styles/TabSelector.css";
 
-const ChallengeSection = () => {
+const ChallengeSection = ({ challenge, challenges, onChallengeSelect }) => {
   const [activeTab, setActiveTab] = useState('steps');
-  const challenges = [
-    {
-      title: "5K Steps Challenge",
-      description: "Complete 5,000 steps in a single day",
-      difficulty: "Easy",
-      stakeRangemin: "Rs 50",
-      stakeRangemax: "- 500 in ETH",
-      rewardMultiplier: "1.5x rewards",
-    },
-    {
-      title: "5K Steps Challenge",
-      description: "Complete 5,000 steps in a single day",
-      difficulty: "Medium",
-      stakeRangemin: "Rs 50",
-      stakeRangemax: "- 500 in ETH",
-      rewardMultiplier: "1.5x rewards",
-    },
-    {
-      title: "5K Steps Challenge",
-      description: "Complete 5,000 steps in a single day",
-      difficulty: "Medium",
-      stakeRangemin: "Rs 50",
-      stakeRangemax: "- 500 in ETH",
-      rewardMultiplier: "1.5x rewards",
-    },
-  ];
+  
+  // Filter challenges based on type (steps, strength, combo)
+  const filteredChallenges = challenges.filter(challenge => {
+    if (activeTab === 'steps') return challenge.type === 'steps';
+    if (activeTab === 'strength') return challenge.type === 'strength';
+    if (activeTab === 'combo') return challenge.type === 'combo';
+    return true;
+  });
+
+  // Format challenge data for display
+  const formatChallengeData = (challenge) => ({
+    title: challenge.name,
+    description: `Complete ${challenge.stepGoal} steps` + 
+                (challenge.exercises?.length ? ` + ${challenge.exercises.length} exercises` : ''),
+    difficulty: challenge.difficulty,
+    stakeRangemin: `${challenge.minStake} ETH`,
+    stakeRangemax: `- ${challenge.maxStake} ETH`,
+    rewardMultiplier: `${challenge.rewardMultiplier}x rewards`,
+    originalData: challenge // Pass through original data for details
+  });
 
   return (
     <div className="w-full max-w-[859px] mx-auto rounded-[19px] p-[50px]">
@@ -66,33 +60,18 @@ const ChallengeSection = () => {
         </div>
       </div>
       
-      {activeTab === 'steps' && (
-        <div className="space-y-12">
-          {challenges.map((challenge, index) => (
+      <div className="space-y-12">
+        {filteredChallenges.map((challenge, index) => {
+          const formattedChallenge = formatChallengeData(challenge);
+          return (
             <ChallengeCard
-              key={index}
-              title={challenge.title}
-              description={challenge.description}
-              difficulty={challenge.difficulty}
-              stakeRangemin={challenge.stakeRangemin}
-              stakeRangemax={challenge.stakeRangemax}
-              rewardMultiplier={challenge.rewardMultiplier}
+              key={challenge._id || index}
+              {...formattedChallenge}
+              onClick={() => onChallengeSelect(challenge)}
             />
-          ))}
-        </div>
-      )}
-      
-      {activeTab === 'strength' && (
-        <div className="space-y-12">
-          {/* Strength content will go here */}
-        </div>
-      )}
-      
-      {activeTab === 'combo' && (
-        <div className="space-y-12">
-          {/* Combo content will go here */}
-        </div>
-      )}
+          );
+        })}
+      </div>
     </div>
   );
 };
