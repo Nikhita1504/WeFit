@@ -16,24 +16,47 @@ import useStepCount from "../utils/useStepCount";
 import useFitnessData from "../utils/useStepCount";
 import AnimatedCounter from "../components/ui/AnimatedCounter";
 import { FaHistory } from "react-icons/fa";
+import ProgressCircle from "../components/ui/ProgressCircle";
+import axios from "axios";
+import { jwtDecode } from "jwt-decode";
 
 const DesktopHome = () => {
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
-  const {logout}=useAuth();
-  const navigate=useNavigate();
-  const { todaySteps, 
-    weeklySteps, 
-    todayCalories, 
+  const { logout, JwtToken } = useAuth();
+  const navigate = useNavigate();
+  const { todaySteps,
+    weeklySteps,
+    todayCalories,
     weeklyCalories, isLoading, error } = useFitnessData();
+  const [userData, setuserData] = useState();
+
+  const getUserData = async () => {
+    try {
+      const payload = jwtDecode(JwtToken);
+      // console.log("Decoded JWT:", payload);
+      const response = await axios.get(`http://localhost:3000/api/users/get/${payload.email}`)
+      // console.log(response.data);
+      setuserData(response.data);
+    } catch (error) {
+      console.log(error);
+
+    }
+  }
   useEffect(() => {
-    console.log('Step Data:', { todaySteps, 
-      weeklySteps, 
-      todayCalories, 
-      weeklyCalories, });
-  }, [todaySteps, 
-    weeklySteps, 
-    todayCalories, 
-    weeklyCalories,]);
+    if (JwtToken) {
+      getUserData();
+    }
+  }, [JwtToken]);
+
+  // useEffect(() => {
+  //   console.log('Step Data:', { todaySteps, 
+  //     weeklySteps, 
+  //     todayCalories, 
+  //     weeklyCalories, });
+  // }, [todaySteps, 
+  //   weeklySteps, 
+  //   todayCalories, 
+  //   weeklyCalories,]);
 
   const chatMessages = [
     {
@@ -47,7 +70,7 @@ const DesktopHome = () => {
   ];
 
   const handleLogout = () => {
-   
+
     logout();
     navigate("/login")
   };
@@ -69,9 +92,9 @@ const DesktopHome = () => {
             <div className="desktop-home__logo-text">StakeFit</div>
           </div>
           <div className="flex gap-4 items-center">
-           <div className="overflow-hidden">
-           <ConnectWallet />
-           </div>
+            <div className="overflow-hidden">
+              <ConnectWallet />
+            </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Avatar className="h-[63px]  p-3.5 w-[63px] border-4 border-[#512E8B] rounded-full bg-[#413359] cursor-pointer hover:opacity-80 transition-opacity">
@@ -81,7 +104,7 @@ const DesktopHome = () => {
               <DropdownMenuContent align="end" className="w-48">
                 <DropdownMenuItem
                   className="cursor-pointer"
-                  
+
                 >
                   previous score
                 </DropdownMenuItem>
@@ -159,7 +182,7 @@ const DesktopHome = () => {
                       src="https://cdn.builder.io/api/v1/image/assets/TEMP/6793544b358ef60ce60a3cf2caf8ae7d41362ed3?placeholderIfAbsent=true&apiKey=1455cb398c424e78afe4261a4bb08b71"
                       className="object-contain shrink-0 self-stretch my-auto w-5 aspect-square"
                     />
-                    <div className="self-stretch my-auto">1</div>
+                    <div className="self-stretch my-auto">{userData?.currentStreak}</div>
                   </div>
                   <div className="gap-1.5 self-stretch px-1 py-0.5 my-auto w-14 bg-blue-900 border border-violet-700 border-solid rounded-[37px]">
                     Today
@@ -172,49 +195,7 @@ const DesktopHome = () => {
                 5K Steps + 30 Push-ups
               </div>
               <div className="flex gap-9 items-center mt-10 w-full max-md:max-w-full">
-                <div className="self-stretch flex flex-col items-center justify-center min-h-[170px] w-[170px] max-md:px-5 relative">
-                  <svg width="175" height="175" viewBox="0 0 120 120">
-                    {/* Background circle */}
-                    <circle
-                      cx="60"
-                      cy="60"
-                      r="54"
-                      fill="none"
-                      stroke="#F2F3F1"
-                      strokeWidth="12"
-                    />
-                    {/* Progress arc - 64% of the circle */}
-                    <circle
-                      cx="60"
-                      cy="60"
-                      r="54"
-                      fill="none"
-                      stroke="url(#progressGradient)"
-                      strokeWidth="12"
-                      strokeLinecap="round"
-                      strokeDasharray="339.3"
-                      strokeDashoffset="122.1" // 339.3 * (1 - 0.64)
-                      transform="rotate(-90 60 60)"
-                    />
-                    {/* Gradient definition */}
-                    <defs>
-                      <linearGradient
-                        id="progressGradient"
-                        x1="0%"
-                        y1="0%"
-                        x2="100%"
-                        y2="0%"
-                      >
-                        <stop offset="0%" stopColor="#CF15E0" />
-                        <stop offset="100%" stopColor="#CF15E0" />
-                      </linearGradient>
-                    </defs>
-                  </svg>
-                  {/* Percentage text in the middle */}
-                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-2xl font-bold text-white">
-                    64%
-                  </div>
-                </div>
+                <ProgressCircle todaySteps={weeklySteps} />
                 <div className="flex flex-col flex-1 shrink justify-center self-stretch ">
                   <div className="max-w-full w-[231px]">
                     <div className="text-sm leading-loose text-white">
@@ -324,7 +305,9 @@ const DesktopHome = () => {
                     />
                     <div className="self-stretch my-auto w-[67px]">
                       <div className="text-sm leading-loose">Calories</div>
-                      <div className="text-2xl">1200</div>
+                      <div className="text-2xl">
+                        <AnimatedCounter value={weeklyCalories}/>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -349,7 +332,7 @@ const DesktopHome = () => {
                       />
                       <div className="self-stretch my-auto w-[99px]">
                         <div className="text-xs leading-6">Challenges Won</div>
-                        <div className="text-xl leading-none">12</div>
+                        <div className="text-xl leading-none">{userData?.challengesWon?.length}</div>
                       </div>
                     </div>
                   </div>
