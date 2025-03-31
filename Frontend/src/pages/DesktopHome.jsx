@@ -1,4 +1,9 @@
-import React, { useEffect, useState } from "react";
+
+import { useNavigate } from "react-router-dom";
+
+
+import React, { useEffect, useRef, useState } from "react";
+
 import ConnectWallet from "../components/ConnectWallet";
 import DesktopChatbot from "../components/DesktopChatbot";
 import "../styles/DesktopHome.css";
@@ -11,7 +16,7 @@ import {
 } from "../components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+
 import useStepCount from "../utils/useStepCount";
 import useFitnessData from "../utils/useStepCount";
 import AnimatedCounter from "../components/ui/AnimatedCounter";
@@ -21,9 +26,11 @@ import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 
 const DesktopHome = () => {
+  const navigate = useNavigate();
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
   const { logout, JwtToken } = useAuth();
-  const navigate = useNavigate();
+  const [isCameraOn, setIsCameraOn] = useState(false);
+
   const { todaySteps,
     weeklySteps,
     todayCalories,
@@ -57,6 +64,46 @@ const DesktopHome = () => {
   //   weeklySteps, 
   //   todayCalories, 
   //   weeklyCalories,]);
+
+
+const [videoStream, setVideoStream] = useState(null);
+const videoRef = useRef(null);
+
+const handleCameraClick = async () => {
+  try {
+    if (!isCameraOn) {
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: "user" } // Front camera
+      });
+      setVideoStream(stream);
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+    } else {
+      // Turn off camera
+      if (videoStream) {
+        videoStream.getTracks().forEach(track => track.stop());
+        setVideoStream(null);
+        if (videoRef.current) {
+          videoRef.current.srcObject = null;
+        }
+      }
+    }
+    setIsCameraOn(!isCameraOn);
+  } catch (err) {
+    console.error("Camera error:", err);
+    alert("Could not access camera. Please enable permissions.");
+  }
+};
+
+// Clean up camera on unmount
+useEffect(() => {
+  return () => {
+    if (videoStream) {
+      videoStream.getTracks().forEach(track => track.stop());
+    }
+  };
+}, [videoStream]);
 
   const chatMessages = [
     {
@@ -102,10 +149,12 @@ const DesktopHome = () => {
                 </Avatar>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
+
                 <DropdownMenuItem
                   className="cursor-pointer"
 
                 >
+
                   previous score
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -128,7 +177,6 @@ const DesktopHome = () => {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-
         </header>
 
         <div className="desktop-home__content">
@@ -138,7 +186,12 @@ const DesktopHome = () => {
               <div className="desktop-home__subtitle">
                 Sweat, hustle, and earn
               </div>
-              <button className="herobutton">Take on next challenge</button>
+              <button
+                className="herobutton"
+                onClick={() => navigate("/challenge")}
+              >
+                Take on next challenge
+              </button>{" "}
             </div>
             <div className="gap-5 flex flex-col">
               <div className="desktop-home__stats-card">
@@ -157,7 +210,7 @@ const DesktopHome = () => {
                   <h2 className="desktop-section-text ">Fitness Tips</h2>
                   <ul className="mt-2.5 text-base leading-9 text-zinc-400 max-md:max-w-full list-none">
                     <li>
-                      Start with 3,000–5,000 steps if you're new to walking
+                      Start with 3,000-5,000 steps if you're new to walking
                     </li>
                     <li>Take the stairs instead of elevators.</li>
                     <li>
@@ -211,10 +264,22 @@ const DesktopHome = () => {
                       </div>
                       <div className="flex flex-1 gap-1 items-center self-stretch my-auto bg-gray-700 min-h-[23px] rounded-[100px] w-full">
                         <div className="flex gap-2.5 items-center self-stretch px-2 py-1 my-auto bg-purple-900 min-h-[23px] rounded-[100px] w-[35px]">
-                          <img
-                            src="https://cdn.builder.io/api/v1/image/assets/TEMP/e826333352b18a0edd62a11ce90e0578440fdeb6?placeholderIfAbsent=true&apiKey=1455cb398c424e78afe4261a4bb08b71"
+                        <img
+                            src="https://cdn.builder.io/api/v1/image/assets/TEMP/33266c09e91dbfd9d462bcbee6a56ad979c4cca1?placeholderIfAbsent=true&apiKey=1455cb398c424e78afe4261a4bb08b71"
                             className="object-contain self-stretch my-auto aspect-square w-[18px]"
                           />
+                          {/* <img
+                            src="https://cdn.builder.io/api/v1/image/assets/TEMP/..."
+                            className="object-contain self-stretch my-auto aspect-square w-[18px] cursor-pointer"
+                            onClick={handleCameraClick}
+                          /> */}
+                          {/* <video 
+  ref={videoRef}
+  autoPlay
+  playsInline
+  muted
+  style={{ display: 'none' }}
+/> */}
                         </div>
                         <div className="self-stretch my-auto text-xs leading-6 text-white">
                           Capture
@@ -306,7 +371,7 @@ const DesktopHome = () => {
                     <div className="self-stretch my-auto w-[67px]">
                       <div className="text-sm leading-loose">Calories</div>
                       <div className="text-2xl">
-                        <AnimatedCounter value={todayCalories}/>
+                        <AnimatedCounter value={weeklyCalories} />
                       </div>
                     </div>
                   </div>

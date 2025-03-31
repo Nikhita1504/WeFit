@@ -4,7 +4,11 @@ import "./App.css";
 import MobileHome from "./pages/MobileHome";
 import DesktopHome from "./pages/DesktopHome";
 import DesktopLogin from "./pages/DesktopLogin";
+import Details from "./pages/Details";
 import MobileLogin from "./pages/MobileLogin";
+
+import Challenge from "./pages/Challenge";
+
 import { AuthProvider, useAuth } from "./context/AuthContext";
 
 function App() {
@@ -41,11 +45,26 @@ function App() {
               <ProtectedRoute>
                 <ResponsiveHome />
               </ProtectedRoute>
-            } />
-          </Routes>
-        </div>
-      </Router>
-    </AuthProvider>
+
+            } 
+          />
+          <Route path="/challenge" element={
+              <ProtectedRoute>
+                <Challenge />
+              </ProtectedRoute>
+            }  />
+            <Route path="/details" element={
+              <ProtectedRoute>
+                <Details />
+              </ProtectedRoute>
+            }  />
+          
+          {/* Add more routes as needed */}
+        </Routes>
+      </div>
+    </Router>
+ </AuthProvider>
+
   );
 }
 
