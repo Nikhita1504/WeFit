@@ -23,7 +23,7 @@ const DetailsCard = ({
 
   return (
     <div className="bg-[#1A0F2B] border-2 border-[#301F4C] rounded-[11px] p-6">
-      <div className="flex justify-between items-start mb-5">
+      <div className="flex justify-between  items-start mb-5">
         <div>
           <h3 className="text-white text-2xl font-medium mb-2.5">{title}</h3>
           <p className="text-[#CDCDCD] text-lg">{description1}</p>
@@ -65,18 +65,13 @@ const DetailsCard = ({
       </div>
 
       <div className="mt-4 mb-6">
-        <p className="text-white text-sm">
-          <span className="font-semibold">Note:</span> The challenge will start immediately after staking. Make sure you're ready to begin.
+        <p className="text-black text-sm bg-amber-400 p-2 rounded-lg">
+          <span className="font-semibold">Note:</span> Your stake will be refunded successfully if you complete the challenge within the given time frame. If you fail your stake will be distributed to the reward pool.
         </p>
       </div>
 
       <div className="flex justify-between gap-4 mt-[38px]">
-        <button 
-          
-          className="detailss-btn"
-        >
-          Connect Wallet
-        </button>
+       
         
         <button 
           className="detailsss-btn"
