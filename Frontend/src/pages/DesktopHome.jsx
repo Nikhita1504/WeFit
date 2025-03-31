@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ConnectWallet from "../components/ConnectWallet";
 import DesktopChatbot from "../components/DesktopChatbot";
 import "../styles/DesktopHome.css";
@@ -10,10 +10,31 @@ import {
   DropdownMenuTrigger,
 } from "../components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
+import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
+import useStepCount from "../utils/useStepCount";
+import useFitnessData from "../utils/useStepCount";
+import AnimatedCounter from "../components/ui/AnimatedCounter";
 import { FaHistory } from "react-icons/fa";
 
 const DesktopHome = () => {
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
+  const {logout}=useAuth();
+  const navigate=useNavigate();
+  const { todaySteps, 
+    weeklySteps, 
+    todayCalories, 
+    weeklyCalories, isLoading, error } = useFitnessData();
+  useEffect(() => {
+    console.log('Step Data:', { todaySteps, 
+      weeklySteps, 
+      todayCalories, 
+      weeklyCalories, });
+  }, [todaySteps, 
+    weeklySteps, 
+    todayCalories, 
+    weeklyCalories,]);
+
   const chatMessages = [
     {
       sender: "bot",
@@ -26,7 +47,9 @@ const DesktopHome = () => {
   ];
 
   const handleLogout = () => {
-    console.log("Logging out...");
+   
+    logout();
+    navigate("/login")
   };
 
   const handleToggleChatbot = () => {
@@ -46,7 +69,9 @@ const DesktopHome = () => {
             <div className="desktop-home__logo-text">StakeFit</div>
           </div>
           <div className="flex gap-4 items-center">
-            <ConnectWallet />
+           <div className="overflow-hidden">
+           <ConnectWallet />
+           </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Avatar className="h-[63px]  p-3.5 w-[63px] border-4 border-[#512E8B] rounded-full bg-[#413359] cursor-pointer hover:opacity-80 transition-opacity">

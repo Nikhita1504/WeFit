@@ -17,7 +17,7 @@ app.get("/", (req, res) => {
   res.send("API is running...");
 });
 
-app.use("/add-user", userData); 
+app.use("/api/users", userData); 
 
 
 // Server
@@ -25,5 +25,7 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
+
+
 
 
