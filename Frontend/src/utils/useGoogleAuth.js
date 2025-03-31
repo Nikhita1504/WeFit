@@ -49,16 +49,15 @@ export const useGoogleAuth = () => {
       
       const token = googleUser.getAuthResponse().access_token;
       console.log(token)
-      login(token);
+     
   
       const { data } = await axios.post('http://localhost:3000/api/users/', {
         email: googleUser.getBasicProfile().getEmail(),
         name: googleUser.getBasicProfile().getName(),
         googleId: googleUser.getBasicProfile().getId()
       });
-
-      console.log(data.token);
-      console.log(data.user);
+      login(token,data.token);
+     
   
       // navigate('/home');
     } catch (error) {
