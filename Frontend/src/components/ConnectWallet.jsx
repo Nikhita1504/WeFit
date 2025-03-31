@@ -1,7 +1,12 @@
-import React from "react";
+import { useState } from "react";
+import { connectMetaMask } from "../Utils/ConnectWallet";
 
 const ConnectWallet = () => {
-  return <button className="connect-wallet">Connect Wallet</button>;
+  const[account , Setaccount] = useState("Connect Wallet")
+  const handleconnect = async () =>{
+    Setaccount( await connectMetaMask());
+   }
+  return <button onClick={handleconnect} className="connect-wallet">{account}</button>;
 };
 
 export default ConnectWallet;
