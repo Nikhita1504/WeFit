@@ -80,13 +80,71 @@ const userSchema = new mongoose.Schema({
   timestamps: true
 });
 
+const challengeSchema = new mongoose.Schema({
+  // Core
+  name: {
+    type: String,
+    required: true
+  },
+  description: {
+    type: String
+  },
+  type: {
+    type: String,
+    enum: ["steps", "strength", "combo"],
+    required: true
+  },
 
+  // Requirements
+  stepGoal: {
+    type: Number
+  },
+  exercises: [{
+    name: {
+      type: String,
+      required: true
+    },
+    reps: {
+      type: Number,
+      required: true
+    }
+  }],
 
+  // Crypto Economics
+  minStake: {
+    type: Number,
+    required: true,
+    min: 0.0000001
+  },
+  maxStake: {
+    type: Number,
+    required: true,
+    max: 50
+  },
+  rewardMultiplier: {
+    type: Number,
+    default: 1.0,
+    min: 1.0
+  },
+
+  // Metadata
+  difficulty: {
+    type: String,
+    enum: ["easy", "medium", "hard"],
+    required: true
+  },
+  tags: {
+    type: [String],
+    default: []
+  }
+}, {
+  timestamps: true
+});
 const User = mongoose.model('User', userSchema);
+const Challenge = mongoose.model('Challenge', challengeSchema);
 
 
 
-
-module.exports = { User};
-
+// Export both models
+module.exports = { User, Challenge };
 

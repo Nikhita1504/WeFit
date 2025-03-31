@@ -7,19 +7,19 @@ export const AuthProvider = ({ children }) => {
     return localStorage.getItem('googleToken') || null;
   });
   const [JwtToken, setJwtToken] = useState(() => {
-    return sessionStorage.getItem('JwtToken') || null;
+    return localStorage.getItem('JwtToken') || null;
   });
 
   const login = (newToken,jwtToken) => {
     localStorage.setItem('googleToken', newToken);
-    sessionStorage.setItem('JwtToken', jwtToken);
+    localStorage.setItem('JwtToken', jwtToken);
     setToken(newToken);
     setJwtToken(jwtToken);
   };
 
   const logout = () => {
     localStorage.removeItem('googleToken');
-    sessionStorage.removeItem('JwtToken');
+    localStorage.removeItem('JwtToken');
     setToken(null);
     setJwtToken(null);
   };

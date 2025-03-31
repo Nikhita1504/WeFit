@@ -1,41 +1,35 @@
 import { useState, useEffect } from "react";
+import AnimatedNumber from "./AnimatedNumber";
 
 const ProgressCircle = ({ todaySteps }) => {
   const [progress, setProgress] = useState(0);
 
   // Total circumference of the circle
-  const circleCircumference = 5000;
+  const circleCircumference = 339.3; // 2 * π * r (for r=54)
 
-  // Calculate strokeDashoffset based on percentage of completion
-  const progressPercentage = Math.min(todaySteps / 10000, 1); // Assuming max steps = 10000
+  // **Modify Progress Calculation for 5000 Steps**
+  const maxSteps = 5000; 
+  const progressPercentage = Math.min(todaySteps / maxSteps, 1); // Normalize within 0-1
   const progressOffset = circleCircumference * (1 - progressPercentage);
 
-  // Define colors dynamically based on todaySteps
+  // **Dynamic Color Based on todaySteps**
   const getProgressColor = () => {
-    if (todaySteps < 3000) return "#FF3B30"; // Red for low steps
-    if (todaySteps < 7000) return "#FF9500"; // Orange for medium steps
-    return "#4CD964"; // Green for high steps
+    if (todaySteps < 1500) return "#FF3B30"; // Red (low progress)
+    if (todaySteps < 3500) return "#FF9500"; // Orange (medium progress)
+    return "#4CD964"; // Green (high progress)
   };
 
   useEffect(() => {
-    // Animate from 0 to the actual progress
     setTimeout(() => {
       setProgress(progressOffset);
     }, 500);
   }, [todaySteps]);
 
   return (
-    <div className="self-stretch flex flex-col items-center justify-center min-h-[170px] w-[170px] max-md:px-5 relative">
+    <div className="relative flex items-center justify-center w-[170px] h-[170px]">
       <svg width="175" height="175" viewBox="0 0 120 120">
         {/* Background Circle */}
-        <circle
-          cx="60"
-          cy="60"
-          r="54"
-          fill="none"
-          stroke="#F2F3F1"
-          strokeWidth="12"
-        />
+        <circle cx="60" cy="60" r="54" fill="none" stroke="#F2F3F1" strokeWidth="12" />
 
         {/* Animated Progress Arc */}
         <circle
@@ -49,15 +43,13 @@ const ProgressCircle = ({ todaySteps }) => {
           strokeDasharray={circleCircumference}
           strokeDashoffset={progress}
           transform="rotate(-90 60 60)"
-          style={{
-            transition: "stroke-dashoffset 1.5s ease-out", // Smooth animation
-          }}
+          style={{ transition: "stroke-dashoffset 1.5s ease-out" }} // Smooth animation
         />
       </svg>
 
-      {/* Percentage Text */}
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-2xl font-bold text-white">
-        {todaySteps}
+      {/* Animated Number in Center */}
+      <div className="absolute text-2xl font-bold text-white">
+        <AnimatedNumber value={todaySteps}/>
       </div>
     </div>
   );
