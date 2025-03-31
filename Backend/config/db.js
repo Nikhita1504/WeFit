@@ -15,35 +15,73 @@ mongoose
 
 // User model
 const userSchema = new mongoose.Schema({
+  // Auth & Identity
+  googleId: {
+    type: String,
+    unique: true,
+    sparse: true,
+    required: true
+  },
   email: {
     type: String,
-    required: true,
     unique: true,
+    required: true,
     trim: true,
     lowercase: true,
     match: [/\S+@\S+\.\S+/, 'is invalid']
   },
   name: {
     type: String,
-    required: true,
     trim: true
   },
-  googleId: {
+  walletAddress: {
     type: String,
-    required: true,
-    unique: true
+    index: true,
+    default: null,
+    // validate: {
+    //   validator: function (v) {
+    //     return /^0x[a-fA-F0-9]{40}$/.test(v);
+    //   },
+    //   message: props => `${props.value} is not a valid wallet address!`
+    // }
   },
-  createdAt: {
-    type: Date,
-    default: Date.now
+
+  // Challenges
+  challengesWon: [{
+    challengeId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Challenge',
+      required: true
+    },
+    dateCompleted: {
+      type: Date,
+      default: Date.now
+    },
+    stakedAmount: {
+      type: Number,
+      required: true,
+      min: 0
+    },
+    rewardReceived: {
+      type: Number,
+      required: true,
+      min: 0
+    }
+  }],
+
+  // Activity
+  currentStreak: {
+    type: Number,
+    default: 0,
+    min: 0
   },
-  lastLogin: {
-    type: Date,
-    default: Date.now
-  },
-  refreshToken: String
+
+}, {
+  timestamps: true
 });
 
 const User = mongoose.model('User', userSchema);
 
 module.exports = { User};
+
+

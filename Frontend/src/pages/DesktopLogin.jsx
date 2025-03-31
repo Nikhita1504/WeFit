@@ -13,7 +13,7 @@ const DesktopLogin = () => {
   // Redirect if already logged in
   useEffect(() => {
     if (token) {
-      console.log(token)
+      // console.log(token)
       navigate(location.state?.from || "/");
     }
 

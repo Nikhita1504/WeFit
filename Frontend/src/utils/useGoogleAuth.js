@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { gapi } from "gapi-script";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 export const useGoogleAuth = () => {
   const navigate = useNavigate();
@@ -44,30 +45,24 @@ export const useGoogleAuth = () => {
   const handleAuth = async () => {
     try {
       const auth2 = gapi.auth2.getAuthInstance();
-      const googleUser = await auth2.signIn({ prompt: "select_account" });
-      const token = googleUser.getAuthResponse().access_token;
+      const googleUser = await auth2.signIn({ prompt: 'select_account' });
       
-      // Call login from AuthContext
+      const token = googleUser.getAuthResponse().access_token;
+      console.log(token)
       login(token);
-
-      // Optional: Send user data to backend
-      const profile = googleUser.getBasicProfile();
-      await fetch("http://localhost:3000/add-user/api/users", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: profile.getEmail(),
-          name: profile.getName(),
-          googleId: profile.getId(),
-          accessToken: token,
-        }),
+  
+      const { data } = await axios.post('http://localhost:3000/api/users/', {
+        email: googleUser.getBasicProfile().getEmail(),
+        name: googleUser.getBasicProfile().getName(),
+        googleId: googleUser.getBasicProfile().getId()
       });
 
-      navigate("/");
+      console.log(data.token);
+      console.log(data.user);
+  
+      // navigate('/home');
     } catch (error) {
-      console.error("Authentication error:", error);
+      console.error('Authentication error:', error);
     }
   };
 
