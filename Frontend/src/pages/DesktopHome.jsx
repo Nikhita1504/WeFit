@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 import ConnectWallet from "../components/ConnectWallet";
 import DesktopChatbot from "../components/DesktopChatbot";
 import "../styles/DesktopHome.css";
@@ -13,6 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import { FaHistory } from "react-icons/fa";
 
 const DesktopHome = () => {
+  const navigate = useNavigate();
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
   const chatMessages = [
     {
@@ -54,10 +57,7 @@ const DesktopHome = () => {
                 </Avatar>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem
-                  className="cursor-pointer"
-                  
-                >
+                <DropdownMenuItem className="cursor-pointer">
                   previous score
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -80,7 +80,6 @@ const DesktopHome = () => {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-
         </header>
 
         <div className="desktop-home__content">
@@ -90,7 +89,12 @@ const DesktopHome = () => {
               <div className="desktop-home__subtitle">
                 Sweat, hustle, and earn
               </div>
-              <button className="herobutton">Take on next challenge</button>
+              <button
+                className="herobutton"
+                onClick={() => navigate("/challenge")}
+              >
+                Take on next challenge
+              </button>{" "}
             </div>
             <div className="gap-5 flex flex-col">
               <div className="desktop-home__stats-card">
@@ -109,7 +113,7 @@ const DesktopHome = () => {
                   <h2 className="desktop-section-text ">Fitness Tips</h2>
                   <ul className="mt-2.5 text-base leading-9 text-zinc-400 max-md:max-w-full list-none">
                     <li>
-                      Start with 3,000–5,000 steps if you're new to walking
+                      Start with 3,000-5,000 steps if you're new to walking
                     </li>
                     <li>Take the stairs instead of elevators.</li>
                     <li>
