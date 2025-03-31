@@ -1,20 +1,23 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import "../styles/DesktopLogin.css";
+import { useGoogleAuth } from "../utils/useGoogleAuth";
+import { useAuth } from "../context/AuthContext";
 
-const DesktopLogin = ({ setIsLoggedIn }) => {
+const DesktopLogin = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { token } = useAuth();
+  const { handleAuth } = useGoogleAuth();
 
-  const handleGoogleLogin = () => {
-    // Dummy authentication - in a real app, this would be a Google OAuth flow
-    console.log("Logging in with Google...");
-    
-    // Simulate successful login
-    setIsLoggedIn(true);
-    
-    // Redirect to home page
-    navigate("/");
-  };
+  // Redirect if already logged in
+  useEffect(() => {
+    if (token) {
+      console.log(token)
+      navigate(location.state?.from || "/");
+    }
+
+  }, [token, navigate, location.state]);
 
   return (
     <div className="desktop-login-container">
@@ -42,7 +45,7 @@ const DesktopLogin = ({ setIsLoggedIn }) => {
           <div className="desktop-login-button-wrapper">
             <button 
               className="desktop-login-google-button"
-              onClick={handleGoogleLogin}
+              onClick={handleAuth}
             >
               <img
                 src="https://cdn.builder.io/api/v1/image/assets/TEMP/554f60cb8c0107cf713b528fea38b3734ddb9b80?placeholderIfAbsent=true"

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ConnectWallet from "../components/ConnectWallet";
 import DesktopChatbot from "../components/DesktopChatbot";
 import "../styles/DesktopHome.css";
@@ -11,9 +11,30 @@ import {
   DropdownMenuTrigger 
 } from "../components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
+import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
+import useStepCount from "../utils/useStepCount";
+import useFitnessData from "../utils/useStepCount";
+import AnimatedCounter from "../components/ui/AnimatedCounter";
 
 const DesktopHome = () => {
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
+  const {logout}=useAuth();
+  const navigate=useNavigate();
+  const { todaySteps, 
+    weeklySteps, 
+    todayCalories, 
+    weeklyCalories, isLoading, error } = useFitnessData();
+  useEffect(() => {
+    console.log('Step Data:', { todaySteps, 
+      weeklySteps, 
+      todayCalories, 
+      weeklyCalories, });
+  }, [todaySteps, 
+    weeklySteps, 
+    todayCalories, 
+    weeklyCalories,]);
+
   const chatMessages = [
     {
       sender: "bot",
@@ -23,7 +44,9 @@ const DesktopHome = () => {
   ];
 
   const handleLogout = () => {
-    console.log("Logging out...");
+   
+    logout();
+    navigate("/login")
   };
 
   const handleToggleChatbot = () => {
@@ -105,7 +128,13 @@ const DesktopHome = () => {
             <div className="desktop-home__stats-content">
               <div className="desktop-home__stats-label">Steps</div>
               <div className="desktop-home__stats-value-container">
-                <div className="desktop-home__stats-value">1980</div>
+                <div className="desktop-home__stats-value">
+                <AnimatedCounter
+                  value={weeklySteps} 
+                  duration={2000} 
+                  // suffix="/3k"
+                />
+                </div>
                 <div className="desktop-home__stats-suffix">/3k</div>
               </div>
               <div className="desktop-home__progress-bar">
@@ -141,7 +170,10 @@ const DesktopHome = () => {
             </div>
             <div className="desktop-home__stats-content">
               <div className="desktop-home__stats-label">Calories</div>
-              <div className="desktop-home__stats-value">1200</div>
+              <div className="desktop-home__stats-value">  <AnimatedCounter
+                value={weeklyCalories}
+                duration={2000}
+                /></div>
             </div>
           </div>
         </div>
