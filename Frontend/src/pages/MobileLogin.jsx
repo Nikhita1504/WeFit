@@ -1,19 +1,16 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/MobileLogin.css";
+import { useGoogleAuth } from "../utils/useGoogleAuth";
 
 const MobileLogin = ({ setIsLoggedIn }) => {
   const navigate = useNavigate();
+  const { handleAuth } = useGoogleAuth();
 
-  const handleGoogleLogin = () => {
-    // Dummy authentication - in a real app, this would be a Google OAuth flow
+  const handleGoogleLogin = async () => {
     console.log("Logging in with Google...");
-    
-    // Simulate successful login
-    setIsLoggedIn(true);
-    
-    // Redirect to home page
-    navigate("/");
+    await handleAuth(); // Uses the same logic as GoogleAuth.js
+    setIsLoggedIn(true); // Optional: Sync with local state if needed
   };
 
   return (

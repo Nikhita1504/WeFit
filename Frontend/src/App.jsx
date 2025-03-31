@@ -1,48 +1,51 @@
 import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import "./App.css";
 import MobileHome from "./pages/MobileHome";
 import DesktopHome from "./pages/DesktopHome";
 import DesktopLogin from "./pages/DesktopLogin";
 import Details from "./pages/Details";
 import MobileLogin from "./pages/MobileLogin";
+
 import Challenge from "./pages/Challenge";
+
+import { AuthProvider, useAuth } from "./context/AuthContext";
+
 function App() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
-
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Protected route component
   const ProtectedRoute = ({ children }) => {
-    if (!isLoggedIn) {
-      return <Navigate to="/login" replace />;
+    const { token } = useAuth();
+    const location = useLocation();
+    
+    if (!token) {
+      return <Navigate to="/login" 
+      state={{ from: location }} 
+       />;
     }
     return children;
   };
 
-  // Responsive component selection based on device type
   const ResponsiveHome = () => (isMobile ? <MobileHome /> : <DesktopHome />);
-  const ResponsiveLogin = () => (isMobile ? <MobileLogin setIsLoggedIn={setIsLoggedIn} /> : <DesktopLogin setIsLoggedIn={setIsLoggedIn} />);
+  const ResponsiveLogin = () => (isMobile ? <MobileLogin /> : <DesktopLogin />);
 
   return (
-    <Router>
-      <div className="app">
-        <Routes>
-          <Route path="/login" element={<ResponsiveLogin />} />
-          <Route 
-            path="/" 
-            element={
+    <AuthProvider>
+      <Router>
+        <div className="app">
+          <Routes>
+            <Route path="/login" element={<ResponsiveLogin />} />
+            <Route path="/" element={
               <ProtectedRoute>
                 <ResponsiveHome />
               </ProtectedRoute>
+
             } 
           />
           <Route path="/challenge" element={
@@ -60,6 +63,8 @@ function App() {
         </Routes>
       </div>
     </Router>
+ </AuthProvider>
+
   );
 }
 
