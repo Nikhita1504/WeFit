@@ -4,8 +4,9 @@ import "./App.css";
 import MobileHome from "./pages/MobileHome";
 import DesktopHome from "./pages/DesktopHome";
 import DesktopLogin from "./pages/DesktopLogin";
+import Details from "./pages/Details";
 import MobileLogin from "./pages/MobileLogin";
-
+import Challenge from "./pages/Challenge";
 function App() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -44,6 +45,17 @@ function App() {
               </ProtectedRoute>
             } 
           />
+          <Route path="/challenge" element={
+              <ProtectedRoute>
+                <Challenge />
+              </ProtectedRoute>
+            }  />
+            <Route path="/details" element={
+              <ProtectedRoute>
+                <Details />
+              </ProtectedRoute>
+            }  />
+          
           {/* Add more routes as needed */}
         </Routes>
       </div>
