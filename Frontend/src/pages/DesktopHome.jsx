@@ -195,7 +195,7 @@ const DesktopHome = () => {
                 5K Steps + 30 Push-ups
               </div>
               <div className="flex gap-9 items-center mt-10 w-full max-md:max-w-full">
-                <ProgressCircle todaySteps={weeklySteps} />
+                <ProgressCircle todaySteps={todaySteps} />
                 <div className="flex flex-col flex-1 shrink justify-center self-stretch ">
                   <div className="max-w-full w-[231px]">
                     <div className="text-sm leading-loose text-white">
@@ -306,7 +306,7 @@ const DesktopHome = () => {
                     <div className="self-stretch my-auto w-[67px]">
                       <div className="text-sm leading-loose">Calories</div>
                       <div className="text-2xl">
-                        <AnimatedCounter value={weeklyCalories}/>
+                        <AnimatedCounter value={todayCalories}/>
                       </div>
                     </div>
                   </div>
