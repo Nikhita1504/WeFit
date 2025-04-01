@@ -1,11 +1,16 @@
 import React, { useState } from "react";
 import ChallengeCard from "./ChallengeCard";
 import "../styles/TabSelector.css";
+import { useChallengeContext } from "../context/ChallengeContext";
+import { useNavigate } from "react-router-dom";
 
-const ChallengeSection = ({ challenge, challenges, onChallengeSelect }) => {
+const ChallengeSection = () => {
   const [activeTab, setActiveTab] = useState('steps');
-  
-  // Filter challenges based on type (steps, strength, combo)
+  const { challenges, setSelectedChallenge } = useChallengeContext();
+  const navigate = useNavigate();
+
+
+  // Filter challenges based on type
   const filteredChallenges = challenges.filter(challenge => {
     if (activeTab === 'steps') return challenge.type === 'steps';
     if (activeTab === 'strength') return challenge.type === 'strength';
@@ -13,17 +18,12 @@ const ChallengeSection = ({ challenge, challenges, onChallengeSelect }) => {
     return true;
   });
 
-  // Format challenge data for display
-  const formatChallengeData = (challenge) => ({
-    title: challenge.name,
-    description: `Complete ${challenge.stepGoal} steps` + 
-                (challenge.exercises?.length ? ` + ${challenge.exercises.length} exercises` : ''),
-    difficulty: challenge.difficulty,
-    stakeRangemin: `${challenge.minStake} ETH`,
-    stakeRangemax: `- ${challenge.maxStake} ETH`,
-    rewardMultiplier: `${challenge.rewardMultiplier}x rewards`,
-    originalData: challenge // Pass through original data for details
-  });
+  const handleChallengeSelect = (challenge) => {
+    setSelectedChallenge(challenge);
+    navigate('/details');
+  };
+
+
 
   return (
     <div className="w-full max-w-[859px] mx-auto rounded-[19px] p-[50px]">
@@ -38,19 +38,19 @@ const ChallengeSection = ({ challenge, challenges, onChallengeSelect }) => {
       <div className="StepsStrengthCombo mb-8">
         <div className="tab-container">
           <div className="tab-nav">
-            <button 
+            <button
               className={`tab-button ${activeTab === 'steps' ? 'active' : ''}`}
               onClick={() => setActiveTab('steps')}
             >
               Steps
             </button>
-            <button 
+            <button
               className={`tab-button ${activeTab === 'strength' ? 'active' : ''}`}
               onClick={() => setActiveTab('strength')}
             >
               Strength
             </button>
-            <button 
+            <button
               className={`tab-button ${activeTab === 'combo' ? 'active' : ''}`}
               onClick={() => setActiveTab('combo')}
             >
@@ -59,18 +59,14 @@ const ChallengeSection = ({ challenge, challenges, onChallengeSelect }) => {
           </div>
         </div>
       </div>
-      
       <div className="space-y-12">
-        {filteredChallenges.map((challenge, index) => {
-          const formattedChallenge = formatChallengeData(challenge);
-          return (
-            <ChallengeCard
-              key={challenge._id || index}
-              {...formattedChallenge}
-              onClick={() => onChallengeSelect(challenge)}
-            />
-          );
-        })}
+      {filteredChallenges.map((challenge) => (
+          <ChallengeCard
+            key={challenge._id}
+            challenge={challenge}
+            onClick={() => handleChallengeSelect(challenge)}
+          />
+        ))}
       </div>
     </div>
   );

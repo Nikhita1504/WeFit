@@ -35,15 +35,6 @@ challengeData.post('/', async (req, res) => {
   }
 });
 
-// Get all challenges
-challengeData.get('/', async (req, res) => {
-  try {
-    const challenges = await Challenge.find();
-    res.json(challenges);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
 
 // Get challenge by ID
 challengeData.get('/:id', async (req, res) => {

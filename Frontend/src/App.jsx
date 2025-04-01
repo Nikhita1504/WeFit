@@ -17,6 +17,7 @@ import Challenge from "./pages/Challenge";
 import Walletprovider from "./context/walletprovider";
 
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import { ChallengeProvider } from "./context/ChallengeContext";
 import Contractprovider from "./context/Contractprovider";
 
 function App() {
@@ -33,7 +34,9 @@ function App() {
     const location = useLocation();
 
     if (!token) {
-      return <Navigate to="/login" state={{ from: location }} />;
+      return <Navigate to="/login" 
+      // state={{ from: location }} 
+       />;
     }
     return children;
   };
@@ -45,6 +48,7 @@ function App() {
     <Contractprovider>
  <Walletprovider>
       <AuthProvider>
+      <ChallengeProvider>
         <Router>
           <div className="app">
             <Routes>
@@ -78,6 +82,7 @@ function App() {
             </Routes>
           </div>
         </Router>
+      </ChallengeProvider>
       </AuthProvider>
     </Walletprovider>
     </Contractprovider>

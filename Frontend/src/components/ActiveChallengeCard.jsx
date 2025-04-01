@@ -1,58 +1,68 @@
 import React, { useState, useEffect } from 'react';
 import { IoCheckmarkCircle } from 'react-icons/io5'; // Import green tick icon from react-icons
 import ProgressCircle from './ui/ProgressCircle';
+import TimerActiveChallenge from './ui/TimerActiveChallenge';
 
 const ActiveChallengeCard = () => {
   const [challengeData, setChallengeData] = useState(null);
+ 
 
+  const fetchedData ={
+    message: "Active Challenge created successfully!",
+    challenge: {
+      userId: "67ea5516e876b029485b754d",
+      challengeId: "67eaeecab6ed7a01f4e16a71",
+      exercises: [
+        {
+          name: "Step",
+          reps: 3000,
+          completedReps: 0,
+          isCompleted: false,
+          isVideoRequired: false,
+          videoUrl: "",
+          _id: "67eb3f5748052433a03caf43"
+        },
+        {
+          name: "Pushup",
+          reps: 20,
+          completedReps: 0,
+          isCompleted: false,
+          isVideoRequired: true,
+          videoUrl: "",
+          _id: "67eb3f5748052433a03caf44"
+        },
+        {
+          name: "Squat",
+          reps: 20,
+          completedReps: 0,
+          isCompleted: false,
+          isVideoRequired: true,
+          videoUrl: "",
+          _id: "67eb3f5748052433a03caf45"
+        }
+      ],
+      ethStaked: 3,
+      rewardsEarned: 1.5,
+      startTime: {
+        date: "2025-05-02T01:20:23.881Z",
+        time: "08:20:23"
+      },
+      isCompleted: false,
+      _id: "67eb3f5748052433a03caf42",
+      createdAt: "2025-04-01T01:20:23.883Z",
+      updatedAt: "2025-04-01T01:20:23.883Z",
+      __v: 0
+    }
+  }
   // Fetch data from API on mount
   useEffect(() => {
-    setChallengeData({
-      "message": "Active Challenge created successfully!",
-      "challenge": {
-          "userId": "67ea5516e876b029485b754d",
-          "challengeId": "67eaeecab6ed7a01f4e16a71",
-          "exercises": [
-              {
-                  "name": "Step",
-                  "reps": 3000,
-                  "completedReps": 2000,
-                  "isCompleted": false,
-                  "isVideoRequired": false,
-                  "videoUrl": "",
-                  "_id": "67eb00606ed8d25400add7e6"
-              },
-              {
-                  "name": "Pushup",
-                  "reps": 20,
-                  "completedReps": 20,
-                  "isCompleted": false,
-                  "isVideoRequired": true,
-                  "videoUrl": "",
-                  "_id": "67eb00606ed8d25400add7e7"
-              },
-              {
-                  "name": "Squat",
-                  "reps": 20,
-                  "completedReps": 20,
-                  "isCompleted": true,
-                  "isVideoRequired": true,
-                  "videoUrl": "",
-                  "_id": "67eb00606ed8d25400add7e8"
-              }
-          ],
-          "ethStaked": 3,
-          "rewardsEarned": 1.5,
-          "timeLeft": 24,
-          "isCompleted": false,
-          "_id": "67eb00606ed8d25400add7e5",
-          "createdAt": "2025-03-31T20:51:44.817Z",
-          "updatedAt": "2025-03-31T20:51:44.817Z",
-          "__v": 0
-      }
-    })
+   
+
+    setChallengeData(fetchedData);
+
   }, []);
 
+ 
   if (!challengeData) {
     return <div>Loading...</div>;
   }
@@ -62,6 +72,7 @@ const ActiveChallengeCard = () => {
   const totalExercises = filteredExercises.length;
   const completedExercises = filteredExercises.filter(ex => ex.isCompleted).length;
   const completionPercentage = (completedExercises / totalExercises) * 100;
+ 
 
   return (
     <div className="flex flex-col grow shrink self-stretch bg-[#1A0F2B] border-4 border-solid border-[#301F4C] rounded-[23px] h-[700px] min-w-[534px] max-md:max-w-full">
@@ -143,25 +154,8 @@ const ActiveChallengeCard = () => {
         </div>
         <div className="mt-10 w-full text-white max-md:max-w-full">
           <div className="flex gap-4 items-start max-md:max-w-full">
-            <div className="flex gap-3 items-start w-[225px]">
-              <div className="flex gap-6 items-center py-2 pr-8 pl-4 bg-purple-900 min-h-[74px] rounded-[140px] w-[225px] max-md:pr-5">
-                <img
-                  src="https://cdn.builder.io/api/v1/image/assets/TEMP/cff239496af3f485e4fc3d530033b89091c58c13?placeholderIfAbsent=true&apiKey=1455cb398c424e78afe4261a4bb08b71"
-                  className="object-contain shrink-0 self-stretch my-auto aspect-[0.98] rounded-[1030px] w-[52px]"
-                />
-                <div className="flex flex-col self-stretch my-auto w-[78px]">
-                  <div className="self-start text-sm leading-loose text-center">
-                    Time Left
-                  </div>
-                  <div className="flex gap-1 items-center w-full whitespace-nowrap">
-                    <div className="self-stretch my-auto text-2xl">{challengeData.challenge.timeLeft}</div>
-                    <div className="self-stretch my-auto text-base font-medium leading-none text-center">
-                      hr
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <TimerActiveChallenge  fetchedData={challengeData}></TimerActiveChallenge>
+           
             <div className="flex gap-4 items-center px-7 py-2 whitespace-nowrap bg-purple-900 min-h-[74px] rounded-[140px] w-[225px] max-md:px-5">
               <img
                 src="https://cdn.builder.io/api/v1/image/assets/TEMP/b8c47120a8d5f778083924c03a11a3fbcf00948a?placeholderIfAbsent=true&apiKey=1455cb398c424e78afe4261a4bb08b71"
