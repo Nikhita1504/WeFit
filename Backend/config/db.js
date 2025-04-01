@@ -143,5 +143,8 @@ const challengeSchema = new mongoose.Schema({
 const User = mongoose.model('User', userSchema);
 const Challenge = mongoose.model('Challenge', challengeSchema);
 
+
+
 // Export both models
 module.exports = { User, Challenge };
+

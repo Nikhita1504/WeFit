@@ -56,6 +56,8 @@ export const useGoogleAuth = () => {
         name: googleUser.getBasicProfile().getName(),
         googleId: googleUser.getBasicProfile().getId()
       });
+      
+      
       login(token,data.token);
      
   
