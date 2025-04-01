@@ -19,7 +19,7 @@ import { useNavigate } from "react-router-dom";
 
 const Challenge = () => {
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
-  const { setChallenges } = useChallengeContext();
+  // const { setChallenges } = useChallengeContext();
   const {logout}=useAuth();
   const navigate=useNavigate();
 
@@ -42,19 +42,6 @@ const Challenge = () => {
   const handleToggleChatbot = () => {
     setIsChatbotOpen(!isChatbotOpen);
   };
-
-  const fetchChallenges = async () => {
-    try {
-      const response = await axios.get("http://localhost:3000/api/challenges/get");
-      setChallenges(response.data);
-    } catch (error) {
-      console.error("Error fetching challenges:", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchChallenges();
-  }, []);
 
 
 

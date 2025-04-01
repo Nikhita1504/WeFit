@@ -6,7 +6,7 @@ import { useChallengeContext } from "../context/ChallengeContext";
 
 const ChallengeCard = ({ challenge, onClick }) => {
   const navigate = useNavigate();
-  const { setSelectedChallenge } = useChallengeContext();
+  // const { setSelectedChallenge } = useChallengeContext();
 
   const getDifficultyStyles = (difficulty) => {
     const baseStyles = "text-white text-xs px-1 py-0.5 rounded-full";
@@ -24,8 +24,8 @@ const ChallengeCard = ({ challenge, onClick }) => {
 
   const handleDetailsClick = (e) => {
     e.stopPropagation();
-    setSelectedChallenge(challenge);
-    navigate("/details");
+    // setSelectedChallenge(challenge);
+    navigate("/details",{state:{challenge}});
   };
 
   return (
