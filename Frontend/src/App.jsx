@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+} from "react-router-dom";
 import "./App.css";
 import MobileHome from "./pages/MobileHome";
 import DesktopHome from "./pages/DesktopHome";
@@ -8,9 +14,11 @@ import Details from "./pages/Details";
 import MobileLogin from "./pages/MobileLogin";
 
 import Challenge from "./pages/Challenge";
+import Walletprovider from "./context/walletprovider";
 
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ChallengeProvider } from "./context/ChallengeContext";
+import Contractprovider from "./context/Contractprovider";
 
 function App() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
@@ -24,7 +32,7 @@ function App() {
   const ProtectedRoute = ({ children }) => {
     const { token } = useAuth();
     const location = useLocation();
-    
+
     if (!token) {
       return <Navigate to="/login" 
       // state={{ from: location }} 
@@ -37,37 +45,48 @@ function App() {
   const ResponsiveLogin = () => (isMobile ? <MobileLogin /> : <DesktopLogin />);
 
   return (
-    <AuthProvider>
+    <Contractprovider>
+ <Walletprovider>
+      <AuthProvider>
       <ChallengeProvider>
-      <Router>
-        <div className="app">
-          <Routes>
-            <Route path="/login" element={<ResponsiveLogin />} />
-            <Route path="/" element={
-              <ProtectedRoute>
-                <ResponsiveHome />
-              </ProtectedRoute>
+        <Router>
+          <div className="app">
+            <Routes>
+              <Route path="/login" element={<ResponsiveLogin />} />
+              <Route
+                path="/"
+                element={
+                  <ProtectedRoute>
+                    <ResponsiveHome />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/challenge"
+                element={
+                  <ProtectedRoute>
+                    <Challenge />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/details"
+                element={
+                  <ProtectedRoute>
+                    <Details />
+                  </ProtectedRoute>
+                }
+              />
 
-            } 
-          />
-          <Route path="/challenge" element={
-              <ProtectedRoute>
-                <Challenge />
-              </ProtectedRoute>
-            }  />
-            <Route path="/details" element={
-              <ProtectedRoute>
-                <Details />
-              </ProtectedRoute>
-            }  />
-          
-          {/* Add more routes as needed */}
-        </Routes>
-      </div>
-    </Router>
+              {/* Add more routes as needed */}
+            </Routes>
+          </div>
+        </Router>
       </ChallengeProvider>
- </AuthProvider>
-
+      </AuthProvider>
+    </Walletprovider>
+    </Contractprovider>
+   
   );
 }
 

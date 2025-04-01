@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useContext } from "react";
 import { ArrowRight } from "lucide-react";
 import "../styles/DesktopHome.css";
 import { Button } from "./ui/button";
-import { cn } from "../lib/utils";
 import { useChallengeContext } from "../context/ChallengeContext";
+import Contractcontext from "../context/contractcontext";
+import walletcontext from "../context/walletcontext";
 
 const DetailsCard = ({
   title,
@@ -12,58 +13,82 @@ const DetailsCard = ({
   minStake = 0.0006342400852418675,
   maxStake = 0.003,
   rewardMultiplier = "2x",
-  type, // Added challenge type prop
-  tags = [], // Added tags prop with default empty array
+  type,
+  tags = [],
 }) => {
+  const { contract } = useContext(Contractcontext);
+  const {account} = useContext(walletcontext); 
   const ethToInrRate = 157669;
   const [ethAmount, setEthAmount] = useState(minStake.toString());
-  const [stakeAmount, setStakeAmount] = useState(minStake * ethToInrRate);
-  const potentialReward = (parseFloat(ethAmount)*ethToInrRate * parseFloat(rewardMultiplier.replace('x', '')))+stakeAmount;
- const {selectedChallenge}=useChallengeContext();
- console.log(selectedChallenge);
-  // Sync ETH input with INR amount
-  useEffect(() => {
-    const inrValue = parseFloat(ethAmount) * ethToInrRate;
-    if (!isNaN(inrValue)) {
-      setStakeAmount(inrValue);
-    }
-  }, [ethAmount]);
+  const [stakeAmount, setStakeAmount] = useState((minStake * ethToInrRate).toFixed(2));
+  const [loading, setLoading] = useState(false);
 
+  // Handle ETH input
   const handleEthChange = (e) => {
     const value = e.target.value;
-    // Allow empty input or valid numbers
-    if (value === '' || /^[0-9]*\.?[0-9]*$/.test(value)) {
+    if (value === "" || /^[0-9]*\.?[0-9]*$/.test(value)) {
       setEthAmount(value);
+      if (value !== "") {
+        setStakeAmount((parseFloat(value || "0") * ethToInrRate).toFixed(2));
+      }
     }
   };
 
   const handleEthBlur = () => {
     let value = parseFloat(ethAmount);
-    if (isNaN(value)) {
-      value = minStake;
-    }
+    if (isNaN(value)) value = minStake;
     value = Math.max(minStake, Math.min(maxStake, value));
     setEthAmount(value.toString());
+    setStakeAmount((value * ethToInrRate).toFixed(2));
   };
 
+  // Handle INR input
   const handleInrChange = (e) => {
     const value = e.target.value;
-    if (value === '' || /^[0-9]*\.?[0-9]*$/.test(value)) {
-      const inrValue = value === '' ? 0 : parseFloat(value);
-      const ethValue = inrValue / ethToInrRate;
-      setStakeAmount(inrValue);
-      setEthAmount(ethValue.toString());
+    if (value === "" || /^[0-9]*\.?[0-9]*$/.test(value)) {
+      setStakeAmount(value);
+      if (value !== "") {
+        setEthAmount((parseFloat(value || "0") / ethToInrRate).toString());
+      }
     }
   };
 
   const handleInrBlur = () => {
     let value = parseFloat(stakeAmount);
-    if (isNaN(value)) {
-      value = minStake * ethToInrRate;
-    }
+    if (isNaN(value)) value = minStake * ethToInrRate;
     value = Math.max(minStake * ethToInrRate, Math.min(maxStake * ethToInrRate, value));
-    setStakeAmount(value);
+    setStakeAmount(value.toFixed(2));
     setEthAmount((value / ethToInrRate).toString());
+  };
+
+  // Potential reward calculation
+  const potentialReward = (
+    parseFloat(stakeAmount || "0") * parseFloat(rewardMultiplier.replace("x", "")) +
+    parseFloat(stakeAmount || "0")
+  ).toFixed(2);
+
+  // Handle staking function
+  const handleStake = async () => {
+    if (!contract || !account) {
+      alert("Please connect your wallet first!");
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      console.log(ethAmount);
+      const valueInWei = window.web3.utils.toWei(ethAmount, "ether");
+      await contract.methods.stake().send({
+        from: account,
+        value: valueInWei,
+      });
+
+      alert("Stake successful!");
+    } catch (error) {
+      console.error("Staking failed:", error);
+      alert("Staking failed. Please try again.");
+    }
+    setLoading(false);
   };
 
   return (
@@ -71,19 +96,14 @@ const DetailsCard = ({
       <div className="flex justify-between items-start mb-5">
         <div>
           <h3 className="text-white text-2xl font-medium mb-2.5">{title}</h3>
-          {/* Added challenge type display */}
           <div className="flex items-center gap-2 mb-2">
             <span className="text-purple-400 text-sm font-medium px-2 py-1 bg-[#301F4C] rounded">
-              {type?.toUpperCase() || 'CHALLENGE'}
+              {type?.toUpperCase() || "CHALLENGE"}
             </span>
-            {/* Display tags if they exist */}
             {tags?.length > 0 && (
               <div className="flex flex-wrap gap-1">
                 {tags.map((tag, index) => (
-                  <span 
-                    key={index}
-                    className="text-amber-300 text-xs font-medium px-2 py-1 bg-[#3A2C50] rounded"
-                  >
+                  <span key={index} className="text-amber-300 text-xs font-medium px-2 py-1 bg-[#3A2C50] rounded">
                     {tag}
                   </span>
                 ))}
@@ -116,7 +136,9 @@ const DetailsCard = ({
             onBlur={handleInrBlur}
             className="w-full bg-[#301F4C] text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
           />
-          <p className="text-white text-sm mt-1">Minimum amount: ₹{(minStake * ethToInrRate).toFixed(2)} (~{minStake} ETH)</p>
+          <p className="text-white text-sm mt-1">
+            Minimum amount: ₹{(minStake * ethToInrRate).toFixed(2)} (~{minStake} ETH)
+          </p>
         </div>
       </div>
 
@@ -126,20 +148,25 @@ const DetailsCard = ({
             <p className="text-white text-xl mb-4">Potential Reward</p>
           </div>
           <div className="text-right">
-            <p className="text-white text-2xl font-bold">${potentialReward}</p>
+            <p className="text-white text-2xl font-bold">₹{potentialReward}</p>
           </div>
         </div>
       </div>
 
       <div className="mt-4 mb-6">
         <p className="text-black text-sm bg-amber-400 p-2 rounded-lg">
-          <span className="font-semibold">Note:</span> Your stake will be refunded successfully if you complete the challenge within the given time frame. If you fail your stake will be distributed to the reward pool.
+          <span className="font-semibold">Note:</span> Your stake will be refunded successfully if you complete the
+          challenge within the given time frame. If you fail, your stake will be distributed to the reward pool.
         </p>
       </div>
 
       <div className="flex justify-between gap-4 mt-[38px]">
-        <button className="detailsss-btn">
-          Start Challenge
+        <button
+          className="detailsss-btn"
+          onClick={handleStake}
+          disabled={loading}
+        >
+          {loading ? "Staking..." : "Stake Amount"}
         </button>
       </div>
     </div>
