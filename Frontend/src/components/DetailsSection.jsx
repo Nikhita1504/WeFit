@@ -53,8 +53,8 @@ const DetailsSection = () => {
          title="5k steps + 30 sit ups"
          description1="Complete 5000 steps"
          description2="+ 30 sit ups"
-         minStake={0.0001}
-         maxStake={15}
+         minStake={0.0006342400852418675}
+         maxStake={100}
          rewardMultiplier="1.2x"
          type="combo"
          tags={["advanced", "strength"]}

@@ -20,7 +20,7 @@ const DetailsCard = ({
   const [stakeAmount, setStakeAmount] = useState(minStake * ethToInrRate);
   const potentialReward = (parseFloat(ethAmount)*ethToInrRate * parseFloat(rewardMultiplier.replace('x', '')))+stakeAmount;
  const {selectedChallenge}=useChallengeContext();
- console.log(selectedChallenge);
+
   // Sync ETH input with INR amount
   useEffect(() => {
     const inrValue = parseFloat(ethAmount) * ethToInrRate;
