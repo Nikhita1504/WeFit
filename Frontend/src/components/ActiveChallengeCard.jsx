@@ -6,7 +6,6 @@ import TimerActiveChallenge from './ui/TimerActiveChallenge';
 const ActiveChallengeCard = () => {
   const [challengeData, setChallengeData] = useState(null);
  
-
   const fetchedData ={
     message: "Active Challenge created successfully!",
     challenge: {
@@ -49,11 +48,12 @@ const ActiveChallengeCard = () => {
       },
       isCompleted: false,
       _id: "67eb3f5748052433a03caf42",
-      createdAt: "2025-04-01T01:20:23.883Z",
+      createdAt: "2025-04-02T02:20:23.883Z",
       updatedAt: "2025-04-01T01:20:23.883Z",
       __v: 0
     }
   }
+
   // Fetch data from API on mount
   useEffect(() => {
    
