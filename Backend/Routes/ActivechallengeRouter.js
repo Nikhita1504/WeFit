@@ -9,11 +9,13 @@ const ActiveChallengeRouter = express.Router();
 
 ActiveChallengeRouter.post("/create/:token", authenticateToken, async (req, res) => {
   try {
-    // Extract decoded userId from req.user (set by authenticateToken middleware)
+
+    console.log("hello active challenge")
     console.log(req.user.userId);
     const userId = req.user.userId;
     
-    const { challengeId, ethStaked, rewardsEarned, timeLeft, isCompleted } = req.body;
+    const { challengeId, ethStaked, rewardsEarned, isCompleted } = req.body;
+
 
     // Validate if challengeId exists
     const challenge = await Challenge.findById(challengeId);
@@ -39,7 +41,7 @@ ActiveChallengeRouter.post("/create/:token", authenticateToken, async (req, res)
       exercises, // Use exercises from Challenge schema
       ethStaked,
       rewardsEarned,
-      timeLeft,
+
       isCompleted,
     });
 
@@ -48,6 +50,29 @@ ActiveChallengeRouter.post("/create/:token", authenticateToken, async (req, res)
   } catch (error) {
     console.error("Error creating Active Challenge:", error);
     res.status(500).json({ message: "Internal Server Error", error: error.message });
+  }
+});
+
+ActiveChallengeRouter.get("/get/:token", authenticateToken, async (req, res) => {
+  try {
+    // console.log("hello")
+    const userId = req.user.userId; 
+
+    
+    // Find active challenge that's not completed
+    const activeChallenge = await ActiveChallenge.findOne({ 
+      userId,
+      isCompleted: false 
+    });
+
+    if (!activeChallenge) {
+      return res.status(404).json({ message: "No active challenge found" });
+    }
+
+    res.json(activeChallenge);
+  } catch (error) {
+    console.error("Error fetching active challenge:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 });
 

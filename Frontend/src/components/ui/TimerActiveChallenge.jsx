@@ -1,31 +1,43 @@
 import React, { useState, useEffect } from 'react';
 
 const TimerActiveChallenge = ({ fetchedData }) => {
-  const [timeLeft, setTimeLeft] = useState({ hours: 0, minutes: 0, seconds: 0 });
+  const [timeLeft, setTimeLeft] = useState({ hours: '00', minutes: '00', seconds: '00' });
   const [creationDate, setCreationDate] = useState('');
   const [creationTime, setCreationTime] = useState('');
 
   useEffect(() => {
-    if (!fetchedData?.challenge?.createdAt) {
-      console.error("Invalid createdAt value");
+    if (!fetchedData?.createdAt) {
+      console.error("No createdAt value found");
       return;
     }
 
-    const createdAt = new Date(fetchedData.challenge.createdAt);
+    // Handle different createdAt formats
+    let createdAt;
+    if (typeof fetchedData.createdAt === 'string') {
+      createdAt = new Date(fetchedData.createdAt);
+    } else if (fetchedData.createdAt?.$date) {
+      // Handle MongoDB extended JSON format
+      createdAt = new Date(fetchedData.createdAt.$date);
+    } else {
+      console.error("Unsupported createdAt format", fetchedData.createdAt);
+      return;
+    }
+
     if (isNaN(createdAt.getTime())) {
-      console.error("Invalid date format for createdAt");
+      console.error("Invalid date format for createdAt", fetchedData.createdAt);
       return;
     }
 
-    // Extract and format the creation date and time
+    // Calculate midnight of the same day
+    const midnightSameDay = new Date(createdAt);
+    midnightSameDay.setHours(24, 0, 0, 0);
+
     const formatDateTime = (date) => {
-      // Format date as DD/MM/YYYY
       const day = String(date.getDate()).padStart(2, '0');
       const month = String(date.getMonth() + 1).padStart(2, '0');
       const year = date.getFullYear();
       const formattedDate = `${day}/${month}/${year}`;
       
-      // Format time as HH:MM:SS in 24-hour format
       const hours = String(date.getHours()).padStart(2, '0');
       const minutes = String(date.getMinutes()).padStart(2, '0');
       const seconds = String(date.getSeconds()).padStart(2, '0');
@@ -38,18 +50,14 @@ const TimerActiveChallenge = ({ fetchedData }) => {
     setCreationDate(formattedDate);
     setCreationTime(formattedTime);
 
-    const currentTime = new Date();
-    const challengeDuration = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
-
     const calculateTimeLeft = () => {
-      const updatedCurrentTime = new Date();
-      const elapsedTime = updatedCurrentTime - createdAt;
-      const remainingTime = challengeDuration - elapsedTime;
+      const now = new Date();
+      const remainingTime = midnightSameDay - now;
       
       if (remainingTime <= 0) {
         setTimeLeft({ hours: '00', minutes: '00', seconds: '00' });
         clearInterval(timer);
-        deleteActiveChallenge(fetchedData.challenge.challengeId);
+        deleteActiveChallenge(fetchedData._id);
       } else {
         const hours = Math.floor(remainingTime / (1000 * 60 * 60));
         const minutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
@@ -64,14 +72,18 @@ const TimerActiveChallenge = ({ fetchedData }) => {
     };
 
     const timer = setInterval(calculateTimeLeft, 1000);
-    calculateTimeLeft(); // Initial call
+    calculateTimeLeft();
 
     return () => clearInterval(timer);
   }, [fetchedData]);
 
-  const deleteActiveChallenge = (challengeId) => {
-    console.log(`Deleting challenge with ID: ${challengeId}`);
-    // Add your actual deletion logic here
+  const deleteActiveChallenge = async (challengeId) => {
+    try {
+      console.log(`Deleting challenge with ID: ${challengeId} at midnight`);
+      // API call to delete the challenge would go here
+    } catch (error) {
+      console.error('Error deleting challenge:', error);
+    }
   };
 
   return (
@@ -90,9 +102,9 @@ const TimerActiveChallenge = ({ fetchedData }) => {
             </div>
             <div className="self-stretch my-auto text-base font-medium leading-none text-center">sec</div>
           </div>
-          <div className="text-xs text-gray-300 mt-1">
+          {/* <div className="text-xs text-gray-300 mt-1">
             Created: {creationDate} at {creationTime}
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

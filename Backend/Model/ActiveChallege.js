@@ -16,10 +16,10 @@ const ActiveChallengeSchema = new mongoose.Schema(
     ],
     ethStaked: { type: Number, required: true },
     rewardsEarned: { type: Number, default: 0 },
-    startTime: {
-      date: { type: Date, default: Date.now },
-      time: { type: String, default: () => new Date().toISOString().split("T")[1].split(".")[0] },
-    },
+    // startTime: {
+    //   date: { type: Date, default: Date.now },
+    //   time: { type: String, default: () => new Date().toISOString().split("T")[1].split(".")[0] },
+    // },
     isCompleted: { type: Boolean, default: false }, // Track challenge completion
   },
   { timestamps: true }

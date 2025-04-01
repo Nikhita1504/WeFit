@@ -1,13 +1,34 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ChallengeCard from "./ChallengeCard";
 import "../styles/TabSelector.css";
 import { useChallengeContext } from "../context/ChallengeContext";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const ChallengeSection = () => {
   const [activeTab, setActiveTab] = useState('steps');
-  const { challenges, setSelectedChallenge } = useChallengeContext();
+  const[challenges,setChallenges]=useState([]);
+  // const { challenges, setSelectedChallenge } = useChallengeContext();
   const navigate = useNavigate();
+
+
+
+  const fetchChallenges = async () => {
+    try {
+      console.log("hello")
+      const response = await axios.get("http://localhost:3000/api/challenges/get");
+      console.log(response.data);
+      setChallenges(response.data);
+    } catch (error) {
+      console.error("Error fetching challenges:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchChallenges();
+  }, []);
+
+
 
 
   // Filter challenges based on type
