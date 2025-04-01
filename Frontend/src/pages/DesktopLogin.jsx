@@ -6,7 +6,7 @@ import { useAuth } from "../context/AuthContext";
 
 const DesktopLogin = () => {
   const navigate = useNavigate();
-  const location = useLocation();
+  // const location = useLocation();
   const { token } = useAuth();
   const { handleAuth } = useGoogleAuth();
 
@@ -14,7 +14,7 @@ const DesktopLogin = () => {
   useEffect(() => {
     if (token) {
       // console.log(token)
-      navigate(location.state?.from || "/");
+      navigate("/");
     }
 
   }, [token, navigate, location.state]);

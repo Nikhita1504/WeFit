@@ -10,6 +10,7 @@ import MobileLogin from "./pages/MobileLogin";
 import Challenge from "./pages/Challenge";
 
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import { ChallengeProvider } from "./context/ChallengeContext";
 
 function App() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
@@ -26,7 +27,7 @@ function App() {
     
     if (!token) {
       return <Navigate to="/login" 
-      state={{ from: location }} 
+      // state={{ from: location }} 
        />;
     }
     return children;
@@ -37,6 +38,7 @@ function App() {
 
   return (
     <AuthProvider>
+      <ChallengeProvider>
       <Router>
         <div className="app">
           <Routes>
@@ -63,6 +65,7 @@ function App() {
         </Routes>
       </div>
     </Router>
+      </ChallengeProvider>
  </AuthProvider>
 
   );

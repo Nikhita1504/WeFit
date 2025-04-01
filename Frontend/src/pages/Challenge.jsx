@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import ConnectWallet from "../components/ConnectWallet";
 import DesktopChatbot from "../components/DesktopChatbot";
 import "../styles/DesktopHome.css";
@@ -13,11 +13,16 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import { FaHistory } from "react-icons/fa";
 import axios from "axios";
+import { useChallengeContext } from "../context/ChallengeContext";
+import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const Challenge = () => {
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
-  const [challenges, setChallenges] = useState([]);
-  
+  const { setChallenges } = useChallengeContext();
+  const {logout}=useAuth();
+  const navigate=useNavigate();
+
   const chatMessages = [
     {
       sender: "bot",
@@ -30,7 +35,8 @@ const Challenge = () => {
   ];
 
   const handleLogout = () => {
-    console.log("Logging out...");
+    logout();
+    navigate("/login")
   };
 
   const handleToggleChatbot = () => {
@@ -50,7 +56,7 @@ const Challenge = () => {
     fetchChallenges();
   }, []);
 
-  
+
 
   return (
     <div className="desktop-home">
@@ -98,7 +104,7 @@ const Challenge = () => {
           </div>
         </header>
 
-        <ChallengeSection challenges={challenges} />
+        <ChallengeSection />
       </div>
 
       {/* Floating Chatbot Bubble */}

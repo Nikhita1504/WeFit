@@ -2,18 +2,12 @@ import React from "react";
 import { ArrowRight } from "lucide-react";
 import "../styles/DesktopHome.css";
 import { useNavigate } from "react-router-dom";
+import { useChallengeContext } from "../context/ChallengeContext";
 
-const ChallengeCard = ({
-  title,
-  description,
-  difficulty,
-  stakeRangemin,
-  stakeRangemax,
-  rewardMultiplier,
-  onClick,
-}) => {
+const ChallengeCard = ({ challenge, onClick }) => {
   const navigate = useNavigate();
-  
+  const { setSelectedChallenge } = useChallengeContext();
+
   const getDifficultyStyles = (difficulty) => {
     const baseStyles = "text-white text-xs px-1 py-0.5 rounded-full";
     switch (difficulty.toLowerCase()) {
@@ -30,6 +24,7 @@ const ChallengeCard = ({
 
   const handleDetailsClick = (e) => {
     e.stopPropagation();
+    setSelectedChallenge(challenge);
     navigate("/details");
   };
 
@@ -40,10 +35,15 @@ const ChallengeCard = ({
     >
       <div className="flex justify-between items-start mb-5">
         <div>
-          <h3 className="text-white text-2xl font-medium mb-2.5">{title}</h3>
-          <p className="text-[#CDCDCD] text-lg">{description}</p>
+          <h3 className="text-white text-2xl font-medium mb-2.5">{challenge.name}</h3>
+          <p className="text-[#CDCDCD] text-lg">
+            Complete {challenge.stepGoal} steps
+            {challenge.exercises?.length ? ` + ${challenge.exercises.length} exercises` : ''}
+          </p>
         </div>
-        <span className={getDifficultyStyles(difficulty)}>{difficulty}</span>
+        <span className={getDifficultyStyles(challenge.difficulty)}>
+          {challenge.difficulty}
+        </span>
       </div>
 
       <div className="bg-[#403359] rounded-lg px-4 py-[17px]">
@@ -53,8 +53,10 @@ const ChallengeCard = ({
             <p className="text-white text-lg">Reward Multiplier:</p>
           </div>
           <div className="text-right">
-            <p className="text-white text-lg mb-[15px]">{stakeRangemin} {stakeRangemax}</p>
-            <p className="text-white text-lg">{rewardMultiplier}</p>
+            <p className="text-white text-lg mb-[15px]">
+              {challenge.minStake} ETH - {challenge.maxStake} ETH
+            </p>
+            <p className="text-white text-lg">{challenge.rewardMultiplier}x rewards</p>
           </div>
         </div>
       </div>
