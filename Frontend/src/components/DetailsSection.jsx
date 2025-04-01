@@ -1,14 +1,17 @@
 import React from "react";
 import DetailsCard from "./DetailsCard";
 import DetailsCardDes from "./DetailsCardDes";
+import { useChallengeContext } from "../context/ChallengeContext";
 const DetailsSection = () => {
+
+
   const challenges = [
     {
       title: "Stake Crypto",
       description1: "1. Complete 5,000 steps in a single day",
       description2: "2. Challenge must be completed within 24 hours",
 
-      rewardMultiplier: "1.5x rewards",
+      rewardMultiplier: "2x rewards",
     },
   ];
   const challengesDes = [
@@ -46,13 +49,16 @@ const DetailsSection = () => {
 
       <div className="space-y-12">
         {challenges.map((challenge, index) => (
-          <DetailsCard
-            key={index}
-            title={challenge.title}
-            description1={challenge.description1}
-            description2={challenge.description2}
-            rewardMultiplier={challenge.rewardMultiplier}
-          />
+         <DetailsCard
+         title="5k steps + 30 sit ups"
+         description1="Complete 5000 steps"
+         description2="+ 30 sit ups"
+         minStake={0.0001}
+         maxStake={15}
+         rewardMultiplier="1.2x"
+         type="combo"
+         tags={["advanced", "strength"]}
+       />
         ))}
       </div>
     </div>

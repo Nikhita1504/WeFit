@@ -12,6 +12,8 @@ import {
 } from "../components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import { FaHistory } from "react-icons/fa";
+import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const Details = () => {
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
@@ -25,11 +27,13 @@ const Details = () => {
       }),
     },
   ];
+  const {logout}=useAuth();
+  const navigate=useNavigate();
 
   const handleLogout = () => {
-    console.log("Logging out...");
+    logout();
+    navigate("/login")
   };
-
   const handleToggleChatbot = () => {
     setIsChatbotOpen(!isChatbotOpen);
   };
