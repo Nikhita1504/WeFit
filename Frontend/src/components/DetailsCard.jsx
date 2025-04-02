@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext , useEffect } from "react";
 import { ArrowRight } from "lucide-react";
 import "../styles/DesktopHome.css";
 import { Button } from "./ui/button";
@@ -7,8 +7,12 @@ import Contractcontext from "../context/contractcontext";
 import walletcontext from "../context/walletcontext";
 import axios from "axios";
 import { Navigate, useNavigate } from "react-router-dom";
+import useFitnessData from "../Utils/useStepCount";
 
 const DetailsCard = ({ challenge }) => {
+
+
+
   const { contract } = useContext(Contractcontext);
   const { account } = useContext(walletcontext);
   const ethToInrRate = 157669;
@@ -65,10 +69,62 @@ const DetailsCard = ({ challenge }) => {
     parseFloat(stakeAmount || "0")
   ).toFixed(2);
 
-  // Handle staking function
+
+
+  const { todaySteps } = useFitnessData(); 
+  const [currentSteps, setCurrentSteps] = useState(null); // Store the fetched steps
+
+  useEffect(() => {
+    if (todaySteps > 0) {
+      setCurrentSteps(todaySteps);
+    }
+  }, [todaySteps]); // Update when `todaySteps` changes
+
+  // // Handle staking function
+  // const handleStake = async () => {
+  //   if (!account) {
+  //     alert("Please connect your wallet first!");
+  //     return;
+  //   }
+
+  //   setLoading(true);
+  //   try {
+  //     const stakeData = {
+  //       challengeId: challenge._id,
+  //       ethStaked: ethAmount,
+  //       rewardsEarned: potentialReward,
+  //       isCompleted: false
+  //     };
+      
+  //     const response = await axios.post(
+  //       `http://localhost:3000/ActiveChallenge/create/${localStorage.getItem('JwtToken')}`,
+  //       stakeData
+  //     );
+
+  //     if (response.status === 201) {
+  //       alert("Challenge started successfully!");
+  //       console.log("hyy",todaySteps);
+  //       localStorage.setItem("challengeInitialSteps", todaySteps);
+  //       navigate("/")
+  //     } else {
+  //       throw new Error("Failed to create challenge");
+  //     }
+  //   } catch (error) {
+  //     console.error("Staking failed:", error);
+  //     alert(`Staking failed: ${error.message}`);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const handleStake = async () => {
     if (!account) {
       alert("Please connect your wallet first!");
+      return;
+    }
+
+    if (currentSteps === null) {
+      alert("Fetching step data, please wait...");
       return;
     }
 
@@ -88,7 +144,8 @@ const DetailsCard = ({ challenge }) => {
 
       if (response.status === 201) {
         alert("Challenge started successfully!");
-        navigate("/")
+        localStorage.setItem("challengeInitialSteps", currentSteps); // Store correct steps
+        navigate("/");
       } else {
         throw new Error("Failed to create challenge");
       }

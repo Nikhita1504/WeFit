@@ -9,212 +9,162 @@ const useFitnessData = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
     const { token } = useAuth();
-  
+
     useEffect(() => {
-      if (!token) return;
-  
-      let isMounted = true;
-      let script = null;
-      let retryCount = 0;
-      const maxRetries = 3;
-  
-      const loadGAPI = async () => {
-        return new Promise((resolve, reject) => {
-          // If already loaded
-          if (window.gapi && window.gapi.client) {
-            resolve();
-            return;
-          }
-  
-          // If script is already being loaded
-          if (document.querySelector('script[src="https://apis.google.com/js/api.js"]')) {
-            const checkInterval = setInterval(() => {
-              if (window.gapi && window.gapi.client) {
-                clearInterval(checkInterval);
-                resolve();
-              }
-            }, 100);
-            return;
-          }
-  
-          // Create and load new script
-          script = document.createElement('script');
-          script.src = 'https://apis.google.com/js/api.js';
-          script.async = true;
-          script.defer = true;
-          
-          script.onload = () => {
-            window.gapi.load('client:auth2', {
-              callback: resolve,
-              onerror: reject
-            });
-          };
-          
-          script.onerror = reject;
-          document.body.appendChild(script);
-        });
-      };
-  
-      const initClient = async () => {
-        try {
-          await window.gapi.client.init({
-            apiKey: import.meta.env.VITE_GOOGLE_API_KEY,
-            discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/fitness/v1/rest"],
-          });
-        } catch (err) {
-          console.error('Google API init error:', err);
-          throw new Error('Failed to initialize Google API client');
-        }
-      };
-  
-      const fetchDataWithRetry = async () => {
-        try {
-          setIsLoading(true);
-          
-          // Load Google API with retry logic
-          while (retryCount < maxRetries) {
+        if (!token) return;
+
+        let isMounted = true;
+        let intervalId = null;
+
+        const fetchTodaySteps = async () => {
             try {
-              await loadGAPI();
-              await initClient();
-              break;
-            } catch (err) {
-              retryCount++;
-              if (retryCount >= maxRetries) throw err;
-              await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
+                const now = new Date();
+                const todayStart = new Date(now);
+                todayStart.setHours(0, 0, 0, 0);
+
+                const todayEnd = now.getTime();
+
+                const today = await fetchStepCount(token, todayStart.getTime(), todayEnd);
+                if (isMounted) {
+                    setTodaySteps(today);
+                }
+            } catch (error) {
+                if (isMounted) {
+                    console.error('Google Fit Error:', error);
+                    setError(error.message || 'Failed to load today\'s fitness data');
+                }
             }
-          }
-  
-          if (!isMounted) return;
-  
-          // Date calculations
-          const now = new Date();
-          const todayStart = new Date(now);
-          todayStart.setHours(0, 0, 0, 0);
-          
-          const todayEnd = new Date(now);
-          todayEnd.setHours(23, 59, 59, 999);
-          
-          const weekStart = new Date(todayStart);
-          weekStart.setDate(weekStart.getDate() - 7);
-  
-          // Fetch data
-          const [steps, calories] = await Promise.all([
-            fetchSteps(token, todayStart.getTime(), todayEnd.getTime(), weekStart.getTime()),
-            fetchCalories(token, todayStart.getTime(), todayEnd.getTime(), weekStart.getTime())
-          ]);
-  
-          if (isMounted) {
-            setTodaySteps(steps.today);
-            setWeeklySteps(steps.weekly);
-            setTodayCalories(calories.today);
-            setWeeklyCalories(calories.weekly);
-          }
-        } catch (error) {
-          if (isMounted) {
-            console.error('Google Fit Error:', error);
-            setError(error.message || 'Failed to load fitness data');
-          }
-        } finally {
-          if (isMounted) setIsLoading(false);
-        }
-      };
-  
-      fetchDataWithRetry();
-  
-      return () => {
-        isMounted = false;
-        if (script) {
-          document.body.removeChild(script);
-        }
-      };
+        };
+
+        const fetchInitialData = async () => {
+            setIsLoading(true);
+            try {
+                const now = new Date();
+                const todayStart = new Date(now);
+                todayStart.setHours(0, 0, 0, 0);
+                const todayEnd = now.getTime();
+
+                const weekStart = new Date(todayStart);
+                weekStart.setDate(weekStart.getDate() - 7);
+
+                const [steps, calories] = await Promise.all([
+                    fetchSteps(token, todayStart.getTime(), todayEnd, weekStart.getTime()),
+                    fetchCalories(token, todayStart.getTime(), todayEnd, weekStart.getTime())
+                ]);
+
+                if (isMounted) {
+                    setTodaySteps(steps.today);
+                    setWeeklySteps(steps.weekly);
+                    setTodayCalories(calories.today);
+                    setWeeklyCalories(calories.weekly);
+                }
+            } catch (error) {
+                if (isMounted) {
+                    console.error('Google Fit Error:', error);
+                    setError(error.message || 'Failed to load fitness data');
+                }
+            } finally {
+                if (isMounted) setIsLoading(false);
+            }
+        };
+
+        fetchInitialData();
+
+        // Start interval to update today's steps every 30 seconds
+        intervalId = setInterval(fetchTodaySteps, 30000);
+
+        return () => {
+            isMounted = false;
+            if (intervalId) clearInterval(intervalId);
+        };
     }, [token]);
 
-  const fetchSteps = async (token, todayStart, todayEnd, weekStart) => {
-    const today = await fetchStepCount(token, todayStart, todayEnd);
-    const weekly = await fetchStepCount(token, weekStart, todayEnd);
-    return { today, weekly };
-  };
+    const fetchSteps = async (token, todayStart, todayEnd, weekStart) => {
+        const today = await fetchStepCount(token, todayStart, todayEnd);
+        const weekly = await fetchStepCount(token, weekStart, todayEnd);
+        return { today, weekly };
+    };
 
-  const fetchCalories = async (token, todayStart, todayEnd, weekStart) => {
-    const today = await fetchCalorieExpenditure(token, todayStart, todayEnd);
-    const weekly = await fetchCalorieExpenditure(token, weekStart, todayEnd);
-    return { today, weekly };
-  };
+    const fetchCalories = async (token, todayStart, todayEnd, weekStart) => {
+        const today = await fetchCalorieExpenditure(token, todayStart, todayEnd);
+        const weekly = await fetchCalorieExpenditure(token, weekStart, todayEnd);
+        return { today, weekly };
+    };
 
-  const fetchStepCount = async (token, startTime, endTime) => {
-    const response = await fetch("https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${token}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        aggregateBy: [{
-          dataTypeName: "com.google.step_count.delta",
-          dataSourceId: "derived:com.google.step_count.delta:com.google.android.gms:estimated_steps"
-        }],
-        bucketByTime: { durationMillis: 86400000 }, // Daily buckets
-        startTimeMillis: startTime,
-        endTimeMillis: endTime
-      })
-    });
+    const fetchStepCount = async (token, startTime, endTime) => {
+        const response = await fetch("https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                aggregateBy: [{
+                    dataTypeName: "com.google.step_count.delta",
+                    dataSourceId: "derived:com.google.step_count.delta:com.google.android.gms:merge_step_deltas"
+                }],
+                bucketByTime: { durationMillis: 60000 }, // 1-minute buckets
+                startTimeMillis: startTime,
+                endTimeMillis: endTime
+            })
+        });
 
-    if (!response.ok) throw new Error('Failed to fetch steps');
-    
-    const data = await response.json();
-    return calculateTotalSteps(data);
-  };
+        if (!response.ok) throw new Error('Failed to fetch steps');
 
-  const fetchCalorieExpenditure = async (token, startTime, endTime) => {
-    const response = await fetch("https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${token}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        aggregateBy: [{
-          dataTypeName: "com.google.calories.expended",
-          dataSourceId: "derived:com.google.calories.expended:com.google.android.gms:merge_calories_expended"
-        }],
-        bucketByTime: { durationMillis: 86400000 }, // Daily buckets
-        startTimeMillis: startTime,
-        endTimeMillis: endTime
-      })
-    });
+        const data = await response.json();
+        return calculateTotalSteps(data);
+    };
 
-    if (!response.ok) throw new Error('Failed to fetch calories');
-    
-    const data = await response.json();
-    return calculateTotalCalories(data);
-  };
+    const fetchCalorieExpenditure = async (token, startTime, endTime) => {
+        const response = await fetch("https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                aggregateBy: [{
+                    dataTypeName: "com.google.calories.expended",
+                    dataSourceId: "derived:com.google.calories.expended:com.google.android.gms:merge_calories_expended"
+                }],
+                bucketByTime: { durationMillis: 86400000 },
+                startTimeMillis: startTime,
+                endTimeMillis: endTime
+            })
+        });
 
-  const calculateTotalSteps = (data) => {
-    return data.bucket?.reduce((total, bucket) => {
-      const points = bucket.dataset?.[0]?.point || [];
-      return total + points.reduce((sum, point) => {
-        return sum + (point.value?.[0]?.intVal || 0);
-      }, 0);
-    }, 0) || 0;
-  };
+        if (!response.ok) throw new Error('Failed to fetch calories');
 
-  const calculateTotalCalories = (data) => {
-    return data.bucket?.reduce((total, bucket) => {
-      const points = bucket.dataset?.[0]?.point || [];
-      return total + points.reduce((sum, point) => {
-        return sum + (point.value?.[0]?.fpVal || 0);
-      }, 0);
-    }, 0) || 0;
-  };
+        const data = await response.json();
+        return calculateTotalCalories(data);
+    };
 
-  return { 
-    todaySteps, 
-    weeklySteps, 
-    todayCalories, 
-    weeklyCalories, 
-    isLoading, 
-    error 
-  };
+    const calculateTotalSteps = (data) => {
+        return data.bucket?.reduce((total, bucket) => {
+            const points = bucket.dataset?.[0]?.point || [];
+            return total + points.reduce((sum, point) => {
+                return sum + (point.value?.[0]?.intVal || 0);
+            }, 0);
+        }, 0) || 0;
+    };
+
+    const calculateTotalCalories = (data) => {
+        return data.bucket?.reduce((total, bucket) => {
+            const points = bucket.dataset?.[0]?.point || [];
+            return total + points.reduce((sum, point) => {
+                return sum + (point.value?.[0]?.fpVal || 0);
+            }, 0);
+        }, 0) || 0;
+    };
+
+    return { 
+        todaySteps, 
+        weeklySteps, 
+        todayCalories, 
+        weeklyCalories, 
+        isLoading, 
+        error 
+    };
 };
 
 export default useFitnessData;
