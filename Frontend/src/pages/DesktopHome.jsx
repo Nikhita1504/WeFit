@@ -20,11 +20,11 @@ import ActiveChallengeCard
  from "../components/ActiveChallengeCard";
 
 
-import useStepCount from "../utils/useStepCount";
-import useFitnessData from "../utils/useStepCount";
-import AnimatedCounter from "../components/ui/AnimatedCounter";
+
+
+
 import { FaHistory } from "react-icons/fa";
-import ProgressCircle from "../components/ui/ProgressCircle";
+
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 
@@ -34,10 +34,6 @@ const DesktopHome = () => {
   const { logout, JwtToken } = useAuth();
   const [isCameraOn, setIsCameraOn] = useState(false);
 
-  const { todaySteps,
-    weeklySteps,
-    todayCalories,
-    weeklyCalories, isLoading, error } = useFitnessData();
   const [userData, setuserData] = useState();
 
   const getUserData = async () => {
@@ -145,6 +141,7 @@ useEffect(() => {
             <div className="overflow-hidden">
               <ConnectWallet />
             </div>
+            
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Avatar className="h-[63px]  p-3.5 w-[63px] border-4 border-[#512E8B] rounded-full bg-[#413359] cursor-pointer hover:opacity-80 transition-opacity">

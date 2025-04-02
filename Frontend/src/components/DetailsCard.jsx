@@ -8,13 +8,15 @@ import walletcontext from "../context/walletcontext";
 import axios from "axios";
 import { Navigate, useNavigate } from "react-router-dom";
 import useFitnessData from "../Utils/useStepCount";
+import { ethers } from "ethers";
+import getBalance from "../Utils/getbalance";
 
 const DetailsCard = ({ challenge }) => {
 
 
 
   const { contract } = useContext(Contractcontext);
-  const { account } = useContext(walletcontext);
+  const { account , Setbalance } = useContext(walletcontext);
   const ethToInrRate = 157669;
   const minStake =  0.0006342400852418675;
   const maxStake =  50;
@@ -117,45 +119,119 @@ const DetailsCard = ({ challenge }) => {
   //   }
   // };
 
+  // const handleStake = async () => {
+  //   console.log("potentialReward",potentialReward);
+  //   if (!account) {
+  //     alert("Please connect your wallet first!");
+  //     return;
+  //   }
+
+  //   if (currentSteps === null) {
+  //     alert("Fetching step data, please wait...");
+  //     return;
+  //   }
+
+  //   setLoading(true);
+  //   try {
+  //     const stakeData = {
+  //       challengeId: challenge._id,
+  //       ethStaked: ethAmount,
+  //       rewardsEarned: potentialReward,
+  //       isCompleted: false
+  //     };
+      
+  //     const response = await axios.post(
+  //       `http://localhost:3000/ActiveChallenge/create/${localStorage.getItem('JwtToken')}`,
+  //       stakeData
+  //     );
+
+  //     if (response.status === 201) {
+  //       alert("Challenge started successfully!");
+  //       localStorage.setItem("challengeInitialSteps", currentSteps); // Store correct steps
+  //       navigate("/");
+  //     } else {
+  //       throw new Error("Failed to create challenge");
+  //     }
+  //   } catch (error) {
+  //     console.error("Staking failed:", error);
+  //     alert(`Staking failed: ${error.message}`);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+
+
   const handleStake = async () => {
+    console.log("potentialReward", potentialReward);
+   
     if (!account) {
-      alert("Please connect your wallet first!");
-      return;
+        alert("Please connect your wallet first!");
+        return;
     }
 
     if (currentSteps === null) {
-      alert("Fetching step data, please wait...");
-      return;
+        alert("Fetching step data, please wait...");
+        return;
     }
 
     setLoading(true);
     try {
-      const stakeData = {
-        challengeId: challenge._id,
-        ethStaked: ethAmount,
-        rewardsEarned: potentialReward,
-        isCompleted: false
-      };
-      
-      const response = await axios.post(
-        `http://localhost:3000/ActiveChallenge/create/${localStorage.getItem('JwtToken')}`,
-        stakeData
-      );
+        // 1. Set goal in the smart contract
+        
+        const weiAmount = ethers.parseEther(parseFloat(ethAmount).toFixed(18)); // Convert to 18 decimals
+        const weiReward = ethers.parseEther(parseFloat(potentialReward/156697).toFixed(18)); // Convert to 18 decimals
+        
 
-      if (response.status === 201) {
-        alert("Challenge started successfully!");
-        localStorage.setItem("challengeInitialSteps", currentSteps); // Store correct steps
-        navigate("/");
-      } else {
-        throw new Error("Failed to create challenge");
-      }
+        // const transaction = await contract.setGoal(weiAmount, weiReward, { value: weiAmount });
+         const transaction = await contract.setGoal( weiReward, { value: weiAmount });
+        // const transaction = await contract.setGoal({ value: weiAmount });
+        // const transaction = await contract.addBalance({ value: weiAmount });
+
+
+        await transaction.wait(); // Wait for the transaction to be mined
+
+
+         // 2. Print contract balance
+         const contractBalance = await contract.getContractBalance();
+         console.log("Contract Balance after setting goal:", ethers.formatEther(contractBalance));
+         
+         // 3. Print user goal data
+         const [stake, reward] = await contract.getUserGoal(account);
+         console.log("User stake amount:", ethers.formatEther(stake));
+         console.log("User reward amount:", ethers.formatEther(reward));
+         
+         const balance = await getBalance(account);
+         console.log(balance*156697);
+         Setbalance(balance);
+
+        // 2. Execute the rest of the function after the contract goal is set
+        const stakeData = {
+            challengeId: challenge._id,
+            ethStaked: ethAmount,
+            rewardsEarned: potentialReward,
+            isCompleted: false
+        };
+
+        const response = await axios.post(
+            `http://localhost:3000/ActiveChallenge/create/${localStorage.getItem('JwtToken')}`,
+            stakeData
+        );
+
+        if (response.status === 201) {
+            alert("Challenge started successfully!");
+            localStorage.setItem("challengeInitialSteps", currentSteps); // Store correct steps
+            navigate("/");
+        } else {
+            throw new Error("Failed to create challenge");
+        }
     } catch (error) {
-      console.error("Staking failed:", error);
-      alert(`Staking failed: ${error.message}`);
+        console.error("Staking failed:", error);
+        alert(`Staking failed: ${error.message}`);
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
-  };
+};
 
   return (
     <div className="bg-[#1A0F2B] border-2 border-[#301F4C] rounded-[11px] p-6">
