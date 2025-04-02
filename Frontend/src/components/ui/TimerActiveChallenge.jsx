@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const TimerActiveChallenge = ({ fetchedData }) => {
+const TimerActiveChallenge = ({ fetchedData , handleDeleteChallenge }) => {
   const [timeLeft, setTimeLeft] = useState({ hours: '00', minutes: '00', seconds: '00' });
   const [creationDate, setCreationDate] = useState('');
   const [creationTime, setCreationTime] = useState('');
@@ -57,7 +57,7 @@ const TimerActiveChallenge = ({ fetchedData }) => {
       if (remainingTime <= 0) {
         setTimeLeft({ hours: '00', minutes: '00', seconds: '00' });
         clearInterval(timer);
-        deleteActiveChallenge(fetchedData._id);
+        handleDeleteChallenge();
       } else {
         const hours = Math.floor(remainingTime / (1000 * 60 * 60));
         const minutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
@@ -77,14 +77,7 @@ const TimerActiveChallenge = ({ fetchedData }) => {
     return () => clearInterval(timer);
   }, [fetchedData]);
 
-  const deleteActiveChallenge = async (challengeId) => {
-    try {
-      console.log(`Deleting challenge with ID: ${challengeId} at midnight`);
-      // API call to delete the challenge would go here
-    } catch (error) {
-      console.error('Error deleting challenge:', error);
-    }
-  };
+
 
   return (
     <div className="flex gap-3 items-start w-[225px]">

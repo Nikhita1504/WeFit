@@ -1,29 +1,47 @@
 import { useState, useEffect } from "react";
 import AnimatedNumber from "./AnimatedNumber";
+import useFitnessData from "../../Utils/useStepCount";
 
-const ProgressCircle = ({ todaySteps }) => {
+const ProgressCircle = ({ exercise, handlecompleteExercise }) => {
+  const alreadySteps = parseInt(localStorage.getItem("challengeInitialSteps")) || 0;
+  const targetSteps = exercise.reps ; // Target steps to complete the challenge
+  const { todaySteps } = useFitnessData();
   const [progress, setProgress] = useState(0);
 
   // Total circumference of the circle
   const circleCircumference = 339.3; // 2 * π * r (for r=54)
 
-  // **Modify Progress Calculation for 5000 Steps**
-  const maxSteps = 5000; 
-  const progressPercentage = Math.min(todaySteps / maxSteps, 1); // Normalize within 0-1
+  // Calculate actual progress after subtracting already completed steps
+  const effectiveSteps = Math.max(todaySteps - alreadySteps, 0); // Avoid negative values
+  const progressPercentage = Math.min(effectiveSteps / targetSteps, 1); // Normalize within 0-1
   const progressOffset = circleCircumference * (1 - progressPercentage);
 
-  // **Dynamic Color Based on todaySteps**
+  // Dynamic color based on progress
   const getProgressColor = () => {
-    if (todaySteps < 1500) return "#FF3B30"; // Red (low progress)
-    if (todaySteps < 3500) return "#FF9500"; // Orange (medium progress)
+    if (progressPercentage < 0.3) return "#FF3B30"; // Red (low progress)
+    if (progressPercentage < 0.7) return "#FF9500"; // Orange (medium progress)
     return "#4CD964"; // Green (high progress)
   };
 
   useEffect(() => {
-    setTimeout(() => {
-      setProgress(progressOffset);
-    }, 500);
+    const intervalId = setInterval(() => {
+      console.log(todaySteps); // Logs every second
+      setProgress(progressOffset); // Update progress every second
+    }, 1000);
+  
+    return () => clearInterval(intervalId); // Cleanup on unmount/re-render
   }, [todaySteps]);
+
+  useEffect(() => {
+    if (progressPercentage >= 1 && !exercise.
+      isCompleted) {
+      console.log("Challenge Completed");
+      
+      handlecompleteExercise(exercise._id);
+      
+     
+    }
+  }, [progressPercentage, handlecompleteExercise, exercise._id]);
 
   return (
     <div className="relative flex items-center justify-center w-[170px] h-[170px]">
@@ -41,7 +59,7 @@ const ProgressCircle = ({ todaySteps }) => {
           strokeWidth="12"
           strokeLinecap="round"
           strokeDasharray={circleCircumference}
-          strokeDashoffset={progress}
+          strokeDashoffset={`${progress}`}
           transform="rotate(-90 60 60)"
           style={{ transition: "stroke-dashoffset 1.5s ease-out" }} // Smooth animation
         />
@@ -49,7 +67,7 @@ const ProgressCircle = ({ todaySteps }) => {
 
       {/* Animated Number in Center */}
       <div className="absolute text-2xl font-bold text-white">
-        <AnimatedNumber value={todaySteps}/>
+        <AnimatedNumber value={effectiveSteps} />
       </div>
     </div>
   );

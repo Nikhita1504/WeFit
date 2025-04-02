@@ -20,13 +20,14 @@ import ActiveChallengeCard
  from "../components/ActiveChallengeCard";
 
 
-import useStepCount from "../utils/useStepCount";
-import useFitnessData from "../utils/useStepCount";
+// import useStepCount from "../utils/useStepCount";
+// import useFitnessData from "../utils/useStepCount";
 import AnimatedCounter from "../components/ui/AnimatedCounter";
 import { FaHistory } from "react-icons/fa";
 import ProgressCircle from "../components/ui/ProgressCircle";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
+import useFitnessData from "../Utils/useStepCount";
 
 const DesktopHome = () => {
   const navigate = useNavigate();
