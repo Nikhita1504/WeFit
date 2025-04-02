@@ -13,10 +13,13 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import { FaHistory } from "react-icons/fa";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const Details = () => {
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
+  const location=useLocation();
+  const challenge=location.state?.challenge;
+  console.log(challenge);
   const chatMessages = [
     {
       sender: "bot",
@@ -90,7 +93,7 @@ const Details = () => {
 
         </header>
      
-        <DetailsSection />
+        <DetailsSection challenge={challenge} />
 
       </div>
 

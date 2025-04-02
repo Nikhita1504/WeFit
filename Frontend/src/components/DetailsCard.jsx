@@ -1,27 +1,29 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext , useEffect } from "react";
 import { ArrowRight } from "lucide-react";
 import "../styles/DesktopHome.css";
 import { Button } from "./ui/button";
 import { useChallengeContext } from "../context/ChallengeContext";
 import Contractcontext from "../context/contractcontext";
 import walletcontext from "../context/walletcontext";
+import axios from "axios";
+import { Navigate, useNavigate } from "react-router-dom";
+import useFitnessData from "../Utils/useStepCount";
 
-const DetailsCard = ({
-  title,
-  description1,
-  description2,
-  minStake = 0.0006342400852418675,
-  maxStake = 0.003,
-  rewardMultiplier = "2x",
-  type,
-  tags = [],
-}) => {
+const DetailsCard = ({ challenge }) => {
+
+
+
   const { contract } = useContext(Contractcontext);
-  const {account} = useContext(walletcontext); 
+  const { account } = useContext(walletcontext);
   const ethToInrRate = 157669;
+  const minStake =  0.0006342400852418675;
+  const maxStake =  50;
+  const rewardMultiplier = challenge?.rewardMultiplier?.toString() || "1.3";
   const [ethAmount, setEthAmount] = useState(minStake.toString());
   const [stakeAmount, setStakeAmount] = useState((minStake * ethToInrRate).toFixed(2));
   const [loading, setLoading] = useState(false);
+  const { selectedChallenge } = useChallengeContext();
+  const navigate=useNavigate();
 
   // Handle ETH input
   const handleEthChange = (e) => {
@@ -67,52 +69,98 @@ const DetailsCard = ({
     parseFloat(stakeAmount || "0")
   ).toFixed(2);
 
-  // Handle staking function
+
+
+  const { todaySteps } = useFitnessData(); 
+  const [currentSteps, setCurrentSteps] = useState(null); // Store the fetched steps
+
+  useEffect(() => {
+    if (todaySteps > 0) {
+      setCurrentSteps(todaySteps);
+    }
+  }, [todaySteps]); // Update when `todaySteps` changes
+
+  // // Handle staking function
+  // const handleStake = async () => {
+  //   if (!account) {
+  //     alert("Please connect your wallet first!");
+  //     return;
+  //   }
+
+  //   setLoading(true);
+  //   try {
+  //     const stakeData = {
+  //       challengeId: challenge._id,
+  //       ethStaked: ethAmount,
+  //       rewardsEarned: potentialReward,
+  //       isCompleted: false
+  //     };
+      
+  //     const response = await axios.post(
+  //       `http://localhost:3000/ActiveChallenge/create/${localStorage.getItem('JwtToken')}`,
+  //       stakeData
+  //     );
+
+  //     if (response.status === 201) {
+  //       alert("Challenge started successfully!");
+  //       console.log("hyy",todaySteps);
+  //       localStorage.setItem("challengeInitialSteps", todaySteps);
+  //       navigate("/")
+  //     } else {
+  //       throw new Error("Failed to create challenge");
+  //     }
+  //   } catch (error) {
+  //     console.error("Staking failed:", error);
+  //     alert(`Staking failed: ${error.message}`);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const handleStake = async () => {
-    if (!contract || !account) {
+    if (!account) {
       alert("Please connect your wallet first!");
       return;
     }
-    
+
+    if (currentSteps === null) {
+      alert("Fetching step data, please wait...");
+      return;
+    }
+
     setLoading(true);
     try {
-      console.log(ethAmount);
-      const valueInWei = window.web3.utils.toWei(ethAmount, "ether");
-      await contract.methods.stake().send({
-        from: account,
-        value: valueInWei,
-      });
+      const stakeData = {
+        challengeId: challenge._id,
+        ethStaked: ethAmount,
+        rewardsEarned: potentialReward,
+        isCompleted: false
+      };
+      
+      const response = await axios.post(
+        `http://localhost:3000/ActiveChallenge/create/${localStorage.getItem('JwtToken')}`,
+        stakeData
+      );
 
-      alert("Stake successful!");
+      if (response.status === 201) {
+        alert("Challenge started successfully!");
+        localStorage.setItem("challengeInitialSteps", currentSteps); // Store correct steps
+        navigate("/");
+      } else {
+        throw new Error("Failed to create challenge");
+      }
     } catch (error) {
       console.error("Staking failed:", error);
-      alert("Staking failed. Please try again.");
+      alert(`Staking failed: ${error.message}`);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
     <div className="bg-[#1A0F2B] border-2 border-[#301F4C] rounded-[11px] p-6">
       <div className="flex justify-between items-start mb-5">
-        <div>
-          <h3 className="text-white text-2xl font-medium mb-2.5">{title}</h3>
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-purple-400 text-sm font-medium px-2 py-1 bg-[#301F4C] rounded">
-              {type?.toUpperCase() || "CHALLENGE"}
-            </span>
-            {tags?.length > 0 && (
-              <div className="flex flex-wrap gap-1">
-                {tags.map((tag, index) => (
-                  <span key={index} className="text-amber-300 text-xs font-medium px-2 py-1 bg-[#3A2C50] rounded">
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
-          <p className="text-[#CDCDCD] text-lg">{description1}</p>
-          <p className="text-[#CDCDCD] text-lg">{description2}</p>
-        </div>
+        
       </div>
 
       <div className="bg-[#403359] rounded-lg px-4 py-[17px] mb-5">
@@ -138,6 +186,7 @@ const DetailsCard = ({
           />
           <p className="text-white text-sm mt-1">
             Minimum amount: ₹{(minStake * ethToInrRate).toFixed(2)} (~{minStake} ETH)
+            {maxStake && ` | Maximum amount: ₹${(maxStake * ethToInrRate).toFixed(2)} (~${maxStake} ETH)`}
           </p>
         </div>
       </div>
@@ -146,6 +195,7 @@ const DetailsCard = ({
         <div className="flex justify-between items-end">
           <div>
             <p className="text-white text-xl mb-4">Potential Reward</p>
+            <p className="text-purple-300 text-sm">Multiplier: {rewardMultiplier}x</p>
           </div>
           <div className="text-right">
             <p className="text-white text-2xl font-bold">₹{potentialReward}</p>
@@ -155,8 +205,8 @@ const DetailsCard = ({
 
       <div className="mt-4 mb-6">
         <p className="text-black text-sm bg-amber-400 p-2 rounded-lg">
-          <span className="font-semibold">Note:</span> Your stake will be refunded successfully if you complete the
-          challenge within the given time frame. If you fail, your stake will be distributed to the reward pool.
+          <span className="font-semibold">Note:</span> Your stake will be refunded if you complete {challenge?.stepGoal?.toLocaleString() || "0"} steps within 24 hours. 
+          If you fail, your stake will be distributed to the reward pool.
         </p>
       </div>
 
