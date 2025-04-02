@@ -40,6 +40,8 @@ const DesktopHome = () => {
     weeklyCalories, isLoading, error } = useFitnessData();
   const [userData, setuserData] = useState();
 
+  console.log(todaySteps);
+
   const getUserData = async () => {
     try {
       const payload = jwtDecode(JwtToken);
