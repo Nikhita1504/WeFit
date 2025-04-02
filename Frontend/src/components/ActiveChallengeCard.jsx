@@ -1,15 +1,23 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { IoCheckmarkCircle } from "react-icons/io5";
 import axios from "axios";
 import ProgressCircle from "./ui/ProgressCircle";
 import TimerActiveChallenge from "./ui/TimerActiveChallenge";
 import useFitnessData from "../Utils/useStepCount";
+import getBalance from "../Utils/getbalance";
+import Contractcontext from "../context/contractcontext";
+import walletcontext from "../context/walletcontext";
+import {ethers} from "ethers"
 
 const ActiveChallengeCard = () => {
   const [challengeData, setChallengeData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isClaiming, setIsClaiming] = useState(false);
+  const {contract} = useContext(Contractcontext);
+  const {Setbalance} = useContext(walletcontext);
+  const{account} = useContext(walletcontext);
+  console.log(challengeData);
 
   // Fetch active challenge from API
   const fetchActiveChallenge = async () => {
@@ -61,15 +69,81 @@ const ActiveChallengeCard = () => {
       </div>
     );
   }
+  // const handleClaimReward = async () => {
+  //   try {
+  //     setIsClaiming(true);
+  
+  //     if (!contract) {
+  //       alert("Contract not connected.");
+  //       return;
+  //     }
+  
+  //     const tx = await contract.claimReward(); // Call contract method to claim reward
+  //     await tx.wait(); // Wait for transaction confirmation
+  //     Setbalance(getBalance());
+  //     alert("Rewards claimed successfully!");
+  
+  //     // Now delete the challenge after successful claim
+  //     handleDeleteChallenge();
+      
+  //     // Optionally refresh the challenge data
+  //     // fetchActiveChallenge();
+      
+  //   } catch (error) {
+  //     console.error("Error claiming reward:", error);
+  //     alert("Failed to claim rewards");
+  //   } finally {
+  //     setIsClaiming(false);
+  //   }
+  // };
+
   const handleClaimReward = async () => {
+    // handleDeleteChallenge();
     try {
       setIsClaiming(true);
-      //first claim reward
-      alert("Rewards claimed successfully!");
-      handleDeleteChallenge();
+  
+      if (!contract) {
+        alert("Contract not connected.");
+        return;
+      }
+  
+      // Get the contract balance
+      const contractBalance = await contract.getContractBalance();
+      const formattedContractBalance = ethers.formatEther(contractBalance);
 
+  // Get the user's reward amount safely
+  const userGoal = await contract.getUserGoal(account);
+  if (!userGoal || userGoal.length < 2) {
+    alert("Failed to fetch user goal.");
+    return;
+  }
+
+  const [stake, reward] = userGoal;
+     
+      const formattedReward = ethers.formatEther(reward);
+      
+      // Check if the contract has enough balance to pay the reward
+      if (parseFloat(formattedContractBalance) < parseFloat(formattedReward)) {
+        alert("Insufficient contract balance to claim rewards.");
+        return;
+      }
+  
+      // Proceed with claiming reward
+      const tx = await contract.claimReward();
+      await tx.wait(); // Wait for transaction confirmation
+  
+      const balance = await getBalance(account);
+      console.log(balance*156697);
+      Setbalance(balance);
+
+      alert("Rewards claimed successfully!");
+  
+      // Now delete the challenge after successful claim
+      handleDeleteChallenge();
+  
       // Optionally refresh the challenge data
       // fetchActiveChallenge();
+  
     } catch (error) {
       console.error("Error claiming reward:", error);
       alert("Failed to claim rewards");
@@ -77,6 +151,8 @@ const ActiveChallengeCard = () => {
       setIsClaiming(false);
     }
   };
+  
+  
 
   // Define filteredExercises before using it in the JSX
   const filteredExercises = challengeData.exercises.filter(
@@ -209,6 +285,7 @@ const ActiveChallengeCard = () => {
         <div className="flex gap-9 items-center mt-10 w-full max-md:max-w-full">
           <ProgressCircle
             handlecompleteExercise={handleCompleteExercise}
+          
             exercise={challengeData.exercises.find((ex) => ex.name === "steps")}
           />
 

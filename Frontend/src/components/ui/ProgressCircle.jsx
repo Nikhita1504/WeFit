@@ -3,6 +3,7 @@ import AnimatedNumber from "./AnimatedNumber";
 import useFitnessData from "../../Utils/useStepCount";
 
 const ProgressCircle = ({ exercise, handlecompleteExercise }) => {
+  console.log(exercise);
   const alreadySteps = parseInt(localStorage.getItem("challengeInitialSteps")) || 0;
   const targetSteps = exercise.reps ; // Target steps to complete the challenge
   const { todaySteps } = useFitnessData();
