@@ -11,6 +11,8 @@ app.use(
 );
 
 const userData = require("./Routes/userData.js");
+const challengeData = require("./Routes/challengeData");
+const ActiveChallengeRouter = require("./Routes/ActivechallengeRouter.js")
 
 
 app.get("/", (req, res) => {
@@ -18,6 +20,8 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/users", userData); 
+app.use("/api/challenges", challengeData); 
+app.use("/ActiveChallenge" ,ActiveChallengeRouter );
 
 
 // Server
