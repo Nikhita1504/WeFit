@@ -8,15 +8,22 @@ function Capture() {
     const [finalc, setFinalc] = useState(() => Number(sessionStorage.getItem("finalc")) || 0);
     const [isTracking, setIsTracking] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [statusMessage, setStatusMessage] = useState("Waiting...");
     const socketRef = useRef(null);
     const videoRef = useRef(null);
     const navigate = useNavigate();
     const location = useLocation();
+    
     const exerciseId = location.state?.exerciseId;
     const reps = location.state?.reps;
+    const exerciseName = location.state?.exerciseName;
+    
+    console.log("Exercise:", exerciseName);
 
     useEffect(() => {
-        // Initialize socket connection
+        const countEvent = exerciseName === "Push Ups" ? "pushup_count" : "squat_count";
+        const statusEvent = exerciseName === "Push Ups" ? "pushup_status" : "squat_status";
+
         socketRef.current = io("http://localhost:3001", {
             transports: ["websocket"],
             reconnection: true,
@@ -28,8 +35,12 @@ function Capture() {
             console.log("Socket connected");
         });
 
-        socketRef.current.on("squat_count", (data) => {
+        socketRef.current.on(countEvent, (data) => {
             setCount(data.count);
+        });
+
+        socketRef.current.on(statusEvent, (data) => {
+            setStatusMessage(data.status);
         });
 
         socketRef.current.on("disconnect", (reason) => {
@@ -45,7 +56,8 @@ function Capture() {
 
         return () => {
             if (socketRef.current) {
-                socketRef.current.off("squat_count");
+                socketRef.current.off(countEvent);
+                socketRef.current.off(statusEvent);
                 socketRef.current.off("connect");
                 socketRef.current.off("disconnect");
                 socketRef.current.off("connect_error");
@@ -53,14 +65,15 @@ function Capture() {
             }
             stopVideoStream();
         };
-    }, []);
+    }, [exerciseName]);
 
     const startVideoStream = async () => {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({
                 video: {
                     width: { ideal: 1280 },
-                    height: { ideal: 720 }
+                    height: { ideal: 720 },
+                    facingMode: "user"
                 }
             });
             if (videoRef.current) {
@@ -69,7 +82,6 @@ function Capture() {
         } catch (err) {
             console.error("Error accessing camera:", err);
             alert("Could not access camera. Please check permissions.");
-            throw err;
         }
     };
 
@@ -77,12 +89,12 @@ function Capture() {
         if (videoRef.current?.srcObject) {
             const stream = videoRef.current.srcObject;
             const tracks = stream.getTracks();
-            
+
             tracks.forEach(track => {
                 track.stop();
                 stream.removeTrack(track);
             });
-            
+
             videoRef.current.srcObject = null;
         }
     };
@@ -91,7 +103,10 @@ function Capture() {
         try {
             setIsLoading(true);
             await startVideoStream();
-            await fetch("http://localhost:3000/flask/start_squat");
+            
+            const apiEndpoint = exerciseName === "Push Ups" ? "start_pushup" : "start_squat";
+            await fetch(`http://localhost:3000/flask/${apiEndpoint}`);
+            
             setIsTracking(true);
         } catch (err) {
             console.error("Error starting tracking:", err);
@@ -102,7 +117,9 @@ function Capture() {
 
     const stopTracking = async () => {
         try {
-            await fetch("http://localhost:3000/flask/stop_squat");
+            const apiEndpoint = exerciseName === "Push Ups" ? "stop_pushup" : "stop_squat";
+            await fetch(`http://localhost:3000/flask/${apiEndpoint}`);
+            
             stopVideoStream();
             setIsTracking(false);
             setFinalc(count);
@@ -145,7 +162,6 @@ function Capture() {
         if (count === reps && reps > 0) {
             const completeExercise = async () => {
                 stopVideoStream();
-                // setIsTracking(false);
                 const success = await handleCompleteExercise(exerciseId);
                 if (success) {
                     alert("Exercise completed successfully!");
@@ -165,13 +181,11 @@ function Capture() {
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-[#0a192f] relative overflow-hidden">
-            {/* Purple and Teal Glow Effects */}
             <div className="absolute top-0 left-0 w-32 h-32 bg-purple-500 opacity-50 blur-2xl rounded-full"></div>
             <div className="absolute bottom-0 right-0 w-32 h-32 bg-teal-400 opacity-50 blur-2xl rounded-full"></div>
 
-            <h1 className="text-3xl font-bold mb-6 text-white">Squat Counter</h1>
+            <h1 className="text-3xl font-bold mb-6 text-white">{exerciseName} Counter</h1>
 
-            {/* Button Section Box */}
             <div className="mb-6 bg-black p-4 rounded-lg shadow-lg border border-gray-700">
                 {!isTracking ? (
                     <button
@@ -207,14 +221,19 @@ function Capture() {
                 </div>
             </div>
 
+            {/* Status Message */}
+            <p className="text-white text-lg font-medium">{statusMessage}</p>
+
             <video
                 ref={videoRef}
                 autoPlay
                 playsInline
                 muted
-                className={`w-full max-w-md rounded-lg border-2 ${isTracking ? 'border-green-400' : 'border-gray-300'
-                    }`}
+                className="w-full h-screen object-contain rounded-lg border-2 
+               transition-all duration-300 border-green-400"
             />
+
+
             <button
                 onClick={handleNavigate}
                 className="mt-6 px-6 py-2 rounded-md font-medium bg-blue-500 hover:bg-blue-600 text-white transition-colors relative z-10"

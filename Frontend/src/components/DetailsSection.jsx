@@ -4,23 +4,12 @@ import DetailsCardDes from "./DetailsCardDes";
 import { useChallengeContext } from "../context/ChallengeContext";
 const DetailsSection = ({ challenge }) => {
 
-
-  // const challenges = [
-  //   {
-  //     title: "Stake Crypto",
-  //     description1: "1. Complete 5,000 steps in a single day",
-  //     description2: "2. Challenge must be completed within 24 hours",
-
-  //     rewardMultiplier: "2x rewards",
-  //   },
-  // ];
   const challengesDes = [
     {
       title: "Challenge Requirement",
       description1: `1. Complete ${challenge.name} in a single day`,
       description2: "2. Excersises must be verified through the app",
       description3: "3. Challenge must be completed within 24 hours",
-
     },
   ];
 
@@ -81,6 +70,20 @@ const DetailsSection = ({ challenge }) => {
         </div>
       </div>
     </div>
+
+    {/* Exercises Section */}
+    <div className="mt-6">
+      <h3 className="text-white text-2xl font-bold mb-4">Exercises</h3>
+      <ul className="list-disc list-inside text-white">
+        {challenge?.exercises?.length > 0 ? (
+          challenge.exercises.map((exercise, index) => (
+            <li key={index} className="text-lg">{exercise.name} - {exercise.reps} reps</li>
+          ))
+        ) : (
+          <p className="text-gray-400">No exercises available.</p>
+        )}
+      </ul>
+    </div>
   </div>
 
   {/* Challenge Descriptions */}
@@ -97,9 +100,7 @@ const DetailsSection = ({ challenge }) => {
   </div>
 
   {/* Stake Card Section */}
-
     <DetailsCard challenge={challenge} />
-  
 </div>
   );
 };

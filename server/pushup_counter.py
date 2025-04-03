@@ -2,13 +2,12 @@ import cv2
 import mediapipe as mp
 import numpy as np
 import time
-from queue import Queue
 import threading
 
 mp_pose = mp.solutions.pose
 mp_drawing = mp.solutions.drawing_utils
 
-class SquatCounter:
+class PushupCounter:
     def __init__(self, socketio):
         self.socketio = socketio
         self.stop_event = threading.Event()
@@ -36,17 +35,17 @@ class SquatCounter:
         return angle if angle <= 180 else 360 - angle
 
     def get_body_orientation(self, landmarks):
-        """Determines whether the body is in a valid squat position."""
+        """Determines whether the body is in a valid pushup position."""
         # Check if essential landmarks are visible
         key_points = [
             mp_pose.PoseLandmark.LEFT_SHOULDER,
-            mp_pose.PoseLandmark.LEFT_HIP,
-            mp_pose.PoseLandmark.LEFT_KNEE,
-            mp_pose.PoseLandmark.LEFT_ANKLE,
+            mp_pose.PoseLandmark.LEFT_ELBOW,
+            mp_pose.PoseLandmark.LEFT_WRIST,
             mp_pose.PoseLandmark.RIGHT_SHOULDER,
-            mp_pose.PoseLandmark.RIGHT_HIP,
-            mp_pose.PoseLandmark.RIGHT_KNEE,
-            mp_pose.PoseLandmark.RIGHT_ANKLE
+            mp_pose.PoseLandmark.RIGHT_ELBOW,
+            mp_pose.PoseLandmark.RIGHT_WRIST,
+            mp_pose.PoseLandmark.LEFT_HIP,
+            mp_pose.PoseLandmark.RIGHT_HIP
         ]
         
         # Check visibility of all key points
@@ -54,20 +53,27 @@ class SquatCounter:
             if landmarks[point.value].visibility < self.min_visibility:
                 return "invalid"
         
-        # Get positions
+        # Calculate body alignment
+        # For pushups, we want to verify the body is roughly horizontal (plank position)
         left_shoulder = landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value]
         right_shoulder = landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value]
         left_hip = landmarks[mp_pose.PoseLandmark.LEFT_HIP.value]
         right_hip = landmarks[mp_pose.PoseLandmark.RIGHT_HIP.value]
+        left_ankle = landmarks[mp_pose.PoseLandmark.LEFT_ANKLE.value]
+        right_ankle = landmarks[mp_pose.PoseLandmark.RIGHT_ANKLE.value]
         
-        # Calculate body orientation
+        # Check if shoulders and hips are at similar heights (horizontal alignment)
+        # Calculate average y positions
         shoulder_y = (left_shoulder.y + right_shoulder.y) / 2
         hip_y = (left_hip.y + right_hip.y) / 2
+        ankle_y = (left_ankle.y + right_ankle.y) / 2
         
-        # Check if body is mostly vertical (proper squat position)
-        # The y-coordinate increases as you go down in the image
-        if (hip_y - shoulder_y) > 0.1:  # Shoulders should be above hips
-            return "vertical"
+        # In a proper pushup position, shoulders and hips should be at similar heights
+        # and ankles should be higher than hips (or at similar height for knees-down pushups)
+        height_diff = abs(shoulder_y - hip_y)
+        
+        if height_diff < 0.15:  # Shoulders and hips are roughly aligned horizontally
+            return "plank"
         else:
             return "invalid"
 
@@ -96,14 +102,14 @@ class SquatCounter:
         self.last_rep_time = 0
         self.angle_history = []
         
-        # Define squat angle thresholds
-        squat_down_angle = 110   # Angle below which we consider a squat "down"
-        squat_up_angle = 160     # Angle above which we consider a squat "up"
+        # Define pushup angle thresholds
+        pushup_down_angle = 90   # Angle below which we consider a pushup "down"
+        pushup_up_angle = 160    # Angle above which we consider a pushup "up"
         
         try:
             with mp_pose.Pose(
-                min_detection_confidence=0.7,  # Increased from 0.5
-                min_tracking_confidence=0.7    # Increased from 0.5
+                min_detection_confidence=0.7,
+                min_tracking_confidence=0.7
             ) as pose:
                 while not self.stop_event.is_set() and cap.isOpened():
                     success, image = cap.read()
@@ -128,27 +134,27 @@ class SquatCounter:
                         # Get body orientation
                         orientation = self.get_body_orientation(landmarks)
                         
-                        if orientation == "vertical":
-                            # Get coordinates for both legs
-                            left_hip = [landmarks[mp_pose.PoseLandmark.LEFT_HIP.value].x,
-                                       landmarks[mp_pose.PoseLandmark.LEFT_HIP.value].y]
-                            left_knee = [landmarks[mp_pose.PoseLandmark.LEFT_KNEE.value].x,
-                                        landmarks[mp_pose.PoseLandmark.LEFT_KNEE.value].y]
-                            left_ankle = [landmarks[mp_pose.PoseLandmark.LEFT_ANKLE.value].x,
-                                         landmarks[mp_pose.PoseLandmark.LEFT_ANKLE.value].y]
+                        if orientation == "plank":
+                            # Get coordinates for both arms
+                            left_shoulder = [landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].x,
+                                           landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].y]
+                            left_elbow = [landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].x,
+                                         landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].y]
+                            left_wrist = [landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].x,
+                                        landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].y]
                             
-                            right_hip = [landmarks[mp_pose.PoseLandmark.RIGHT_HIP.value].x,
-                                        landmarks[mp_pose.PoseLandmark.RIGHT_HIP.value].y]
-                            right_knee = [landmarks[mp_pose.PoseLandmark.RIGHT_KNEE.value].x,
-                                         landmarks[mp_pose.PoseLandmark.RIGHT_KNEE.value].y]
-                            right_ankle = [landmarks[mp_pose.PoseLandmark.RIGHT_ANKLE.value].x,
-                                          landmarks[mp_pose.PoseLandmark.RIGHT_ANKLE.value].y]
+                            right_shoulder = [landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].x,
+                                            landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].y]
+                            right_elbow = [landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value].x,
+                                          landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value].y]
+                            right_wrist = [landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value].x,
+                                         landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value].y]
                             
-                            # Calculate angles for both legs
-                            left_angle = self.calculate_angle(left_hip, left_knee, left_ankle)
-                            right_angle = self.calculate_angle(right_hip, right_knee, right_ankle)
+                            # Calculate angles for both arms
+                            left_angle = self.calculate_angle(left_shoulder, left_elbow, left_wrist)
+                            right_angle = self.calculate_angle(right_shoulder, right_elbow, right_wrist)
                             
-                            # Use average of both legs if both are visible
+                            # Use average of both arms if both are visible
                             if left_angle is not None and right_angle is not None:
                                 angle = (left_angle + right_angle) / 2
                             elif left_angle is not None:
@@ -168,11 +174,11 @@ class SquatCounter:
                                 time_since_last_rep = current_time - self.last_rep_time
                                 
                                 # State machine logic with hysteresis
-                                if self.state == "up" and smoothed_angle < squat_down_angle:
+                                if self.state == "up" and smoothed_angle < pushup_down_angle:
                                     self.state = "down"
                                     status = f"angle:{smoothed_angle:.1f},down"
                                     
-                                elif self.state == "down" and smoothed_angle > squat_up_angle:
+                                elif self.state == "down" and smoothed_angle > pushup_up_angle:
                                     # Ensure minimum time between reps (1 second)
                                     if time_since_last_rep > 1:
                                         self.counter += 1
@@ -181,8 +187,8 @@ class SquatCounter:
                                         
                                         # Emit count via socketio if available
                                         if self.socketio:
-                                            self.socketio.emit("squat_count", {"count": self.counter})
-                                            print(f"Squat counted: {self.counter}")
+                                            self.socketio.emit("pushup_count", {"count": self.counter})
+                                            print(f"Pushup counted: {self.counter}")
                                     self.state = "up"
                         else:
                             status = "invalid_position"
@@ -190,9 +196,7 @@ class SquatCounter:
                         status = "no_person"
                     
                     # Print status for debugging
-                   # Inside the process_frames() loop, after setting the status
-                    self.socketio.emit("squat_status", {"status": status})
-  
+                    print(f"Status: {status}, Count: {self.counter}")
                     
             print("Pose processing stopped")
         except Exception as e:
@@ -204,7 +208,7 @@ class SquatCounter:
     def main(self):
         """Main entry point when run directly"""
         try:
-            print("Starting squat counter...")
+            print("Starting pushup counter...")
             processing_thread = self.start()
             
             # Keep the main thread alive
@@ -213,13 +217,13 @@ class SquatCounter:
                 print(f"Current count: {self.counter}")
                 
         except KeyboardInterrupt:
-            print("\nStopping squat counter...")
+            print("\nStopping pushup counter...")
         finally:
             self.stop()
             processing_thread.join()
 
     def start(self):
-        """Start squat counter with processing thread."""
+        """Start pushup counter with processing thread."""
         self.stop_event.clear()  # Make sure the event is cleared
         processing_thread = threading.Thread(target=self.process_frames)
         processing_thread.daemon = True  # Make thread exit when main program exits
@@ -229,12 +233,9 @@ class SquatCounter:
 
     def stop(self):
         """Stop all threads."""
-        print("Stopping squat counter...")
+        print("Stopping pushup counter...")
         self.stop_event.set()
 
 if __name__ == "__main__":
-    counter = SquatCounter(None)
+    counter = PushupCounter(None)
     counter.main()
-
-
-

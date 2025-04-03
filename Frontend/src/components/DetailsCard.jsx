@@ -188,7 +188,7 @@ const DetailsCard = ({ challenge }) => {
         // const transaction = await contract.setGoal({ value: weiAmount });
         // const transaction = await contract.addBalance({ value: weiAmount });
 
-
+        // const transaction = await contract.deleteGoal();
         await transaction.wait(); // Wait for the transaction to be mined
 
 

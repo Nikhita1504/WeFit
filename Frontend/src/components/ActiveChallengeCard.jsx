@@ -247,10 +247,10 @@ const ActiveChallengeCard = () => {
     }
   };
 
-  const handleCaptureClick = (exerciseId,reps) => {
+  const handleCaptureClick = (exerciseId,reps,exerciseName) => {
 
     // localStorage.setItem("currentExerciseId", exerciseId);
-    navigate("/capture",{state:{exerciseId,reps}});
+    navigate("/capture",{state:{exerciseId,reps,exerciseName}});
   };
 
   return (
@@ -322,7 +322,7 @@ const ActiveChallengeCard = () => {
   
                 {exercise.isVideoRequired && (
                   <button
-                    onClick={() => handleCaptureClick(exercise._id, exercise.reps)}
+                    onClick={() => handleCaptureClick(exercise._id, exercise.reps,exercise.name)}
                     className="flex items-center gap-1 px-3 py-1 bg-purple-900 hover:bg-purple-800 rounded-full text-xs text-white transition-colors"
                   >
                     <FiCamera className="w-3 h-3" />
