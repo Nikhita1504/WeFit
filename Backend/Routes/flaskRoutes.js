@@ -29,14 +29,50 @@ router.get("/stop_squat", async (req, res) => {
 });
 
 // Get Squat Count
-router.get("/get_count", async (req, res) => {
+router.get("/get_squat_count", async (req, res) => {
   try {
-    const response = await axios.get(`${FLASK_SERVER_URL}/get_count`);
+    const response = await axios.get(`${FLASK_SERVER_URL}/get_squat_count`);
     console.log("count", response.data);
     res.json(response.data);
   } catch (error) {
     console.error("Error fetching squat count:", error.message);
     res.status(500).json({ error: "Failed to fetch squat count" });
+  }
+});
+
+// Start Pushup Tracking
+router.get("/start_pushup", async (req, res) => {
+  try {
+    const response = await axios.get(`${FLASK_SERVER_URL}/start_pushup`);
+    console.log(response.data);
+    res.json(response.data);
+  } catch (error) {
+    console.error("Error starting pushup tracking:", error.message);
+    res.status(500).json({ error: "Failed to start pushup tracking" });
+  }
+});
+
+// Stop Pushup Tracking
+router.get("/stop_pushup", async (req, res) => {
+  try {
+    const response = await axios.get(`${FLASK_SERVER_URL}/stop_pushup`);
+    console.log("stop", response.data);
+    res.json(response.data);
+  } catch (error) {
+    console.error("Error stopping pushup tracking:", error.message);
+    res.status(500).json({ error: "Failed to stop pushup tracking" });
+  }
+});
+
+// Get Pushup Count
+router.get("/get_pushup_count", async (req, res) => {
+  try {
+    const response = await axios.get(`${FLASK_SERVER_URL}/get_pushup_count`);
+    console.log("count", response.data);
+    res.json(response.data);
+  } catch (error) {
+    console.error("Error fetching pushup count:", error.message);
+    res.status(500).json({ error: "Failed to fetch pushup count" });
   }
 });
 
