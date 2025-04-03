@@ -12,9 +12,14 @@ import {
 } from "../components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import { FaHistory } from "react-icons/fa";
+import { useAuth } from "../context/AuthContext";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const Details = () => {
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
+  const location = useLocation();
+  const challenge = location.state?.challenge;
+  console.log(challenge);
   const chatMessages = [
     {
       sender: "bot",
@@ -25,21 +30,24 @@ const Details = () => {
       }),
     },
   ];
-
-  const handleLogout = () => {
-    console.log("Logging out...");
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+  const handleNavigateToHistory = () => {
+    navigate("/history");
   };
 
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
   const handleToggleChatbot = () => {
     setIsChatbotOpen(!isChatbotOpen);
   };
 
   return (
     <div className="desktop-home">
-      
-      
       <div className="desktop-home__container">
-      <header className="desktop-home__header">
+        <header className="desktop-home__header">
           <div className="desktop-home__logo-container">
             <img
               src="https://cdn.builder.io/api/v1/image/assets/TEMP/69e8365158abd202fc7d010edd0471beda6cd6aa?placeholderIfAbsent=true&apiKey=1455cb398c424e78afe4261a4bb08b71"
@@ -50,21 +58,11 @@ const Details = () => {
           </div>
           <div className="flex gap-4 items-center">
             <ConnectWallet />
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Avatar className="h-[63px]  p-3.5 w-[63px] border-4 border-[#512E8B] rounded-full bg-[#413359] cursor-pointer hover:opacity-80 transition-opacity">
-                  <FaHistory color="white" size={30} />
-                </Avatar>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem
-                  className="cursor-pointer"
-                  
-                >
-                  previous score
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <button onClick={handleNavigateToHistory} className="rounded-full">
+              <Avatar className="h-[63px]  p-3.5 w-[63px] border-4 border-[#512E8B] rounded-full bg-[#413359] cursor-pointer hover:opacity-80 transition-opacity">
+                <FaHistory color="white" size={30} />
+              </Avatar>
+            </button>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -83,11 +81,9 @@ const Details = () => {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-
         </header>
-     
-        <DetailsSection />
 
+        <DetailsSection challenge={challenge} />
       </div>
 
       {/* Floating Chatbot Bubble */}
