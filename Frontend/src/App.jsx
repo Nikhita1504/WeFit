@@ -19,6 +19,7 @@ import Walletprovider from "./context/walletprovider";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ChallengeProvider } from "./context/ChallengeContext";
 import Contractprovider from "./context/Contractprovider";
+import Capture from "./pages/Capture";
 
 function App() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
@@ -74,6 +75,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Details />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/capture"
+                element={
+                  <ProtectedRoute>
+                    <Capture />
                   </ProtectedRoute>
                 }
               />

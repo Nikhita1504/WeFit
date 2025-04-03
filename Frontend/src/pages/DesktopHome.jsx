@@ -1,5 +1,5 @@
 
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 
 import React, { useEffect, useRef, useState } from "react";
@@ -27,14 +27,18 @@ import { FaHistory } from "react-icons/fa";
 
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
+import useFitnessData from "../Utils/useStepCount";
 
 const DesktopHome = () => {
   const navigate = useNavigate();
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
   const { logout, JwtToken } = useAuth();
   const [isCameraOn, setIsCameraOn] = useState(false);
+  const{todaySteps}=useFitnessData();
+  console.log(todaySteps);
 
   const [userData, setuserData] = useState();
+  
 
   const getUserData = async () => {
     try {
