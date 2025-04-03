@@ -1,6 +1,26 @@
 [
 	{
 		"inputs": [],
+		"name": "addBalance",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "BalanceAdded",
+		"type": "event"
+	},
+	{
+		"inputs": [],
 		"name": "claimReward",
 		"outputs": [],
 		"stateMutability": "nonpayable",
@@ -8,28 +28,23 @@
 	},
 	{
 		"inputs": [],
-		"name": "depositToTreasure",
-		"outputs": [],
-		"stateMutability": "payable",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "expireAndCollect",
+		"name": "deleteGoal",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
 	},
 	{
+		"anonymous": false,
 		"inputs": [
 			{
+				"indexed": true,
 				"internalType": "address",
-				"name": "_treasureWallet",
+				"name": "user",
 				"type": "address"
 			}
 		],
-		"stateMutability": "nonpayable",
-		"type": "constructor"
+		"name": "GoalDeleted",
+		"type": "event"
 	},
 	{
 		"anonymous": false,
@@ -43,13 +58,13 @@
 			{
 				"indexed": false,
 				"internalType": "uint256",
-				"name": "goalSteps",
+				"name": "stakeAmount",
 				"type": "uint256"
 			},
 			{
 				"indexed": false,
 				"internalType": "uint256",
-				"name": "stakeAmount",
+				"name": "rewardAmount",
 				"type": "uint256"
 			}
 		],
@@ -62,13 +77,57 @@
 			{
 				"indexed": true,
 				"internalType": "address",
+				"name": "owner",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "OwnerWithdrawal",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
 				"name": "user",
 				"type": "address"
 			},
 			{
 				"indexed": false,
 				"internalType": "uint256",
-				"name": "rewardAmount",
+				"name": "reward",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "reason",
+				"type": "string"
+			}
+		],
+		"name": "RewardClaimFailed",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "user",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "reward",
 				"type": "uint256"
 			}
 		],
@@ -79,7 +138,7 @@
 		"inputs": [
 			{
 				"internalType": "uint256",
-				"name": "goalSteps",
+				"name": "_rewardAmount",
 				"type": "uint256"
 			}
 		],
@@ -89,65 +148,12 @@
 		"type": "function"
 	},
 	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "user",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "amountToTreasure",
-				"type": "uint256"
-			}
-		],
-		"name": "StakeFailed",
-		"type": "event"
+		"stateMutability": "payable",
+		"type": "fallback"
 	},
 	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "user",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "currentSteps",
-				"type": "uint256"
-			}
-		],
-		"name": "StepsUpdated",
-		"type": "event"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "steps",
-				"type": "uint256"
-			}
-		],
-		"name": "updateStepCount",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "amount",
-				"type": "uint256"
-			}
-		],
-		"name": "withdrawTreasure",
+		"inputs": [],
+		"name": "withdrawAll",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -158,20 +164,7 @@
 	},
 	{
 		"inputs": [],
-		"name": "owner",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "treasureBalance",
+		"name": "getContractBalance",
 		"outputs": [
 			{
 				"internalType": "uint256",
@@ -183,13 +176,24 @@
 		"type": "function"
 	},
 	{
-		"inputs": [],
-		"name": "treasureWallet",
-		"outputs": [
+		"inputs": [
 			{
 				"internalType": "address",
-				"name": "",
+				"name": "_user",
 				"type": "address"
+			}
+		],
+		"name": "getUserGoal",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "stake",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "reward",
+				"type": "uint256"
 			}
 		],
 		"stateMutability": "view",
@@ -203,13 +207,8 @@
 				"type": "address"
 			}
 		],
-		"name": "userStakes",
+		"name": "goals",
 		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "goalSteps",
-				"type": "uint256"
-			},
 			{
 				"internalType": "uint256",
 				"name": "stakeAmount",
@@ -217,18 +216,21 @@
 			},
 			{
 				"internalType": "uint256",
-				"name": "startTime",
+				"name": "rewardAmount",
 				"type": "uint256"
-			},
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "owner",
+		"outputs": [
 			{
-				"internalType": "uint256",
-				"name": "currentSteps",
-				"type": "uint256"
-			},
-			{
-				"internalType": "bool",
-				"name": "hasStaked",
-				"type": "bool"
+				"internalType": "address",
+				"name": "",
+				"type": "address"
 			}
 		],
 		"stateMutability": "view",

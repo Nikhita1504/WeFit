@@ -68,7 +68,7 @@ def get_count():
 
 if __name__ == "__main__":
     try:
-        socketio.run(app, debug=True, port=3000)
+        socketio.run(app, debug=True, port=3001, host="0.0.0.0")  # Run on port 5000
     finally:
         # Cleanup on server shutdown
         if squat_counter:

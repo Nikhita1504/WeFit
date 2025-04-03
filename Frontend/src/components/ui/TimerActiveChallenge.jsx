@@ -90,7 +90,7 @@ const TimerActiveChallenge = ({ fetchedData , handleDeleteChallenge }) => {
         <div className="flex flex-col self-stretch my-auto w-[78px]">
           <div className="self-start text-sm leading-loose text-center">Time Left</div>
           <div className="flex gap-1 items-center w-full whitespace-nowrap">
-            <div className="self-stretch my-auto text-2xl">
+            <div className="self-stretch my-auto text-xl">
               {timeLeft.hours}:{timeLeft.minutes}:{timeLeft.seconds}
             </div>
             <div className="self-stretch my-auto text-base font-medium leading-none text-center">sec</div>

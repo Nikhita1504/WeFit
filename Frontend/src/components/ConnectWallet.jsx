@@ -9,7 +9,7 @@ import { connectContract } from "../Utils/ConnectContract";
 import Contractcontext from "../context/contractcontext";
 
 const ConnectWallet = () => {
-  const { account, Setaccount } = useContext(walletcontext);
+  const { account, Setaccount ,  balance , Setbalance } = useContext(walletcontext);
   const { JwtToken } = useAuth();
   const {Setcontract } = useContext(Contractcontext);
 
@@ -21,8 +21,9 @@ const ConnectWallet = () => {
   };
 
   const handleconnect = async () => {
-    const walletAddress = await connectMetaMask();
-    Setaccount(walletAddress);
+    const {account , Balance} = await connectMetaMask();
+    Setaccount(account);
+    Setbalance(Balance);
     const  contract = await connectContract();
     Setcontract(contract);
     console.log(contract);
@@ -53,6 +54,7 @@ const ConnectWallet = () => {
   }, [account]);
 
   return (
+   <>
     <button
       onClick={handleconnect }
       
@@ -60,6 +62,15 @@ const ConnectWallet = () => {
     >
       {truncateAddress(account)}
     </button>
+    <button
+  
+      
+      className="connect-wallet px-4 py-2 bg-[#512E8B] text-white rounded-full hover:bg-[#3a1d66] transition-colors max-w-[180px] truncate font-mono"
+    >
+     ₹{Math.floor(balance*156697)}
+    </button>
+   </>
+    
   );
 };
 

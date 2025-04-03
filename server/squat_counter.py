@@ -74,7 +74,9 @@ class SquatCounter:
                                     last_rep_time = current_time
                                 state = "up"
 
-                            self.socketio.emit("squat_count", {"count": self.counter})
+                            if self.socketio:
+                                self.socketio.emit("squat_count", {"count": self.counter})
+
 
                     # Add counter text to frame
                     annotated_image = image.copy()
@@ -118,6 +120,24 @@ class SquatCounter:
         
         cv2.destroyAllWindows()
 
+    def main(self):
+        """Main entry point when run directly"""
+        try:
+            print("Starting squat counter...")
+            processing_thread, display_thread = self.start()
+            
+            # Keep the main thread alive
+            while True:
+                time.sleep(1)
+                print({"count": self.counter})  # Output for Node.js
+                
+        except KeyboardInterrupt:
+            print("\nStopping squat counter...")
+        finally:
+            self.stop()
+            processing_thread.join()
+            display_thread.join()
+
     def start(self):
         """Start squat counter with separate processing and display threads."""
         processing_thread = threading.Thread(target=self.process_frames)
@@ -131,3 +151,7 @@ class SquatCounter:
     def stop(self):
         """Stop all threads."""
         self.stop_event.set()
+
+if __name__ == "__main__":
+    counter = SquatCounter(None)
+    counter.main()
