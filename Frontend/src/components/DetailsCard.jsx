@@ -170,10 +170,10 @@ const DetailsCard = ({ challenge }) => {
         return;
     }
 
-    if (currentSteps === null) {
-        alert("Fetching step data, please wait...");
-        return;
-    }
+    // if (currentSteps === null) {
+    //     alert("Fetching step data, please wait...");
+    //     return;
+    // }
 
     setLoading(true);
     try {
