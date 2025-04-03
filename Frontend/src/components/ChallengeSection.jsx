@@ -1,35 +1,50 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ChallengeCard from "./ChallengeCard";
 import "../styles/TabSelector.css";
+import { useChallengeContext } from "../context/ChallengeContext";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const ChallengeSection = () => {
   const [activeTab, setActiveTab] = useState('steps');
-  const challenges = [
-    {
-      title: "5K Steps Challenge",
-      description: "Complete 5,000 steps in a single day",
-      difficulty: "Easy",
-      stakeRangemin: "Rs 50",
-      stakeRangemax: "- 500 in ETH",
-      rewardMultiplier: "1.5x rewards",
-    },
-    {
-      title: "5K Steps Challenge",
-      description: "Complete 5,000 steps in a single day",
-      difficulty: "Medium",
-      stakeRangemin: "Rs 50",
-      stakeRangemax: "- 500 in ETH",
-      rewardMultiplier: "1.5x rewards",
-    },
-    {
-      title: "5K Steps Challenge",
-      description: "Complete 5,000 steps in a single day",
-      difficulty: "Medium",
-      stakeRangemin: "Rs 50",
-      stakeRangemax: "- 500 in ETH",
-      rewardMultiplier: "1.5x rewards",
-    },
-  ];
+  const[challenges,setChallenges]=useState([]);
+  // const { challenges, setSelectedChallenge } = useChallengeContext();
+  const navigate = useNavigate();
+
+
+
+  const fetchChallenges = async () => {
+    try {
+      console.log("hello")
+      const response = await axios.get("http://localhost:3000/api/challenges/get");
+      console.log(response.data);
+      setChallenges(response.data);
+    } catch (error) {
+      console.error("Error fetching challenges:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchChallenges();
+  }, []);
+
+
+
+
+  // Filter challenges based on type
+  const filteredChallenges = challenges.filter(challenge => {
+    if (activeTab === 'steps') return challenge.type === 'steps';
+    if (activeTab === 'strength') return challenge.type === 'strength';
+    if (activeTab === 'combo') return challenge.type === 'combo';
+    return true;
+  });
+
+  const handleChallengeSelect = (challenge) => {
+    setSelectedChallenge(challenge);
+    navigate('/details');
+  };
+
+
 
   return (
     <div className="w-full max-w-[859px] mx-auto rounded-[19px] p-[50px]">
@@ -44,19 +59,19 @@ const ChallengeSection = () => {
       <div className="StepsStrengthCombo mb-8">
         <div className="tab-container">
           <div className="tab-nav">
-            <button 
+            <button
               className={`tab-button ${activeTab === 'steps' ? 'active' : ''}`}
               onClick={() => setActiveTab('steps')}
             >
               Steps
             </button>
-            <button 
+            <button
               className={`tab-button ${activeTab === 'strength' ? 'active' : ''}`}
               onClick={() => setActiveTab('strength')}
             >
               Strength
             </button>
-            <button 
+            <button
               className={`tab-button ${activeTab === 'combo' ? 'active' : ''}`}
               onClick={() => setActiveTab('combo')}
             >
@@ -65,34 +80,15 @@ const ChallengeSection = () => {
           </div>
         </div>
       </div>
-      
-      {activeTab === 'steps' && (
-        <div className="space-y-12">
-          {challenges.map((challenge, index) => (
-            <ChallengeCard
-              key={index}
-              title={challenge.title}
-              description={challenge.description}
-              difficulty={challenge.difficulty}
-              stakeRangemin={challenge.stakeRangemin}
-              stakeRangemax={challenge.stakeRangemax}
-              rewardMultiplier={challenge.rewardMultiplier}
-            />
-          ))}
-        </div>
-      )}
-      
-      {activeTab === 'strength' && (
-        <div className="space-y-12">
-          {/* Strength content will go here */}
-        </div>
-      )}
-      
-      {activeTab === 'combo' && (
-        <div className="space-y-12">
-          {/* Combo content will go here */}
-        </div>
-      )}
+      <div className="space-y-12">
+      {filteredChallenges.map((challenge) => (
+          <ChallengeCard
+            key={challenge._id}
+            challenge={challenge}
+            onClick={() => handleChallengeSelect(challenge)}
+          />
+        ))}
+      </div>
     </div>
   );
 };
