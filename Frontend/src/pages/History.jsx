@@ -1,5 +1,5 @@
-import { useNavigate } from "react-router-dom";
 
+import { useNavigate } from "react-router-dom";
 import React, { useEffect, useRef, useState } from "react";
 import ConnectWallet from "../components/ConnectWallet";
 import DesktopChatbot from "../components/DesktopChatbot";
@@ -15,47 +15,80 @@ import {
 } from "../components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import { useAuth } from "../context/AuthContext";
-
 import { FaHistory } from "react-icons/fa";
-
 import axios from "axios";
-import { jwtDecode } from "jwt-decode";
+
 
 const History = () => {
   const navigate = useNavigate();
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
   const { logout, JwtToken } = useAuth();
-
   const [userData, setuserData] = useState();
+  const [historyData, setHistoryData] = useState({
+    stats: {
+      totalChallenges: 0,
+      successRate: "0%",
+      ethEarned: 0,
+      ethLost: 0
+    },
+    historyEntries: []
+  });
+  const [filterType, setFilterType] = useState("all");
+  const [sortOrder, setSortOrder] = useState("newest");
 
-  const getUserData = async () => {
+  
+  
+  const fetchUserHistory = async () => {
     try {
-      const payload = jwtDecode(JwtToken);
-      // console.log("Decoded JWT:", payload);
+      console.log(JwtToken);
+      
       const response = await axios.get(
-        `http://localhost:3000/api/users/get/${payload.email}`
+        `http://localhost:3000/history/user/${JwtToken}`
       );
-      // console.log(response.data);
-      setuserData(response.data);
+      setHistoryData(response.data);
     } catch (error) {
-      console.log(error);
+      console.error("Error fetching history data:", error);
     }
   };
-  useEffect(() => {
-    if (JwtToken) {
-      getUserData();
-    }
-  }, [JwtToken]);
 
-  // useEffect(() => {
-  //   console.log('Step Data:', { todaySteps,
-  //     weeklySteps,
-  //     todayCalories,
-  //     weeklyCalories, });
-  // }, [todaySteps,
-  //   weeklySteps,
-  //   todayCalories,
-  //   weeklyCalories,]);
+  useEffect(() => {
+    fetchUserHistory()
+  }, []);
+
+  // Handle filtering and sorting
+  const handleFilterChange = (e) => {
+    setFilterType(e.target.value);
+  };
+
+  const handleSortChange = (e) => {
+    setSortOrder(e.target.value);
+  };
+
+  // Filter and sort the history entries
+  const getFilteredAndSortedEntries = () => {
+    let filtered = [...historyData.historyEntries];
+    
+    // Apply filters
+    if (filterType !== "all") {
+      filtered = filtered.filter(entry => {
+        if (filterType === "completed") return entry.isCompleted;
+        if (filterType === "incomplete") return !entry.isCompleted;
+        return true;
+      });
+    }
+    
+    // Apply sorting
+    if (sortOrder === "oldest") {
+      filtered.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+    } else if (sortOrder === "highest-stake") {
+      filtered.sort((a, b) => b.ethStaked - a.ethStaked);
+    } else if (sortOrder === "lowest-stake") {
+      filtered.sort((a, b) => a.ethStaked - b.ethStaked);
+    }
+    // Default is "newest" which is already sorted from the API
+    
+    return filtered;
+  };
 
   const chatMessages = [
     {
@@ -72,12 +105,27 @@ const History = () => {
     logout();
     navigate("/login");
   };
+  
   const handleNavigateToHistory = () => {
     navigate("/history");
   };
 
   const handleToggleChatbot = () => {
     setIsChatbotOpen(!isChatbotOpen);
+  };
+
+  // Calculate progress for each challenge
+  const calculateProgress = (exercises) => {
+    if (!exercises || exercises.length === 0) return "0/0";
+    const total = exercises.length;
+    const completed = exercises.filter(ex => ex.isCompleted).length;
+    return `${completed}/${total}`;
+  };
+
+  // Format date
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toISOString().split('T')[0];
   };
 
   return (
@@ -98,10 +146,10 @@ const History = () => {
             </div>
 
             <button onClick={handleNavigateToHistory} className="rounded-full">
-                            <Avatar className="h-[63px]  p-3.5 w-[63px] border-4 border-[#512E8B] rounded-full bg-[#413359] cursor-pointer hover:opacity-80 transition-opacity">
-                              <FaHistory color="white" size={30} />
-                            </Avatar>
-                            </button>
+              <Avatar className="h-[63px] p-3.5 w-[63px] border-4 border-[#512E8B] rounded-full bg-[#413359] cursor-pointer hover:opacity-80 transition-opacity">
+                <FaHistory color="white" size={30} />
+              </Avatar>
+            </button>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -128,97 +176,72 @@ const History = () => {
               Challenge History
             </h1>
             <div className="flex gap-6 items-center">
-              <select className="w-[180px] bg-[#413359] h-10 pl-2 pr-2  py-2 rounded-md  border-input  text-sm text-white">
-                <option value="" disabled selected>All Challenges</option>
-                <option value="apple">Apple</option>
-                <option value="banana">Banana</option>
-                <option value="blueberry">Blueberry</option>
-                <option value="grapes">Grapes</option>
-                <option value="pineapple">Pineapple</option>
+              <select 
+                className="w-[180px] bg-[#413359] h-10 pl-2 pr-2 py-2 rounded-md border-input text-sm text-white"
+                value={filterType}
+                onChange={handleFilterChange}
+              >
+                <option value="all">All Challenges</option>
+                <option value="completed">Completed</option>
+                <option value="incomplete">Incomplete</option>
               </select>              
-              <select className="w-[180px] bg-[#413359] h-10 pl-2 pr-2  py-2 rounded-md  border-input  text-sm text-white">
-                <option value="" disabled selected>Newest</option>
-                <option value="apple">Apple</option>
-                <option value="banana">Banana</option>
-                <option value="blueberry">Blueberry</option>
-                <option value="grapes">Grapes</option>
-                <option value="pineapple">Pineapple</option>
-              </select>             </div>
+              <select 
+                className="w-[180px] bg-[#413359] h-10 pl-2 pr-2 py-2 rounded-md border-input text-sm text-white"
+                value={sortOrder}
+                onChange={handleSortChange}
+              >
+                <option value="newest">Newest</option>
+                <option value="oldest">Oldest</option>
+                <option value="highest-stake">Highest Stake</option>
+                <option value="lowest-stake">Lowest Stake</option>
+              </select>
+            </div>
           </header>
 
           <section className="flex flex-col gap-11">
             <div className="flex gap-8 items-center w-full max-md:flex-wrap max-md:justify-center max-sm:flex-col">
               <StatisticCard
                 title="Total Challenges"
-                value="156"
+                value={historyData.stats.totalChallenges.toString()}
                 textColor="text-white"
               />
               <StatisticCard
                 title="Success Rate"
-                value="94%"
+                value={historyData.stats.successRate}
                 textColor="text-white"
               />
               <StatisticCard
                 title="ETH Earned"
-                value="+ 2.45 ETH"
+                value={`+ ${historyData.stats.ethEarned.toFixed(2)} ETH`}
                 textColor="text-green-500"
               />
               <StatisticCard
                 title="ETH Lost"
-                value="-0.13 ETH"
+                value={`- ${historyData.stats.ethLost.toFixed(2)} ETH`}
                 textColor="text-red-600"
               />
             </div>
 
             <section className="flex flex-wrap gap-9 justify-center">
-              <ChallengeCard
-                title="Morning HIIT"
-                date="2024-01-15"
-                amount="+ 0.05 ETH"
-                status="Completed"
-                progress="20/20"
-                isSuccess={true}
-              />
-              <ChallengeCard
-                title="Morning HIIT"
-                date="2024-01-15"
-                amount="+ 0.05 ETH"
-                status="Completed"
-                progress="20/20"
-                isSuccess={true}
-              />
-              <ChallengeCard
-                title="Morning HIIT"
-                date="2024-01-15"
-                amount="+ 0.05 ETH"
-                status="Completed"
-                progress="20/20"
-                isSuccess={true}
-              />
-              <ChallengeCard
-                title="Core Focus"
-                date="2024-02-15"
-                amount="- 0.05 ETH"
-                status="Incomplete"
-                progress="10/20"
-                isSuccess={false}
-              />
-              <ChallengeCard
-                title="Morning HIIT"
-                date="2024-01-15"
-                amount="+ 0.05 ETH"
-                status="Completed"
-                progress="20/20"
-                isSuccess={true}
-              />
-              <ChallengeCard
-                title="Morning HIIT"
-                date="2024-01-15"
-                amount="+ 0.05 ETH"
-                status="Completed"
-                progress="20/20"
-                isSuccess={false}
-              />
+              {getFilteredAndSortedEntries().length > 0 ? (
+                getFilteredAndSortedEntries().map((entry, index) => (
+                  <ChallengeCard
+                    key={index}
+                    title={entry.challengeId?.title || "Challenge"}
+                    date={formatDate(entry.createdAt)}
+                    amount={entry.isCompleted 
+                      ? `+ ${entry.rewardsEarned.toFixed(2)} ETH` 
+                      : `- ${entry.ethStaked.toFixed(2)} ETH`}
+                    status={entry.isCompleted ? "Completed" : "Incomplete"}
+                    progress={calculateProgress(entry.exercises)}
+                    isSuccess={entry.isCompleted}
+                  />
+                ))
+              ) : (
+                <div className="text-white text-center w-full py-8">
+                  No challenge history found. Start a challenge to see your progress!
+                </div>
+              )}
             </section>
           </section>
         </main>
