@@ -20,6 +20,8 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ChallengeProvider } from "./context/ChallengeContext";
 import Contractprovider from "./context/Contractprovider";
 import Capture from "./pages/Capture";
+import History from "./pages/History";
+
 
 function App() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
@@ -83,6 +85,15 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Capture />
+                  </ProtectedRoute>
+                }
+              />
+
+<Route
+                path="/history"
+                element={
+                  <ProtectedRoute>
+                  <History></History>
                   </ProtectedRoute>
                 }
               />

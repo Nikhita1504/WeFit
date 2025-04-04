@@ -124,6 +124,9 @@ useEffect(() => {
     logout();
     navigate("/login")
   };
+  const handleNavigateToHistory = () => {
+    navigate("/history");
+  };
 
   const handleToggleChatbot = () => {
     setIsChatbotOpen(!isChatbotOpen);
@@ -145,24 +148,14 @@ useEffect(() => {
             <div className="overflow-hidden">
               <ConnectWallet />
             </div>
+
+            <button onClick={handleNavigateToHistory} className="rounded-full">
+              <Avatar className="h-[63px]  p-3.5 w-[63px] border-4 border-[#512E8B] rounded-full bg-[#413359] cursor-pointer hover:opacity-80 transition-opacity">
+                <FaHistory color="white" size={30} />
+              </Avatar>
+            </button>
             
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Avatar className="h-[63px]  p-3.5 w-[63px] border-4 border-[#512E8B] rounded-full bg-[#413359] cursor-pointer hover:opacity-80 transition-opacity">
-                  <FaHistory color="white" size={30} />
-                </Avatar>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-
-                <DropdownMenuItem
-                  className="cursor-pointer"
-
-                >
-
-                  previous score
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+           
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

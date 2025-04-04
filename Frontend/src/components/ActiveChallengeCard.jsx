@@ -100,6 +100,72 @@ const ActiveChallengeCard = () => {
   //   }
   // };
 
+  const handlecompletechallenge = async()=>{
+    try{
+      // Retrieve the JWT token from localStorage
+      const token = localStorage.getItem("JwtToken");
+
+      if (!token) {
+        console.error("No JWT token found in localStorage");
+        alert("You need to be logged in to delete the challenge.");
+        return;
+      }
+
+      // Make the DELETE request using axios
+      const response = await axios.put(
+        `http://localhost:3000/ActiveChallenge/update/challenge/${token}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // Handle successful response
+      console.log("Challenge completed successfully:", response.data);
+     
+      alert("Active  completed successfully!");
+
+      // Optionally, update the UI (e.g., redirect the user, refresh data, etc.)
+      // For example, you might want to clear the active challenge from the UI
+      // or redirect the user to another page
+    } catch (error) {
+      console.error("Error completing challenge:", error);
+      alert("An error occurred while completing the active challenge.");
+    }
+  };
+
+  const handleAddtohistory = async() =>{
+    try {
+      const token = localStorage.getItem("JwtToken");
+
+      if (!token) {
+        console.error("No JWT token found in localStorage");
+        alert("You need to be logged in to delete the challenge.");
+        return;
+      }
+
+      // Make the DELETE request using axios
+      const response = await axios.post(
+        `http://localhost:3000/history/create/${token}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+        // Handle successful response
+        console.log("history created  successfully:", response.data);
+     
+        alert("history created  successfully!");
+    } catch (error) {
+      console.error("Error history created  challenge:", error);
+      alert("An error occurred while history created  .");
+    }
+  }
+  
+
   const handleClaimReward = async () => {
     // handleDeleteChallenge();
     try {
@@ -141,7 +207,12 @@ const ActiveChallengeCard = () => {
 
       alert("Rewards claimed successfully!");
 
+      
+      handlecompletechallenge();
       // Now delete the challenge after successful claim
+      
+      handleAddtohistory();
+
       handleDeleteChallenge();
 
       // Optionally refresh the challenge data
