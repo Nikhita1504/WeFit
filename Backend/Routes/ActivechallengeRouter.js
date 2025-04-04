@@ -113,6 +113,59 @@ ActiveChallengeRouter.put("/update/:token", authenticateToken, async (req, res) 
 });
 
 
+
+
+
+
+
+
+
+
+
+
+ActiveChallengeRouter.put("/update/challenge/:token", authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    
+
+    // Find and update the active challenge
+    const updatedChallenge = await ActiveChallenge.findOneAndUpdate(
+      { 
+        userId,
+      },
+      { 
+        $set: { 
+          isCompleted: true,
+          
+        },
+      
+      },
+      { 
+        new: true // Return the updated document
+      }
+    );
+
+    if (!updatedChallenge) {
+      return res.status(404).json({ 
+        message: "No active challenge found to update" 
+      });
+    }
+
+    res.status(200).json({
+      message: "Challenge marked as completed",
+      challenge: updatedChallenge
+    });
+
+  } catch (error) {
+    console.error("Error updating challenge:", error);
+    res.status(500).json({ 
+      message: "Server error", 
+      error: error.message 
+    });
+  }
+});
+
+
 ActiveChallengeRouter.delete("/delete/:token", authenticateToken, async (req, res) => {
   try {
     const userId = req.user.userId; // Get userId from the token
