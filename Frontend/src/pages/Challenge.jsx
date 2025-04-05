@@ -16,12 +16,13 @@ import axios from "axios";
 import { useChallengeContext } from "../context/ChallengeContext";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
 
 const Challenge = () => {
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
-  // const { setChallenges } = useChallengeContext();
-  const {logout}=useAuth();
-  const navigate=useNavigate();
+  const [userData, setUserData] = useState(null);
+  const { JwtToken, logout } = useAuth();
+  const navigate = useNavigate();
 
   const chatMessages = [
     {
@@ -34,16 +35,53 @@ const Challenge = () => {
     },
   ];
 
+  // Fetch user data when component mounts or user changes
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (!JwtToken) {
+        console.error("No JWT token available");
+        return;
+      }
+
+      try {
+        const payload = jwtDecode(JwtToken);
+        if (!payload?.email) {
+          console.error("No email in JWT payload");
+          return;
+        }
+
+        const response = await axios.get(`http://localhost:3000/api/users/get/${payload.email}`);
+
+        console.log("Full user data:", response.data);
+
+        // Extract physical data from the response
+        const { physicalData } = response.data;
+        console.log("Physical data:", physicalData);
+
+        // Set the physical data in state
+        setUserData({
+          height: physicalData.height,
+          weight: physicalData.weight,
+          bmi: physicalData.bmi,
+          age: physicalData.age,
+          gender: physicalData.gender
+        });
+
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+
+    fetchUserData();
+  }, [JwtToken]);
   const handleLogout = () => {
     logout();
-    navigate("/login")
+    navigate("/login");
   };
 
   const handleToggleChatbot = () => {
     setIsChatbotOpen(!isChatbotOpen);
   };
-
-
 
   return (
     <div className="desktop-home">
@@ -91,7 +129,16 @@ const Challenge = () => {
           </div>
         </header>
 
-        <ChallengeSection />
+        {/* Pass userData to ChallengeSection */}
+        <ChallengeSection
+          userData={{
+            height: userData?.height,
+            weight: userData?.weight,
+            age: userData?.age,
+            gender: userData?.gender,
+            bmi: userData?.bmi
+          }}
+        />
       </div>
 
       {/* Floating Chatbot Bubble */}

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { IoCheckmarkCircle } from "react-icons/io5";
 import axios from "axios";
+import { ToastContainer, toast } from 'react-toastify';
 import ProgressCircle from "./ui/ProgressCircle";
 import TimerActiveChallenge from "./ui/TimerActiveChallenge";
 import useFitnessData from "../Utils/useStepCount";
@@ -10,8 +11,9 @@ import walletcontext from "../context/walletcontext";
 import { ethers } from "ethers"
 import { useNavigate } from "react-router-dom";
 import { FiCamera, FiDollarSign, FiGift, FiLoader } from 'react-icons/fi';
+import { useAuth } from "../context/AuthContext";
 
-const ActiveChallengeCard = () => {
+const ActiveChallengeCard = ({getUserData}) => {
   const [challengeData, setChallengeData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -20,6 +22,7 @@ const ActiveChallengeCard = () => {
   const { Setbalance } = useContext(walletcontext);
   const { account } = useContext(walletcontext);
   const navigate = useNavigate();
+  const {JwtToken}=useAuth();
   // console.log(challengeData);
 
   // Fetch active challenge from API
@@ -124,7 +127,7 @@ const ActiveChallengeCard = () => {
       // Handle successful response
       console.log("Challenge completed successfully:", response.data);
 
-      alert("Active  completed successfully!");
+      toast.success("Active challenge completed successfully!");
 
       // Optionally, update the UI (e.g., redirect the user, refresh data, etc.)
       // For example, you might want to clear the active challenge from the UI
@@ -158,7 +161,7 @@ const ActiveChallengeCard = () => {
       // Handle successful response
       console.log("history created  successfully:", response.data);
 
-      alert("history created  successfully!");
+      toast.success("history created  successfully!");
     } catch (error) {
       console.error("Error history created  challenge:", error);
       alert("An error occurred while history created  .");
@@ -255,7 +258,7 @@ const ActiveChallengeCard = () => {
       console.log(balance * 156697);
       Setbalance(balance);
 
-      alert("Rewards claimed successfully!");
+      toast.success("Rewards claimed successfully!");
 
 
       handlecompletechallenge();
@@ -278,7 +281,38 @@ const ActiveChallengeCard = () => {
     }
   };
 
+  const handleIncreasePoints = async () => {
+    try {
+      console.log("Attempting to increase points");
+      const JwtToken = localStorage.getItem("JwtToken"); // Make sure to get the token
+  
+      if (!JwtToken) {
+        console.error("No JWT token found in localStorage");
+        return;
+      }
+  
+      // Make a PUT request with proper headers
+      const response = await axios.put(
+        `http://localhost:3000/api/users/updatePoints/${JwtToken}`,
+        { points: 3 },
+        {
+          headers: {
+            'Authorization': `Bearer ${JwtToken}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      getUserData();
+      handleAddtohistory();
+      handleDeleteChallenge();
 
+      console.log("Points updated successfully:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Error increasing points:", error.response?.data || error.message);
+      throw error;
+    }
+  };
 
   // Define filteredExercises before using it in the JSX
   const filteredExercises = challengeData.exercises.filter(
@@ -318,7 +352,7 @@ const ActiveChallengeCard = () => {
       console.log("Challenge deleted successfully:", response.data);
       localStorage.removeItem("challengeInitialSteps");
       fetchActiveChallenge();
-      alert("Active challenge deleted successfully!");
+      toast.success("Active challenge deleted successfully!");
 
       // Optionally, update the UI (e.g., redirect the user, refresh data, etc.)
       // For example, you might want to clear the active challenge from the UI
@@ -359,7 +393,7 @@ const ActiveChallengeCard = () => {
       // Handle successful response
       console.log("Exercise marked as completed:", response.data);
       fetchActiveChallenge();
-      alert("Exercise completed successfully!");
+      toast.success("Exercise completed successfully!");
 
       // Optionally, you can update the UI or re-fetch the challenge data
 
@@ -377,6 +411,7 @@ const ActiveChallengeCard = () => {
   };
 
   return (
+    <>
     <div className="flex flex-col grow shrink self-stretch bg-[#1A0F2B] border-4 border-solid border-[#301F4C] rounded-[23px] h-[700px] min-w-[400px] max-md:max-w-full">
       {/* Header section - width unchanged */}
       <div className="flex flex-col justify-center py-4 pr-10 pl-9 w-full bg-gradient-to-r from-[#2B1748] to-[#3A225D] min-h-[55px] rounded-[22px_22px_0px_0px] border-b border-[#4A2D7A] max-md:px-5 max-md:max-w-full">
@@ -515,7 +550,7 @@ const ActiveChallengeCard = () => {
         {/* Claim button - width unchanged */}
         <div className="mt-6 mb-6 w-full">
           <button
-            onClick={handleClaimReward}
+            onClick={handleIncreasePoints}
             disabled={!allExercisesCompleted || isClaiming}
             className={`w-full py-3 rounded-lg font-medium text-white transition-all ${allExercisesCompleted
               ? "bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-md"
@@ -530,13 +565,16 @@ const ActiveChallengeCard = () => {
             ) : (
               <span className="flex items-center justify-center gap-2">
                 <FiGift />
-                Claim Reward
+               Complete Challenge
               </span>
             )}
           </button>
         </div>
       </div>
     </div>
+    <ToastContainer />
+
+    </>
   );
 };
 
