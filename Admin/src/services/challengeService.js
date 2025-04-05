@@ -3,7 +3,7 @@ import axios from 'axios';
 const API_URL = 'http://localhost:3000/api/challenges';
 
 export const getChallenges = async () => {
-  return await axios.get(API_URL);
+  return await axios.get(`${API_URL}/get`);
 };
 
 export const getChallenge = async (id) => {

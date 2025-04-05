@@ -35,6 +35,18 @@ Historyrouter.post("/create/:token", authenticateToken, async (req, res) => {
     });
   }
 });
+Historyrouter.get("/get/:email", authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+
+    const historyList = await History.find({ userId }).sort({ createdAt: -1 }); // Sort by recent first
+
+    res.status(200).json(historyList);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch history", error });
+  }
+});
+
 
 // Historyrouter.get('/user/:token', authenticateToken ,async (req, res) => {
 //   try {

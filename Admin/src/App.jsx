@@ -1,23 +1,43 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-// import './App.css'
-// import GoogleAuth from './pages/GoogleAuth'
-import { Outlet, Router } from 'react-router-dom'
-// import { AuthProvider } from './context/AuthContext'
+import { useState } from 'react';
+import ChallengeList from './components/ChallengeList';
+import ChallengeForm from './components/ChallengeForm';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [currentView, setCurrentView] = useState('list'); // 'list' or 'form'
+  const [editingChallengeId, setEditingChallengeId] = useState(null);
+
+  // Handle view transitions
+  const showChallengeList = () => {
+    setCurrentView('list');
+    setEditingChallengeId(null);
+  };
+
+  const showNewChallengeForm = () => {
+    setCurrentView('form');
+    setEditingChallengeId(null);
+  };
+
+  const showEditChallengeForm = (id) => {
+    setCurrentView('form');
+    setEditingChallengeId(id);
+  };
 
   return (
-    <>
-
-
-      <Outlet />
-
-
-    </>
-  )
+    <div className="app-container">
+      {currentView === 'list' ? (
+        <ChallengeList
+          onAddNew={showNewChallengeForm}
+          onEdit={showEditChallengeForm}
+        />
+      ) : (
+        <ChallengeForm
+          id={editingChallengeId}
+          onSave={showChallengeList}
+          onCancel={showChallengeList}
+        />
+      )}
+    </div>
+  );
 }
 
-export default App
+export default App;

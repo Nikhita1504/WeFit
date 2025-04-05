@@ -47,27 +47,42 @@ const userSchema = new mongoose.Schema({
   },
 
   // Challenges
-  challengesWon: [{
-    challengeId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Challenge',
-      required: true
-    },
-    dateCompleted: {
-      type: Date,
-      default: Date.now
-    },
-    stakedAmount: {
-      type: Number,
-      required: true,
+  challengesWon:{
+    type: Number,
+    default: 0,
+    min: 0
+  },
+  physicalData: {
+    height: {
+      type: Number, // in cm
       min: 0
     },
-    rewardReceived: {
-      type: Number,
-      required: true,
+    weight: {
+      type: Number, // in kg
       min: 0
+    },
+    bmi: {
+      type: Number,
+      min: 0
+    },
+    age: {
+      type: Number,
+      min: 0
+    },
+    gender: {
+      type: String,
+      enum: ['male', 'female', 'other']
+    },
+    goals: {
+      type: [String], // e.g., ['weight-loss', 'muscle-gain']
+      validate: {
+        validator: function (val) {
+          return val.length <= 2;
+        },
+        message: 'You can select up to 2 fitness goals only.'
+      }
     }
-  }],
+  },
 
   // Activity
   currentStreak: {
@@ -75,6 +90,11 @@ const userSchema = new mongoose.Schema({
     default: 0,
     min: 0
   },
+  totalEthEarned: {
+    type: Number,
+    default: 0,
+    min: 0
+  }
 
 }, {
   timestamps: true
