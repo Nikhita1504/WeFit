@@ -4,139 +4,138 @@ import ConnectWallet from "../components/ConnectWallet";
 import DesktopChatbot from "../components/DesktopChatbot";
 import "../styles/DesktopHome.css";
 import chatbot from "../assets/chatbot.png";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "../components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
+import { Avatar } from "../components/ui/avatar";
 import { useAuth } from "../context/AuthContext";
-import { FaHistory } from "react-icons/fa";
+import { FaHistory, FaCrown, FaUsers } from "react-icons/fa";
 import axios from "axios";
-import { jwtDecode } from "jwt-decode";
 
 const Community = () => {
   const navigate = useNavigate();
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
   const { logout, JwtToken } = useAuth();
-  const [userData, setUserData] = useState();
-  const [userCommunities, setUserCommunities] = useState([]);
-  const [allCommunities, setAllCommunities] = useState([]);
-  const [selectedCommunity, setSelectedCommunity] = useState("");
+  const [leaderCommunities, setLeaderCommunities] = useState([]);
+  const [memberCommunities, setMemberCommunities] = useState([]);
+  const [otherCommunities, setOtherCommunities] = useState([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showJoinModal, setShowJoinModal] = useState(false);
-  const [newCommunityName, setNewCommunityName] = useState("");
-  const [newCommunityTag, setNewCommunityTag] = useState("");
-  const [communitiesRanking, setCommunitiesRanking] = useState([]);
+  const [allCommunities, setAllCommunities] = useState([]);
 
-  // Fetch user data
-  const getUserData = async () => {
-    try {
-      const payload = jwtDecode(JwtToken);
-      const response = await axios.get(
-        `http://localhost:3000/api/users/get/${payload.email}`,
-      );
-      setUserData(response.data);
-    } catch (error) {
-      console.log(error);
-    }
+  // Function to navigate to community challenge page
+  const navigateToCommunity = (communityId) => {
+    console.log(communityId);
+    navigate(`/community/add-challenge`, { state: {communityId} });
   };
 
-  // Fetch user communities
-  const getUserCommunities = async () => {
-    try {
-      const response = await axios.get(
-        `http://localhost:3000/community/user/${JwtToken}`,
-        {
-          headers: {
-            Authorization: `Bearer ${JwtToken}`,
-          },
-        }
-      );
-      setUserCommunities(response.data);
-    } catch (error) {
-      console.log("Error fetching user communities:", error);
-    }
-  };
-
-  // Fetch all communities for leaderboard
+  // Fetch all communities from server
   const getAllCommunities = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/community/all");
-      setAllCommunities(response.data); 
-      
-      // Mock ranking calculation - in real app, this would be based on actual user earnings
-      const ranked = response.data.map(community => ({
-        ...community,
-        avgEarnings: calculateMockAvgEarnings(community)
-      })).sort((a, b) => b.avgEarnings - a.avgEarnings)
-        .slice(0, 10);  // Top 10
-      
-      setCommunitiesRanking(ranked);
+      const response = await axios.get(
+        `http://localhost:3000/community/new`
+      );
+      setAllCommunities(response.data);
     } catch (error) {
       console.log("Error fetching all communities:", error);
     }
   };
 
-  // Mock function to calculate average earnings (replace with real calculation)
-  const calculateMockAvgEarnings = (community) => {
-    // In real implementation, you would calculate based on actual user earnings
-    // For now, just generate random values for demonstration
-    return parseFloat((Math.random() * 200 + 50).toFixed(2));
-  };
-
-  // Join a community
-  const handleJoinCommunity = async (communityId) => {
+  // Fetch user communities and separate them into leader and member communities
+  const getUserCommunities = async () => {
     try {
-      await axios.post(
-        "http://localhost:3000/api/community/join/:token",
-        { communityId },
+      const response = await axios.get(
+        `http://localhost:3000/community/all/${JwtToken}`,
         {
           headers: {
             Authorization: `Bearer ${JwtToken}`,
           },
         }
       );
-      getUserCommunities(); // Refresh user communities
-      setShowJoinModal(false);
+      
+      // Get user ID from auth context or JWT token payload
+      const userId = getUserIdFromToken(JwtToken);
+      
+      // Split communities based on role
+      const leaderComms = [];
+      const memberComms = [];
+      
+      response.data.forEach(community => {
+        // Find the user's member record in the community
+        const userMember = community.members.find(member => 
+          member.userId.toString() === userId.toString() || 
+          member.userId === userId
+        );
+        
+        if (userMember && userMember.role === 'leader') {
+          leaderComms.push(community);
+        } else {
+          memberComms.push(community);
+        }
+      });
+      
+      setLeaderCommunities(leaderComms);
+      setMemberCommunities(memberComms);
+    } catch (error) {
+      console.log("Error fetching user communities:", error);
+    }
+  };
+  
+  // Helper function to extract user ID from JWT token
+  const getUserIdFromToken = (token) => {
+    // Simple implementation - in a real app, you'd decode the token properly
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      
+      return JSON.parse(jsonPayload).userId;
+    } catch (e) {
+      console.error('Error decoding token:', e);
+      return null;
+    }
+  };
+
+  const handleJoinCommunity = async (communityId) => {
+    try {
+      await axios.post(
+        `http://localhost:3000/community/join/${JwtToken}`,
+        { communityId }, // send it in the body
+        {
+          headers: {
+            Authorization: `Bearer ${JwtToken}`,
+          },
+        }
+      );
+  
+      // Refresh community lists
+      await getUserCommunities();
+      updateOtherCommunities();
+  
     } catch (error) {
       console.log("Error joining community:", error);
       alert(error.response?.data?.message || "Failed to join community");
     }
   };
-
-  // Create a community
-  const handleCreateCommunity = async () => {
-    try {
-      await axios.post(
-        `http://localhost:3000/community/create/${JwtToken}`,
-        { name: newCommunityName, tag: newCommunityTag },
-        {
-          headers: {
-            Authorization: `Bearer ${JwtToken}`,
-          },
-        }
-      );
-      setNewCommunityName("");
-      setNewCommunityTag("");
-      setShowCreateModal(false);
-      getUserCommunities(); // Refresh user communities
-      getAllCommunities(); // Refresh all communities
-    } catch (error) {
-      console.log("Error creating community:", error);
-      alert(error.response?.data?.message || "Failed to create community");
-    }
+  
+  // Filter out communities that user is already part of
+  const updateOtherCommunities = () => {
+    const userCommunityIds = [...leaderCommunities, ...memberCommunities].map(c => c._id);
+    const others = allCommunities.filter(comm => !userCommunityIds.includes(comm._id));
+    setOtherCommunities(others);
   };
 
   // Load data on component mount
   useEffect(() => {
     if (JwtToken) {
-      getUserData();
-      getUserCommunities();
       getAllCommunities();
+      getUserCommunities();
     }
   }, [JwtToken]);
+
+  // Update other communities whenever user or all communities change
+  useEffect(() => {
+    updateOtherCommunities();
+  }, [allCommunities, leaderCommunities, memberCommunities]);
 
   const chatMessages = [
     {
@@ -149,11 +148,6 @@ const Community = () => {
     },
   ];
 
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
-  };
-
   const handleNavigateToHistory = () => {
     navigate("/history");
   };
@@ -162,61 +156,287 @@ const Community = () => {
     setIsChatbotOpen(!isChatbotOpen);
   };
 
-  // Create Community Modal
-  const CreateCommunityModal = () => (
-    <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-      <div className="bg-[#1A0F2B] border-2 border-[#512E8B] rounded-2xl p-6 w-[400px]">
-        <h2 className="text-white text-2xl font-medium mb-4">Create Community</h2>
-        <div className="mb-4">
-          <label className="text-white block mb-2">Community Name</label>
-          <input
-            type="text"
-            value={newCommunityName}
-            onChange={(e) => setNewCommunityName(e.target.value)}
-            className="w-full bg-[#301F4C] text-white p-2 rounded-lg"
-            placeholder="Enter community name"
-          />
+  // Community Card Component
+  const CommunityCard = ({ community, isLeader, showJoinButton = false }) => {
+    return (
+      <div
+        className={`flex flex-col p-6 rounded-[15px] border-2 border-[#301F4C] bg-[#1A0F2B] hover:border-[#512E8B] transition-colors ${showJoinButton ? '' : 'cursor-pointer'}`}
+        onClick={() => !showJoinButton && navigateToCommunity(community._id)}
+      >
+        <div className="flex justify-between items-start mb-2">
+          <h3 className="text-white text-2xl font-medium">
+            {community.name}
+          </h3>
+          {isLeader && (
+            <div className="flex items-center bg-[#6b44ae] px-2 py-1 rounded-full">
+              <FaCrown className="text-yellow-300 mr-1" />
+              <span className="text-white text-xs">Leader</span>
+            </div>
+          )}
         </div>
-        <div className="mb-6">
-          <label className="text-white block mb-2">Community Tag</label>
-          <input
-            type="text"
-            value={newCommunityTag}
-            onChange={(e) => setNewCommunityTag(e.target.value)}
-            className="w-full bg-[#301F4C] text-white p-2 rounded-lg"
-            placeholder="Enter unique tag (no spaces)"
-          />
+        
+        <p className="text-gray-300 text-sm mb-3 line-clamp-2">
+          {community.description}
+        </p>
+        
+        <div className="flex flex-wrap gap-2 mb-3">
+          {community.tags && community.tags.map((tag, index) => (
+            <span key={index} className="text-[#CDCDCD] text-sm bg-[#301F4C] px-2 py-1 rounded-full">
+              #{tag}
+            </span>
+          ))}
         </div>
-        <div className="flex justify-end gap-4">
-          <button
-            onClick={() => setShowCreateModal(false)}
-            className="px-4 py-2 bg-[#3D2A64] text-white rounded-lg hover:bg-[#4a336e]"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleCreateCommunity}
-            className="px-4 py-2 bg-[#6b44ae] text-white rounded-lg hover:bg-[#7b54be]"
-          >
-            Create
-          </button>
+        
+        <div className="mt-auto flex items-center justify-between pt-4">
+          <div className="bg-[#301F4C] px-3 py-1 rounded-full flex items-center">
+            <FaUsers className="text-white mr-1" />
+            <span className="text-white text-sm">
+              {community.members?.length || 0} Members
+            </span>
+          </div>
+          
+          {community.completionPercentage > 0 && (
+            <div className="bg-[#301F4C] px-3 py-1 rounded-full">
+              <span className="text-white text-sm">
+                {community.completionPercentage}% Complete
+              </span>
+            </div>
+          )}
+          
+          {showJoinButton ? (
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                handleJoinCommunity(community._id);
+              }}
+              className="px-4 py-2 bg-[#6b44ae] text-white rounded-full hover:bg-[#7b54be]"
+            >
+              Join
+            </button>
+          ) : (
+            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[#6b44ae]">
+              <span className="text-white font-bold">→</span>
+            </div>
+          )}
         </div>
       </div>
-    </div>
-  );
+    );
+  };
+
+  // Community Section Component
+  const CommunitySection = ({ title, communities, isLeader, showJoinButton = false }) => {
+    return (
+      <div className="p-8 rounded-[19px] bg-[#4a336e5c] mb-8">
+        <h2 className="text-white text-3xl font-medium mb-6">
+          {title} ({communities.length})
+        </h2>
+        
+        {communities.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {communities.map((community) => (
+              <CommunityCard 
+                key={community._id} 
+                community={community} 
+                isLeader={isLeader}
+                showJoinButton={showJoinButton}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-10">
+            <p className="text-gray-300 mb-4">
+              {isLeader ? "You haven't created any communities yet." : 
+               showJoinButton ? "No communities available to join." : "You haven't joined any communities yet."}
+            </p>
+            {!showJoinButton && (
+              <button 
+                onClick={() => isLeader ? setShowCreateModal(true) : setShowJoinModal(true)}
+                className="px-6 py-2 bg-[#6b44ae] text-white rounded-full hover:bg-[#7b54be]"
+              >
+                {isLeader ? "Create a Community" : "Join a Community"}
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // Create Community Modal
+  const CreateCommunityModal = () => {
+    const [communityData, setCommunityData] = useState({
+      name: "",
+      description: "",
+      tags: [],
+      isPrivate: false,
+      currentTag: ""
+    });
+  
+    const handleChange = (e) => {
+      const { name, value, type, checked } = e.target;
+      setCommunityData(prev => ({
+        ...prev,
+        [name]: type === "checkbox" ? checked : value
+      }));
+    };
+  
+    const addTag = () => {
+      if (communityData.currentTag.trim()) {
+        setCommunityData(prev => ({
+          ...prev,
+          tags: [...prev.tags, prev.currentTag.trim()],
+          currentTag: ""
+        }));
+      }
+    };
+  
+    const removeTag = (indexToRemove) => {
+      setCommunityData(prev => ({
+        ...prev,
+        tags: prev.tags.filter((_, index) => index !== indexToRemove)
+      }));
+    };
+  
+    const handleCreateCommunity = async () => {
+      try {
+        const dataToSubmit = {
+          name: communityData.name,
+          description: communityData.description,
+          tags: communityData.tags,
+        };
+  
+        await axios.post(
+          `http://localhost:3000/community/create/${JwtToken}`,
+          dataToSubmit,
+          {
+            headers: {
+              Authorization: `Bearer ${JwtToken}`,
+            },
+          }
+        );
+        setShowCreateModal(false);
+        navigate('/community/add-challenge');
+        getUserCommunities();
+        
+      } catch (error) {
+        console.log("Error creating community:", error);
+        alert(error.response?.data?.message || "Failed to create community");
+      }
+    };
+  
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+        <div className="bg-[#1A0F2B] border-2 border-[#512E8B] rounded-2xl p-6 w-[500px] max-h-[90vh] overflow-y-auto">
+          <h2 className="text-white text-2xl font-medium mb-4">Create Community</h2>
+          
+          <div className="mb-4">
+            <label className="text-white block mb-2">Community Name*</label>
+            <input
+              type="text"
+              name="name"
+              value={communityData.name}
+              onChange={handleChange}
+              className="w-full bg-[#301F4C] text-white p-2 rounded-lg"
+              placeholder="Enter community name"
+              required
+            />
+          </div>
+          
+          <div className="mb-4">
+            <label className="text-white block mb-2">Description*</label>
+            <textarea
+              name="description"
+              value={communityData.description}
+              onChange={handleChange}
+              className="w-full bg-[#301F4C] text-white p-2 rounded-lg min-h-[100px]"
+              placeholder="Describe your community"
+              required
+            />
+          </div>
+          
+          <div className="mb-4">
+            <label className="text-white block mb-2">Tags</label>
+            <div className="flex">
+              <input
+                type="text"
+                name="currentTag"
+                value={communityData.currentTag}
+                onChange={handleChange}
+                className="flex-1 bg-[#301F4C] text-white p-2 rounded-l-lg"
+                placeholder="Add tags (press Add)"
+              />
+              <button
+                onClick={addTag}
+                className="px-4 py-2 bg-[#6b44ae] text-white rounded-r-lg hover:bg-[#7b54be]"
+              >
+                Add
+              </button>
+            </div>
+            
+            <div className="flex flex-wrap gap-2 mt-2">
+              {communityData.tags.map((tag, index) => (
+                <div key={index} className="flex items-center gap-1 bg-[#301F4C] text-white px-2 py-1 rounded-full">
+                  <span>#{tag}</span>
+                  <button 
+                    onClick={() => removeTag(index)}
+                    className="text-red-400 hover:text-red-300 font-bold"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          <div className="mb-6">
+            <div className="flex items-center mb-2">
+              <input
+                type="checkbox"
+                id="isPrivate"
+                name="isPrivate"
+                checked={communityData.isPrivate}
+                onChange={handleChange}
+                className="mr-2 h-4 w-4"
+              />
+              <label htmlFor="isPrivate" className="text-white">Private Community</label>
+            </div>
+          </div>
+          
+          <div className="flex justify-end gap-4">
+            <button
+              onClick={() => setShowCreateModal(false)}
+              className="px-4 py-2 bg-[#3D2A64] text-white rounded-lg hover:bg-[#4a336e]"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleCreateCommunity}
+              disabled={!communityData.name || !communityData.description}
+              className={`px-4 py-2 text-white rounded-lg ${
+                !communityData.name || !communityData.description 
+                  ? "bg-gray-500 cursor-not-allowed"
+                  : "bg-[#6b44ae] hover:bg-[#7b54be]"
+              }`}
+            >
+              Create
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   // Join Community Modal
   const JoinCommunityModal = () => {
     const [availableCommunities, setAvailableCommunities] = useState([]);
     
     useEffect(() => {
-      // Filter out communities user has already joined
-      const userCommunityIds = userCommunities.map(c => c._id);
+      const userCommunityIds = [...leaderCommunities, ...memberCommunities].map(c => c._id);
       const available = allCommunities.filter(
         c => !userCommunityIds.includes(c._id)
       );
       setAvailableCommunities(available);
-    }, [allCommunities, userCommunities]);
+    }, [allCommunities, leaderCommunities, memberCommunities]);
     
     return (
       <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
@@ -234,7 +454,9 @@ const Community = () => {
                 >
                   <div>
                     <h3 className="text-white font-medium">{community.name}</h3>
-                    <p className="text-gray-300 text-sm">#{community.tag}</p>
+                    {community.tags && community.tags.length > 0 && (
+                      <p className="text-gray-300 text-sm">#{community.tags[0]}</p>
+                    )}
                   </div>
                   <button className="px-3 py-1 bg-[#6b44ae] text-white rounded-full text-sm">
                     Join
@@ -280,9 +502,7 @@ const Community = () => {
           </div>
         </header>
 
-        {/* Community Section */}
         <div className="flex flex-col font-poppins p-6">
-          {/* Navigation Buttons */}
           <div className="flex h-[73px] p-3 justify-between items-center rounded-[48px] bg-[#4a336e5c] w-full">
             <div className="flex items-center gap-2">
               <button 
@@ -298,131 +518,40 @@ const Community = () => {
                 Create
               </button>
             </div>
-            <select 
-              className="w-[180px] bg-[#6b44ae] h-10 pl-2 mr-3 pr-4 py-2 rounded-full border-input text-sm text-white"
-              value={selectedCommunity}
-              onChange={(e) => setSelectedCommunity(e.target.value)}
-            >
-              <option value="" disabled>Select Community</option>
-              {userCommunities.map((community) => (
-                <option key={community._id} value={community._id}>
-                  {community.name}
-                </option>
-              ))}
-            </select>  
+            <div className="text-white font-medium text-lg">
+              Communities ({leaderCommunities.length + memberCommunities.length})
+            </div>
           </div>
 
-          {/* Main Content */}
-          <div className="flex gap-10 mt-8">
-            {/* Joined Communities */}
-            <div className="flex-1 p-12 rounded-[19px] bg-[#4a336e5c]">
-              <h2 className="text-white text-3xl font-medium mb-10">
-                {userCommunities.length > 0 ? "Joined Communities" : "No Communities Joined Yet"}
-              </h2>
-              <div className="flex flex-col gap-6">
-                {userCommunities.length > 0 ? (
-                  userCommunities.map((community) => (
-                    <div
-                      key={community._id}
-                      className="flex flex-col justify-center p-4 rounded-[11px] border-2 border-[#301F4C] bg-[#1A0F2B] hover:border-[#512E8B] transition-colors cursor-pointer"
-                    >
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <h3 className="text-white text-2xl font-medium">
-                            {community.name}
-                          </h3>
-                          <p className="text-[#CDCDCD] text-lg font-medium">
-                            #{community.tag}
-                          </p>
-                        </div>
-                        <div className="bg-[#301F4C] px-3 py-1 rounded-full">
-                          <span className="text-white text-sm">
-                            {community.users?.length || 0} Members
-                          </span>
-                        </div>
-                      </div>
-                      <div className="mt-2 flex items-center gap-2">
-                        <div className="text-sm text-gray-300">
-                          Average Earnings: 
-                          <span className="text-green-400 font-medium ml-1">
-                            {calculateMockAvgEarnings(community).toFixed(2)} ETH
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center py-10">
-                    <p className="text-gray-300 mb-4">You haven't joined any communities yet.</p>
-                    <button 
-                      onClick={() => setShowJoinModal(true)}
-                      className="px-6 py-2 bg-[#6b44ae] text-white rounded-full hover:bg-[#7b54be]"
-                    >
-                      Join a Community
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Leaderboard */}
-            <div className="w-[308px] p-5 rounded-[19px] h-fit bg-[#4a336e5c]">
-              <div className="flex flex-col items-center gap-5">
-                <h2 className="text-white text-xl font-medium">Leaderboard</h2>
-                <img 
-                  src="https://cdn.builder.io/api/v1/image/assets/TEMP/5ee0513993b0ba538478b5f1d93cdfa9972dd1ed" 
-                  alt="Trophy" 
-                  className="rounded-full w-[99px] h-[99px] bg-gradient-to-br from-purple-600 to-red-400" 
-                />
-                <div className="w-full p-5 rounded-[11px] border-2 border-[#301F4C] bg-[#1A0F2B]">
-                  <div className="flex justify-between mb-3">
-                    <span className="text-white text-sm font-medium">
-                      Rank
-                    </span>
-                    <span className="text-[#ABABAB] text-sm font-medium">
-                      Out of {allCommunities.length}
-                    </span>
-                  </div>
-                  <div className="flex flex-col gap-3">
-                    {communitiesRanking.slice(0, 5).map((community, index) => (
-                      <div
-                        key={community._id}
-                        className="flex items-center gap-2.5 pb-3 border-b border-[#7E7E7E]"
-                      >
-                        <div
-                          className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-medium"
-                          style={{ 
-                            backgroundColor: 
-                              index === 0 ? "#FFD700" : 
-                              index === 1 ? "#C0C0C0" : 
-                              index === 2 ? "#CD7F32" : "#2A9D90" 
-                          }}
-                        >
-                          {index + 1}
-                        </div>
-                        <div className="flex-1">
-                          <span className="text-white text-sm block">
-                            {community.name}
-                          </span>
-                          <span className="text-green-400 text-xs">
-                            {community.avgEarnings} ETH
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div className="mt-8">
+            {/* Your Communities (Leader) Section */}
+            <CommunitySection 
+              title="Your Communities" 
+              communities={leaderCommunities} 
+              isLeader={true} 
+            />
+            
+            {/* Joined Communities (Member) Section */}
+            <CommunitySection 
+              title="Joined Communities" 
+              communities={memberCommunities} 
+              isLeader={false} 
+            />
+            
+            {/* Other Communities (Available to Join) Section */}
+            <CommunitySection 
+              title="Discover Communities" 
+              communities={otherCommunities} 
+              isLeader={false}
+              showJoinButton={true}
+            />
           </div>
         </div>
       </div>
 
-      {/* Modals */}
       {showCreateModal && <CreateCommunityModal />}
       {showJoinModal && <JoinCommunityModal />}
 
-      {/* Chatbot */}
       <div className="chatbot-bubble" onClick={handleToggleChatbot}>
         <img src={chatbot} alt="Chatbot" />
       </div>

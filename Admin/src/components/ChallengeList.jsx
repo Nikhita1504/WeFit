@@ -6,9 +6,8 @@ import {
   IconButton, Typography 
 } from '@mui/material';
 import { Delete, Edit } from '@mui/icons-material';
-import { Link } from 'react-router-dom';
 
-export default function ChallengeList() {
+export default function ChallengeList({ onAddNew, onEdit }) {
   const [challenges, setChallenges] = useState([]);
 
   useEffect(() => {
@@ -30,8 +29,7 @@ export default function ChallengeList() {
       <Typography variant="h4" gutterBottom>
         Challenges
         <Button 
-          component={Link} 
-          to="/challenges/new" 
+          onClick={onAddNew} 
           variant="contained" 
           color="primary"
           style={{ float: 'right' }}
@@ -62,8 +60,7 @@ export default function ChallengeList() {
                 <TableCell>${challenge.maxStake}</TableCell>
                 <TableCell>
                   <IconButton 
-                    component={Link} 
-                    to={`/challenges/edit/${challenge._id}`}
+                    onClick={() => onEdit(challenge._id)}
                     color="primary"
                   >
                     <Edit />

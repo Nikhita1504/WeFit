@@ -55,20 +55,21 @@ const ConnectWallet = () => {
 
   return (
    <>
-    <button
-      onClick={handleconnect }
-      
-      className="connect-wallet px-4 py-2 bg-[#512E8B] text-white rounded-full hover:bg-[#3a1d66] transition-colors max-w-[180px] truncate font-mono"
-    >
-      {truncateAddress(account)}
-    </button>
-    <button
+    <div className="flex gap-4"> {/* Add gap between the buttons */}
+  <button
+    onClick={handleconnect}
+    className="connect-wallet px-4 py-2 bg-[#512E8B] text-white rounded-full hover:bg-[#3a1d66] transition-colors max-w-[180px] truncate font-mono"
+  >
+    {truncateAddress(account)}
+  </button>
   
-      
-      className="connect-wallet px-4 py-2 bg-[#512E8B] text-white rounded-full hover:bg-[#3a1d66] transition-colors max-w-[180px] truncate font-mono"
-    >
-     ₹{Math.floor(balance*156697)}
-    </button>
+  <button
+    className="connect-wallet px-4 py-2 bg-[#512E8B] text-white rounded-full hover:bg-[#3a1d66] transition-colors max-w-[180px] truncate font-mono"
+  >
+    ₹{Math.floor(balance * 156697)}
+  </button>
+</div>
+
    </>
     
   );
