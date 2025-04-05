@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const communitySchema = new mongoose.Schema({
-  name: { type: String, required: true, trim: true },
+  leader: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   description: { type: String, required: true },
   tags: [{ type: String, trim: true }],
   members: [{

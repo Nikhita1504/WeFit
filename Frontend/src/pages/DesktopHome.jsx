@@ -20,7 +20,7 @@ import ActiveChallengeCard
   from "../components/ActiveChallengeCard";
 
 
-
+import Leaderboard from "../components/Leaderboard";
 
 
 import { FaHistory } from "react-icons/fa";
@@ -29,7 +29,8 @@ import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import useFitnessData from "../Utils/useStepCount";
 import HealthOverview from "../components/HealthOverview";
-import Leaderboard from "../components/LeaderBoard";
+import NotificationBell from "../components/Notificationbell";
+
 
 const DesktopHome = () => {
   const navigate = useNavigate();
@@ -54,11 +55,7 @@ const DesktopHome = () => {
 
     }
   }
-  useEffect(() => {
-    if (JwtToken) {
-      getUserData();
-    }
-  }, [JwtToken]);
+
 
   // useEffect(() => {
   //   console.log('Step Data:', { todaySteps, 
@@ -153,7 +150,7 @@ const DesktopHome = () => {
               <ConnectWallet />
             </div>
           
-
+           <NotificationBell></NotificationBell>
             <button onClick={handleNavigateToHistory} className="rounded-full">
               <Avatar className="h-[63px]  p-3.5 w-[63px] border-4 border-[#512E8B] rounded-full bg-[#413359] cursor-pointer hover:opacity-80 transition-opacity">
                 <FaHistory color="white" size={30} />
@@ -210,7 +207,7 @@ const DesktopHome = () => {
       <div className="chatbot-bubble" onClick={handleToggleChatbot}>
         <img src={chatbot} alt="Chatbot" />
       </div>
-
+      <Leaderboard onClick={handleNavigateToCommunity} />
       {/* Chatbot Component */}
       <DesktopChatbot
         isOpen={isChatbotOpen}

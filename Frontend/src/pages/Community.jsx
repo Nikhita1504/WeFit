@@ -4,389 +4,138 @@ import ConnectWallet from "../components/ConnectWallet";
 import DesktopChatbot from "../components/DesktopChatbot";
 import "../styles/DesktopHome.css";
 import chatbot from "../assets/chatbot.png";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "../components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
+import { Avatar } from "../components/ui/avatar";
 import { useAuth } from "../context/AuthContext";
-import { FaHistory } from "react-icons/fa";
+import { FaHistory, FaCrown, FaUsers } from "react-icons/fa";
 import axios from "axios";
-import { jwtDecode } from "jwt-decode";
 
 const Community = () => {
   const navigate = useNavigate();
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
   const { logout, JwtToken } = useAuth();
-  const [userData, setUserData] = useState();
-  const [userCommunities, setUserCommunities] = useState([]);
-  const [allCommunities, setAllCommunities] = useState([]);
-  const [selectedCommunity, setSelectedCommunity] = useState("");
+  const [leaderCommunities, setLeaderCommunities] = useState([]);
+  const [memberCommunities, setMemberCommunities] = useState([]);
+  const [otherCommunities, setOtherCommunities] = useState([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showJoinModal, setShowJoinModal] = useState(false);
-  const [newCommunityName, setNewCommunityName] = useState("");
-  const [newCommunityTag, setNewCommunityTag] = useState("");
-  const [communitiesRanking, setCommunitiesRanking] = useState([]);
-  const [showChallengeModal, setShowChallengeModal] = useState(false);
-  const [currentExercise, setCurrentExercise] = useState({
-    name: "",
-    reps: 0,
-    sets: 0,
-    duration: 0,
-    description: ""
-  });
-  const [challengeData, setChallengeData] = useState({
-    communityId: "",
-    name: "",
-    description: "",
-    exercises: [],
-    stake: {
-      amount: 0
-    }
-  });
+  const [allCommunities, setAllCommunities] = useState([]);
 
-  const ChallengeModal = () => {
-    const handleChange = (e) => {
-      const { name, value } = e.target;
-      setChallengeData(prev => ({
-        ...prev,
-        [name]: value
-      }));
-    };
-  
-    const handleStakeChange = (e) => {
-      const { value } = e.target;
-      setChallengeData(prev => ({
-        ...prev,
-        stake: {
-          amount: parseFloat(value) || 0
-        }
-      }));
-    };
-  
-    const handleExerciseChange = (e) => {
-      const { name, value } = e.target;
-      setCurrentExercise(prev => ({
-        ...prev,
-        [name]: name === 'name' || name === 'description' ? value : parseInt(value) || 0
-      }));
-    };
-  
-    const addExercise = () => {
-      if (currentExercise.name.trim()) {
-        setChallengeData(prev => ({
-          ...prev,
-          exercises: [...prev.exercises, currentExercise]
-        }));
-        setCurrentExercise({
-          name: "",
-          reps: 0,
-          sets: 0,
-          duration: 0,
-          description: ""
-        });
-      }
-    };
-  
-    const removeExercise = (index) => {
-      setChallengeData(prev => ({
-        ...prev,
-        exercises: prev.exercises.filter((_, i) => i !== index)
-      }));
-    };
-  
-    const handleSubmit = async () => {
-      try {
-        const payload = {
-          ...challengeData,
-          communityId: selectedCommunity
-        };
-  
-        await axios.post(
-          'http://localhost:3000/communityChallenge/create',
-          payload,
-          {
-            headers: {
-              Authorization: `Bearer ${JwtToken}`,
-            },
-          }
-        );
-  
-        setShowChallengeModal(false);
-        setChallengeData({
-          communityId: "",
-          name: "",
-          description: "",
-          exercises: [],
-          stake: {
-            amount: 0
-          }
-        });
-      } catch (error) {
-        console.log("Error creating challenge:", error);
-        alert(error.response?.data?.message || "Failed to create challenge");
-      }
-    };
-  
-    return (
-      <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-        <div className="bg-[#1A0F2B] border-2 border-[#512E8B] rounded-2xl p-6 w-[600px] max-h-[90vh] overflow-y-auto">
-          <h2 className="text-white text-2xl font-medium mb-4">Create New Challenge</h2>
-          
-          <div className="mb-4">
-            <label className="text-white block mb-2">Challenge Name*</label>
-            <input
-              type="text"
-              name="name"
-              value={challengeData.name}
-              onChange={handleChange}
-              className="w-full bg-[#301F4C] text-white p-2 rounded-lg"
-              placeholder="Enter challenge name"
-              required
-            />
-          </div>
-          
-          <div className="mb-4">
-            <label className="text-white block mb-2">Description*</label>
-            <textarea
-              name="description"
-              value={challengeData.description}
-              onChange={handleChange}
-              className="w-full bg-[#301F4C] text-white p-2 rounded-lg min-h-[100px]"
-              placeholder="Describe the challenge"
-              required
-            />
-          </div>
-          
-          <div className="mb-6">
-            <label className="text-white block mb-2">Stake Amount (ETH)*</label>
-            <input
-              type="number"
-              min="0"
-              step="0.01"
-              value={challengeData.stake.amount}
-              onChange={handleStakeChange}
-              className="w-full bg-[#301F4C] text-white p-2 rounded-lg"
-              placeholder="0.00"
-              required
-            />
-          </div>
-          
-          <div className="mb-6">
-            <h3 className="text-white text-xl font-medium mb-3">Exercises</h3>
-            
-            <div className="bg-[#301F4C] p-4 rounded-lg mb-4">
-              <div className="grid grid-cols-2 gap-4 mb-3">
-                <div>
-                  <label className="text-white block mb-1 text-sm">Exercise Name*</label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={currentExercise.name}
-                    onChange={handleExerciseChange}
-                    className="w-full bg-[#1A0F2B] text-white p-2 rounded"
-                    placeholder="e.g., Push-ups"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="text-white block mb-1 text-sm">Description</label>
-                  <input
-                    type="text"
-                    name="description"
-                    value={currentExercise.description}
-                    onChange={handleExerciseChange}
-                    className="w-full bg-[#1A0F2B] text-white p-2 rounded"
-                    placeholder="e.g., Keep back straight"
-                  />
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <label className="text-white block mb-1 text-sm">Reps</label>
-                  <input
-                    type="number"
-                    min="0"
-                    name="reps"
-                    value={currentExercise.reps}
-                    onChange={handleExerciseChange}
-                    className="w-full bg-[#1A0F2B] text-white p-2 rounded"
-                  />
-                </div>
-                <div>
-                  <label className="text-white block mb-1 text-sm">Sets</label>
-                  <input
-                    type="number"
-                    min="0"
-                    name="sets"
-                    value={currentExercise.sets}
-                    onChange={handleExerciseChange}
-                    className="w-full bg-[#1A0F2B] text-white p-2 rounded"
-                  />
-                </div>
-                <div>
-                  <label className="text-white block mb-1 text-sm">Duration (sec)</label>
-                  <input
-                    type="number"
-                    min="0"
-                    name="duration"
-                    value={currentExercise.duration}
-                    onChange={handleExerciseChange}
-                    className="w-full bg-[#1A0F2B] text-white p-2 rounded"
-                  />
-                </div>
-              </div>
-              
-              <button
-                onClick={addExercise}
-                disabled={!currentExercise.name}
-                className={`mt-3 px-3 py-1 rounded text-sm ${
-                  !currentExercise.name
-                    ? "bg-gray-500 cursor-not-allowed"
-                    : "bg-[#4CAF50] hover:bg-[#3e8e41]"
-                }`}
-              >
-                Add Exercise
-              </button>
-            </div>
-            
-            {challengeData.exercises.length > 0 && (
-              <div className="bg-[#301F4C] p-3 rounded-lg">
-                <h4 className="text-white text-sm font-medium mb-2">Added Exercises:</h4>
-                <div className="space-y-2">
-                  {challengeData.exercises.map((exercise, index) => (
-                    <div key={index} className="flex justify-between items-center bg-[#1A0F2B] p-2 rounded">
-                      <div>
-                        <span className="text-white font-medium">{exercise.name}</span>
-                        {exercise.description && (
-                          <p className="text-gray-300 text-xs">{exercise.description}</p>
-                        )}
-                        <div className="flex gap-2 text-xs text-gray-400 mt-1">
-                          {exercise.reps > 0 && <span>{exercise.reps} reps</span>}
-                          {exercise.sets > 0 && <span>{exercise.sets} sets</span>}
-                          {exercise.duration > 0 && <span>{exercise.duration}s</span>}
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => removeExercise(index)}
-                        className="text-red-400 hover:text-red-300 text-lg"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-          
-          <div className="flex justify-end gap-4">
-            <button
-              onClick={() => setShowChallengeModal(false)}
-              className="px-4 py-2 bg-[#3D2A64] text-white rounded-lg hover:bg-[#4a336e]"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleSubmit}
-              disabled={!challengeData.name || !challengeData.description || challengeData.exercises.length === 0}
-              className={`px-4 py-2 text-white rounded-lg ${
-                !challengeData.name || !challengeData.description || challengeData.exercises.length === 0
-                  ? "bg-gray-500 cursor-not-allowed"
-                  : "bg-[#4CAF50] hover:bg-[#3e8e41]"
-              }`}
-            >
-              Create Challenge
-            </button>
-          </div>
-        </div>
-      </div>
-    );
+  // Function to navigate to community challenge page
+  const navigateToCommunity = (communityId) => {
+    console.log(communityId);
+    navigate(`/community/add-challenge`, { state: {communityId} });
   };
 
-  // Fetch user data
-  const getUserData = async () => {
-    try {
-      const payload = jwtDecode(JwtToken);
-      const response = await axios.get(
-        `http://localhost:3000/api/users/get/${payload.email}`,
-      );
-      setUserData(response.data);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  // Fetch user communities
-  const getUserCommunities = async () => {
-    try {
-      const response = await axios.get(
-        `http://localhost:3000/community/user/${JwtToken}`,
-        {
-          headers: {
-            Authorization: `Bearer ${JwtToken}`,
-          },
-        }
-      );
-      setUserCommunities(response.data);
-    } catch (error) {
-      console.log("Error fetching user communities:", error);
-    }
-  };
-
-  // Fetch all communities for leaderboard
+  // Fetch all communities from server
   const getAllCommunities = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/community/all");
-      setAllCommunities(response.data); 
-      
-      const ranked = response.data.map(community => ({
-        ...community,
-        avgEarnings: calculateMockAvgEarnings(community)
-      })).sort((a, b) => b.avgEarnings - a.avgEarnings)
-        .slice(0, 10);
-      
-      setCommunitiesRanking(ranked);
+      const response = await axios.get(
+        `http://localhost:3000/community/new`
+      );
+      setAllCommunities(response.data);
     } catch (error) {
       console.log("Error fetching all communities:", error);
     }
   };
 
-  const calculateMockAvgEarnings = (community) => {
-    return parseFloat((Math.random() * 200 + 50).toFixed(2));
-  };
-
-  // Join a community
-  const handleJoinCommunity = async (communityId) => {
+  // Fetch user communities and separate them into leader and member communities
+  const getUserCommunities = async () => {
     try {
-      await axios.post(
-        "http://localhost:3000/api/community/join/:token",
-        { communityId },
+      const response = await axios.get(
+        `http://localhost:3000/community/all/${JwtToken}`,
         {
           headers: {
             Authorization: `Bearer ${JwtToken}`,
           },
         }
       );
-      getUserCommunities();
-      setShowJoinModal(false);
+      
+      // Get user ID from auth context or JWT token payload
+      const userId = getUserIdFromToken(JwtToken);
+      
+      // Split communities based on role
+      const leaderComms = [];
+      const memberComms = [];
+      
+      response.data.forEach(community => {
+        // Find the user's member record in the community
+        const userMember = community.members.find(member => 
+          member.userId.toString() === userId.toString() || 
+          member.userId === userId
+        );
+        
+        if (userMember && userMember.role === 'leader') {
+          leaderComms.push(community);
+        } else {
+          memberComms.push(community);
+        }
+      });
+      
+      setLeaderCommunities(leaderComms);
+      setMemberCommunities(memberComms);
+    } catch (error) {
+      console.log("Error fetching user communities:", error);
+    }
+  };
+  
+  // Helper function to extract user ID from JWT token
+  const getUserIdFromToken = (token) => {
+    // Simple implementation - in a real app, you'd decode the token properly
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      
+      return JSON.parse(jsonPayload).userId;
+    } catch (e) {
+      console.error('Error decoding token:', e);
+      return null;
+    }
+  };
+
+  const handleJoinCommunity = async (communityId) => {
+    try {
+      await axios.post(
+        `http://localhost:3000/community/join/${JwtToken}`,
+        { communityId }, // send it in the body
+        {
+          headers: {
+            Authorization: `Bearer ${JwtToken}`,
+          },
+        }
+      );
+  
+      // Refresh community lists
+      await getUserCommunities();
+      updateOtherCommunities();
+  
     } catch (error) {
       console.log("Error joining community:", error);
       alert(error.response?.data?.message || "Failed to join community");
     }
   };
+  
+  // Filter out communities that user is already part of
+  const updateOtherCommunities = () => {
+    const userCommunityIds = [...leaderCommunities, ...memberCommunities].map(c => c._id);
+    const others = allCommunities.filter(comm => !userCommunityIds.includes(comm._id));
+    setOtherCommunities(others);
+  };
 
   // Load data on component mount
   useEffect(() => {
     if (JwtToken) {
-      getUserData();
-      getUserCommunities();
       getAllCommunities();
+      getUserCommunities();
     }
   }, [JwtToken]);
+
+  // Update other communities whenever user or all communities change
+  useEffect(() => {
+    updateOtherCommunities();
+  }, [allCommunities, leaderCommunities, memberCommunities]);
 
   const chatMessages = [
     {
@@ -399,17 +148,118 @@ const Community = () => {
     },
   ];
 
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
-  };
-
   const handleNavigateToHistory = () => {
     navigate("/history");
   };
 
   const handleToggleChatbot = () => {
     setIsChatbotOpen(!isChatbotOpen);
+  };
+
+  // Community Card Component
+  const CommunityCard = ({ community, isLeader, showJoinButton = false }) => {
+    return (
+      <div
+        className={`flex flex-col p-6 rounded-[15px] border-2 border-[#301F4C] bg-[#1A0F2B] hover:border-[#512E8B] transition-colors ${showJoinButton ? '' : 'cursor-pointer'}`}
+        onClick={() => !showJoinButton && navigateToCommunity(community._id)}
+      >
+        <div className="flex justify-between items-start mb-2">
+          <h3 className="text-white text-2xl font-medium">
+            {community.name}
+          </h3>
+          {isLeader && (
+            <div className="flex items-center bg-[#6b44ae] px-2 py-1 rounded-full">
+              <FaCrown className="text-yellow-300 mr-1" />
+              <span className="text-white text-xs">Leader</span>
+            </div>
+          )}
+        </div>
+        
+        <p className="text-gray-300 text-sm mb-3 line-clamp-2">
+          {community.description}
+        </p>
+        
+        <div className="flex flex-wrap gap-2 mb-3">
+          {community.tags && community.tags.map((tag, index) => (
+            <span key={index} className="text-[#CDCDCD] text-sm bg-[#301F4C] px-2 py-1 rounded-full">
+              #{tag}
+            </span>
+          ))}
+        </div>
+        
+        <div className="mt-auto flex items-center justify-between pt-4">
+          <div className="bg-[#301F4C] px-3 py-1 rounded-full flex items-center">
+            <FaUsers className="text-white mr-1" />
+            <span className="text-white text-sm">
+              {community.members?.length || 0} Members
+            </span>
+          </div>
+          
+          {community.completionPercentage > 0 && (
+            <div className="bg-[#301F4C] px-3 py-1 rounded-full">
+              <span className="text-white text-sm">
+                {community.completionPercentage}% Complete
+              </span>
+            </div>
+          )}
+          
+          {showJoinButton ? (
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                handleJoinCommunity(community._id);
+              }}
+              className="px-4 py-2 bg-[#6b44ae] text-white rounded-full hover:bg-[#7b54be]"
+            >
+              Join
+            </button>
+          ) : (
+            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[#6b44ae]">
+              <span className="text-white font-bold">→</span>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  // Community Section Component
+  const CommunitySection = ({ title, communities, isLeader, showJoinButton = false }) => {
+    return (
+      <div className="p-8 rounded-[19px] bg-[#4a336e5c] mb-8">
+        <h2 className="text-white text-3xl font-medium mb-6">
+          {title} ({communities.length})
+        </h2>
+        
+        {communities.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {communities.map((community) => (
+              <CommunityCard 
+                key={community._id} 
+                community={community} 
+                isLeader={isLeader}
+                showJoinButton={showJoinButton}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-10">
+            <p className="text-gray-300 mb-4">
+              {isLeader ? "You haven't created any communities yet." : 
+               showJoinButton ? "No communities available to join." : "You haven't joined any communities yet."}
+            </p>
+            {!showJoinButton && (
+              <button 
+                onClick={() => isLeader ? setShowCreateModal(true) : setShowJoinModal(true)}
+                className="px-6 py-2 bg-[#6b44ae] text-white rounded-full hover:bg-[#7b54be]"
+              >
+                {isLeader ? "Create a Community" : "Join a Community"}
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+    );
   };
 
   // Create Community Modal
@@ -419,7 +269,6 @@ const Community = () => {
       description: "",
       tags: [],
       isPrivate: false,
-      accessCode: "",
       currentTag: ""
     });
   
@@ -455,7 +304,6 @@ const Community = () => {
           description: communityData.description,
           tags: communityData.tags,
         };
-        console.log(dataToSubmit)
   
         await axios.post(
           `http://localhost:3000/community/create/${JwtToken}`,
@@ -467,9 +315,9 @@ const Community = () => {
           }
         );
         setShowCreateModal(false);
-        navigate('/community/add-challenge')
+        navigate('/community/add-challenge');
         getUserCommunities();
-        getAllCommunities();
+        
       } catch (error) {
         console.log("Error creating community:", error);
         alert(error.response?.data?.message || "Failed to create community");
@@ -563,7 +411,7 @@ const Community = () => {
             </button>
             <button
               onClick={handleCreateCommunity}
-              disabled={!communityData.name || !communityData.description }
+              disabled={!communityData.name || !communityData.description}
               className={`px-4 py-2 text-white rounded-lg ${
                 !communityData.name || !communityData.description 
                   ? "bg-gray-500 cursor-not-allowed"
@@ -583,12 +431,12 @@ const Community = () => {
     const [availableCommunities, setAvailableCommunities] = useState([]);
     
     useEffect(() => {
-      const userCommunityIds = userCommunities.map(c => c._id);
+      const userCommunityIds = [...leaderCommunities, ...memberCommunities].map(c => c._id);
       const available = allCommunities.filter(
         c => !userCommunityIds.includes(c._id)
       );
       setAvailableCommunities(available);
-    }, [allCommunities, userCommunities]);
+    }, [allCommunities, leaderCommunities, memberCommunities]);
     
     return (
       <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
@@ -606,7 +454,9 @@ const Community = () => {
                 >
                   <div>
                     <h3 className="text-white font-medium">{community.name}</h3>
-                    <p className="text-gray-300 text-sm">#{community.tag}</p>
+                    {community.tags && community.tags.length > 0 && (
+                      <p className="text-gray-300 text-sm">#{community.tags[0]}</p>
+                    )}
                   </div>
                   <button className="px-3 py-1 bg-[#6b44ae] text-white rounded-full text-sm">
                     Join
@@ -667,149 +517,40 @@ const Community = () => {
               >
                 Create
               </button>
-              <button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setSelectedCommunity('67f0bab6f400dc2e0589d700');
-                  setShowChallengeModal(true);
-                }}
-                className="px-3 py-1 bg-[#4CAF50] text-white rounded-full text-sm hover:bg-[#3e8e41]"
-              >
-                Add Challenge
-              </button>
             </div>
-            <select 
-              className="w-[180px] bg-[#6b44ae] h-10 pl-2 mr-3 pr-4 py-2 rounded-full border-input text-sm text-white"
-              value={selectedCommunity}
-              onChange={(e) => setSelectedCommunity(e.target.value)}
-            >
-              <option value="" disabled>Select Community</option>
-              {userCommunities.map((community) => (
-                <option key={community._id} value={community._id}>
-                  {community.name}
-                </option>
-              ))}
-            </select>  
+            <div className="text-white font-medium text-lg">
+              Communities ({leaderCommunities.length + memberCommunities.length})
+            </div>
           </div>
 
-          <div className="flex gap-10 mt-8">
-            <div className="flex-1 p-12 rounded-[19px] bg-[#4a336e5c]">
-              <h2 className="text-white text-3xl font-medium mb-10">
-                {userCommunities.length > 0 ? "Joined Communities" : "No Communities Joined Yet"}
-              </h2>
-              <div className="flex flex-col gap-6">
-                {userCommunities.length > 0 ? (
-                  userCommunities.map((community) => (
-                    <div
-                      key={community._id}
-                      className="flex flex-col justify-center p-4 rounded-[11px] border-2 border-[#301F4C] bg-[#1A0F2B] hover:border-[#512E8B] transition-colors cursor-pointer"
-                    >
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <h3 className="text-white text-2xl font-medium">
-                            {community.name}
-                          </h3>
-                          <p className="text-[#CDCDCD] text-lg font-medium">
-                            #{community.tag}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <div className="bg-[#301F4C] px-3 py-1 rounded-full">
-                            <span className="text-white text-sm">
-                              {community.users?.length || 0} Members
-                            </span>
-                          </div>
-                          <button 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedCommunity(community._id);
-                              setShowChallengeModal(true);
-                            }}
-                            className="px-3 py-1 bg-[#4CAF50] text-white rounded-full text-sm hover:bg-[#3e8e41]"
-                          >
-                            Add Challenge
-                          </button>
-                        </div>
-                      </div>
-                      <div className="mt-2 flex items-center gap-2">
-                        <div className="text-sm text-gray-300">
-                          Average Earnings: 
-                          <span className="text-green-400 font-medium ml-1">
-                            {calculateMockAvgEarnings(community).toFixed(2)} ETH
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center py-10">
-                    <p className="text-gray-300 mb-4">You haven't joined any communities yet.</p>
-                    <button 
-                      onClick={() => setShowJoinModal(true)}
-                      className="px-6 py-2 bg-[#6b44ae] text-white rounded-full hover:bg-[#7b54be]"
-                    >
-                      Join a Community
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="w-[308px] p-5 rounded-[19px] h-fit bg-[#4a336e5c]">
-              <div className="flex flex-col items-center gap-5">
-                <h2 className="text-white text-xl font-medium">Leaderboard</h2>
-                <img 
-                  src="https://cdn.builder.io/api/v1/image/assets/TEMP/5ee0513993b0ba538478b5f1d93cdfa9972dd1ed" 
-                  alt="Trophy" 
-                  className="rounded-full w-[99px] h-[99px] bg-gradient-to-br from-purple-600 to-red-400" 
-                />
-                <div className="w-full p-5 rounded-[11px] border-2 border-[#301F4C] bg-[#1A0F2B]">
-                  <div className="flex justify-between mb-3">
-                    <span className="text-white text-sm font-medium">
-                      Rank
-                    </span>
-                    <span className="text-[#ABABAB] text-sm font-medium">
-                      Out of {allCommunities.length}
-                    </span>
-                  </div>
-                  <div className="flex flex-col gap-3">
-                    {communitiesRanking.slice(0, 5).map((community, index) => (
-                      <div
-                        key={community._id}
-                        className="flex items-center gap-2.5 pb-3 border-b border-[#7E7E7E]"
-                      >
-                        <div
-                          className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-medium"
-                          style={{ 
-                            backgroundColor: 
-                              index === 0 ? "#FFD700" : 
-                              index === 1 ? "#C0C0C0" : 
-                              index === 2 ? "#CD7F32" : "#2A9D90" 
-                          }}
-                        >
-                          {index + 1}
-                        </div>
-                        <div className="flex-1">
-                          <span className="text-white text-sm block">
-                            {community.name}
-                          </span>
-                          <span className="text-green-400 text-xs">
-                            {community.avgEarnings} ETH
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div className="mt-8">
+            {/* Your Communities (Leader) Section */}
+            <CommunitySection 
+              title="Your Communities" 
+              communities={leaderCommunities} 
+              isLeader={true} 
+            />
+            
+            {/* Joined Communities (Member) Section */}
+            <CommunitySection 
+              title="Joined Communities" 
+              communities={memberCommunities} 
+              isLeader={false} 
+            />
+            
+            {/* Other Communities (Available to Join) Section */}
+            <CommunitySection 
+              title="Discover Communities" 
+              communities={otherCommunities} 
+              isLeader={false}
+              showJoinButton={true}
+            />
           </div>
         </div>
       </div>
 
       {showCreateModal && <CreateCommunityModal />}
       {showJoinModal && <JoinCommunityModal />}
-      {showChallengeModal && <ChallengeModal />}
 
       <div className="chatbot-bubble" onClick={handleToggleChatbot}>
         <img src={chatbot} alt="Chatbot" />

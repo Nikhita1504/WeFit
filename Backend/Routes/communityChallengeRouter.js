@@ -2,16 +2,86 @@ const express = require('express');
 const router = express.Router();
 const CommunityChallenge = require('../Model/communityChallenge');
 const communityChallenge = require('../Model/communityChallenge');
+const Community = require('../Model/community');
+const authenticateToken = require('../Middleware/Authenticatetowken');
+const Notification = require('../Model/Notification');
+
+// Reference to userSockets and io - will be set when router is initialized
+let userSockets;
+let io;
+
+// Initialize router with socketIO and userSockets references
+const initializeRouter = (socketIO, socketUsers) => {
+  io = socketIO;
+  userSockets = socketUsers;
+  return router;
+};
 
 // ✅ Create a new community challenge
 router.post('/create', async (req, res) => {
   try {
-    console.log("backend",req.body)
-    const challenge = new communityChallenge(req.body);
-    await challenge.save();
-    res.status(201).json(challenge);
+    console.log("backend", req.body);
+    const { communityId, name, description, exercises, stake } = req.body;
+   
+    // Create the challenge
+    const challenge = new communityChallenge({
+      communityId,
+      name,
+      description,
+      exercises,
+      stake,
+      participants: []
+    });
+    
+    const savedChallenge = await challenge.save();
+    console.log(savedChallenge);
+    // Get all users in the community
+    const community = await Community.findById(communityId);
+    console.log(community);
+    if (!community) {
+      return res.status(404).json({ message: "Community not found" });
+    }
+    
+    // Create notifications for all community members
+    const memberIds = community.members.map(member => member.userId);
+    console.log(memberIds);
+    
+    // Create notifications array
+    const notifications = memberIds.map(userId => {
+      return {
+        userId,
+        type: 'challenge_invite',
+        title: `New Challenge: ${name}`,
+        description: `You've been invited to join "${name}" challenge`,
+        data: {
+          challengeId: savedChallenge._id,
+          communityId: communityId,
+          stakeAmount: stake.amount,
+          challengeName: name,
+          challengeDescription: description
+        },
+        read: false,
+        createdAt: new Date()
+      };
+    });
+    
+    // Save notifications to database
+    const savedNotifications = await Notification.insertMany(notifications);
+    
+    // Send real-time notifications to connected users
+    if (io && userSockets) {
+      savedNotifications.forEach(notification => {
+        const socketId = userSockets[notification.userId.toString()];
+        if (socketId) {
+          io.to(socketId).emit('new_notification', notification);
+        }
+      });
+    }
+    
+    res.status(200).json(savedChallenge);
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    console.error(err);
+    res.status(500).json({ message: err.message });
   }
 });
 
@@ -82,4 +152,4 @@ router.post('/complete/:challengeId', async (req, res) => {
   }
 });
 
-module.exports = router;
+module.exports = { router, initializeRouter };

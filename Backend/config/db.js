@@ -42,7 +42,7 @@ const userSchema = new mongoose.Schema({
     //   validator: function (v) {
     //     return /^0x[a-fA-F0-9]{40}$/.test(v);
     //   },
-    //   message: props => `${props.value} is not a valid wallet address!`
+    //   message: props => ${props.value} is not a valid wallet address!
     // }
   },
 
@@ -72,15 +72,6 @@ const userSchema = new mongoose.Schema({
     gender: {
       type: String,
       enum: ['male', 'female', 'other']
-    },
-    goals: {
-      type: [String], // e.g., ['weight-loss', 'muscle-gain']
-      validate: {
-        validator: function (val) {
-          return val.length <= 2;
-        },
-        message: 'You can select up to 2 fitness goals only.'
-      }
     }
   },
 
@@ -94,6 +85,14 @@ const userSchema = new mongoose.Schema({
     type: Number,
     default: 0,
     min: 0
+  },
+  points:{
+    type: Number,
+    default: 0,
+    min: 0
+  },
+  isPaid:{
+    type:Boolean,
   }
 
 }, {
@@ -167,4 +166,3 @@ const Challenge = mongoose.model('Challenge', challengeSchema);
 
 // Export both models
 module.exports = { User, Challenge };
-

@@ -1,4 +1,4 @@
-const { string } = require('@tensorflow/tfjs');
+
 const mongoose = require('mongoose');
 
 const communityChallengeSchema = new mongoose.Schema({

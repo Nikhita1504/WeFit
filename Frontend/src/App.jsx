@@ -24,6 +24,8 @@ import History from "./pages/History";
 import Input from "./pages/Input";
 import Community from "./pages/Community";
 import CommunityChallenge from "./pages/CommunityChallenge";
+import { SocketProvider } from "./context/useSocket";
+import NotificationsPanel from "./pages/Notification";
 
 
 function App() {
@@ -51,6 +53,7 @@ function App() {
   const ResponsiveLogin = () => (isMobile ? <MobileLogin /> : <DesktopLogin />);
 
   return (
+    <SocketProvider>
     <Contractprovider>
       <Walletprovider>
         <AuthProvider>
@@ -119,6 +122,14 @@ function App() {
                       </ProtectedRoute>
                     }
                   />
+                  <Route
+                    path="/notifications"
+                    element={
+                      <ProtectedRoute>
+                        <NotificationsPanel />
+                      </ProtectedRoute>
+                    }
+                  />
                   {/* Add more routes as needed */}
                 </Routes>
               </div>
@@ -127,6 +138,7 @@ function App() {
         </AuthProvider>
       </Walletprovider>
     </Contractprovider>
+    </SocketProvider>
 
   );
 }
