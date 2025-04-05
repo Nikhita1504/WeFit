@@ -20,6 +20,11 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ChallengeProvider } from "./context/ChallengeContext";
 import Contractprovider from "./context/Contractprovider";
 import Capture from "./pages/Capture";
+import History from "./pages/History";
+import Input from "./pages/Input";
+import Community from "./pages/Community";
+import CommunityChallenge from "./pages/CommunityChallenge";
+
 
 function App() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
@@ -35,9 +40,9 @@ function App() {
     const location = useLocation();
 
     if (!token) {
-      return <Navigate to="/login" 
+      return <Navigate to="/login"
       // state={{ from: location }} 
-       />;
+      />;
     }
     return children;
   };
@@ -47,55 +52,82 @@ function App() {
 
   return (
     <Contractprovider>
- <Walletprovider>
-      <AuthProvider>
-      <ChallengeProvider>
-        <Router>
-          <div className="app">
-            <Routes>
-              <Route path="/login" element={<ResponsiveLogin />} />
-              <Route
-                path="/"
-                element={
-                  <ProtectedRoute>
-                    <ResponsiveHome />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/challenge"
-                element={
-                  <ProtectedRoute>
-                    <Challenge />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/details"
-                element={
-                  <ProtectedRoute>
-                    <Details />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/capture"
-                element={
-                  <ProtectedRoute>
-                    <Capture />
-                  </ProtectedRoute>
-                }
-              />
+      <Walletprovider>
+        <AuthProvider>
+          <ChallengeProvider>
+            <Router>
+              <div className="app">
+                <Routes>
+                  <Route path="/login" element={<ResponsiveLogin />} />
+                  <Route path="/input" element={<ProtectedRoute>
+                    <Input />
+                  </ProtectedRoute>} />
+                  <Route
+                    path="/"
+                    element={
+                      <ProtectedRoute>
+                        <ResponsiveHome />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/challenge"
+                    element={
+                      <ProtectedRoute>
+                        <Challenge />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/details"
+                    element={
+                      <ProtectedRoute>
+                        <Details />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/capture"
+                    element={
+                      <ProtectedRoute>
+                        <Capture />
+                      </ProtectedRoute>
+                    }
+                  />
 
-              {/* Add more routes as needed */}
-            </Routes>
-          </div>
-        </Router>
-      </ChallengeProvider>
-      </AuthProvider>
-    </Walletprovider>
+                  <Route
+                    path="/history"
+                    element={
+                      <ProtectedRoute>
+                        <History></History>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/community"
+                    element={
+                      <ProtectedRoute>
+                        <Community />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/community/add-challenge"
+                    element={
+                      <ProtectedRoute>
+                        <CommunityChallenge />
+                      </ProtectedRoute>
+                    }
+                  />
+                  {/* Add more routes as needed */}
+                </Routes>
+              </div>
+            </Router>
+          </ChallengeProvider>
+        </AuthProvider>
+      </Walletprovider>
     </Contractprovider>
-   
+
   );
 }
 

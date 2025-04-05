@@ -17,7 +17,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import { useAuth } from "../context/AuthContext";
 import ActiveChallengeCard
- from "../components/ActiveChallengeCard";
+  from "../components/ActiveChallengeCard";
 
 
 
@@ -28,17 +28,19 @@ import { FaHistory } from "react-icons/fa";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import useFitnessData from "../Utils/useStepCount";
+import HealthOverview from "../components/HealthOverview";
+import Leaderboard from "../components/LeaderBoard";
 
 const DesktopHome = () => {
   const navigate = useNavigate();
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
   const { logout, JwtToken } = useAuth();
   const [isCameraOn, setIsCameraOn] = useState(false);
-  const{todaySteps}=useFitnessData();
+  const { todaySteps } = useFitnessData();
   console.log(todaySteps);
 
   const [userData, setuserData] = useState();
-  
+
 
   const getUserData = async () => {
     try {
@@ -67,46 +69,48 @@ const DesktopHome = () => {
   //   weeklySteps, 
   //   todayCalories, 
   //   weeklyCalories,]);
+  const handleNavigateToCommunity = () => {
+    navigate("/community");
+  };
 
+  const [videoStream, setVideoStream] = useState(null);
+  const videoRef = useRef(null);
 
-const [videoStream, setVideoStream] = useState(null);
-const videoRef = useRef(null);
-
-const handleCameraClick = async () => {
-  try {
-    if (!isCameraOn) {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: "user" } // Front camera
-      });
-      setVideoStream(stream);
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-      }
-    } else {
-      // Turn off camera
-      if (videoStream) {
-        videoStream.getTracks().forEach(track => track.stop());
-        setVideoStream(null);
+  const handleCameraClick = async () => {
+    try {
+      if (!isCameraOn) {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "user" } // Front camera
+        });
+        setVideoStream(stream);
         if (videoRef.current) {
-          videoRef.current.srcObject = null;
+          videoRef.current.srcObject = stream;
+        }
+      } else {
+        // Turn off camera
+        if (videoStream) {
+          videoStream.getTracks().forEach(track => track.stop());
+          setVideoStream(null);
+          if (videoRef.current) {
+            videoRef.current.srcObject = null;
+          }
         }
       }
-    }
-    setIsCameraOn(!isCameraOn);
-  } catch (err) {
-    console.error("Camera error:", err);
-    alert("Could not access camera. Please enable permissions.");
-  }
-};
-
-// Clean up camera on unmount
-useEffect(() => {
-  return () => {
-    if (videoStream) {
-      videoStream.getTracks().forEach(track => track.stop());
+      setIsCameraOn(!isCameraOn);
+    } catch (err) {
+      console.error("Camera error:", err);
+      alert("Could not access camera. Please enable permissions.");
     }
   };
-}, [videoStream]);
+
+  // Clean up camera on unmount
+  useEffect(() => {
+    return () => {
+      if (videoStream) {
+        videoStream.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, [videoStream]);
 
   const chatMessages = [
     {
@@ -123,6 +127,9 @@ useEffect(() => {
 
     logout();
     navigate("/login")
+  };
+  const handleNavigateToHistory = () => {
+    navigate("/history");
   };
 
   const handleToggleChatbot = () => {
@@ -145,24 +152,15 @@ useEffect(() => {
             <div className="overflow-hidden">
               <ConnectWallet />
             </div>
-            
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Avatar className="h-[63px]  p-3.5 w-[63px] border-4 border-[#512E8B] rounded-full bg-[#413359] cursor-pointer hover:opacity-80 transition-opacity">
-                  <FaHistory color="white" size={30} />
-                </Avatar>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
+          
 
-                <DropdownMenuItem
-                  className="cursor-pointer"
+            <button onClick={handleNavigateToHistory} className="rounded-full">
+              <Avatar className="h-[63px]  p-3.5 w-[63px] border-4 border-[#512E8B] rounded-full bg-[#413359] cursor-pointer hover:opacity-80 transition-opacity">
+                <FaHistory color="white" size={30} />
+              </Avatar>
+            </button>
 
-                >
-
-                  previous score
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <Leaderboard onClick={handleNavigateToCommunity} />
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -197,37 +195,14 @@ useEffect(() => {
                 Take on next challenge
               </button>{" "}
             </div>
-            <div className="gap-5 flex flex-col">
-              <div className="desktop-home__stats-card">
-                <div className="flex-1 w-full max-md:max-w-full">
-                  <h2 className="desktop-section-text ">How it works?</h2>
-                  <ul className="mt-2.5 text-base leading-9 text-zinc-400 max-md:max-w-full list-none">
-                    <li>Connect your wallet and stake ETH</li>
-                    <li>Complete your daily step goal</li>
-                    <li>Earn rewards for staying active</li>
-                  </ul>
-                </div>
-                <div className="desktop-home__stats-content"></div>
-              </div>
-              <div className="desktop-home__stats-card">
-                <div className="flex-1 w-full max-md:max-w-full">
-                  <h2 className="desktop-section-text ">Fitness Tips</h2>
-                  <ul className="mt-2.5 text-base leading-9 text-zinc-400 max-md:max-w-full list-none">
-                    <li>
-                      Start with 3,000-5,000 steps if you're new to walking
-                    </li>
-                    <li>Take the stairs instead of elevators.</li>
-                    <li>
-                      Stay hydrated and stretch post-walk to prevent stiffness.
-                    </li>
-                  </ul>
-                </div>
-                <div className="desktop-home__stats-content"></div>
-              </div>
+            <div className="flex flex-col flex-1"> {/* Added flex-1 */}
+               {/* Added h-full */}
+                <HealthOverview className="h-full" /> {/* Pass height prop if needed */}
+
             </div>
           </div>
 
-         <ActiveChallengeCard></ActiveChallengeCard>
+          <ActiveChallengeCard></ActiveChallengeCard>
         </div>
       </div>
 
