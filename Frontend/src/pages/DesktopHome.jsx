@@ -20,7 +20,7 @@ import ActiveChallengeCard
  from "../components/ActiveChallengeCard";
 
 
-
+import Leaderboard from "../components/Leaderboard";
 
 
 import { FaHistory } from "react-icons/fa";
@@ -52,6 +52,9 @@ const DesktopHome = () => {
 
     }
   }
+  const handleNavigateToCommunity = () => {
+    navigate("/community");
+  };
   useEffect(() => {
     if (JwtToken) {
       getUserData();
@@ -228,7 +231,7 @@ useEffect(() => {
       <div className="chatbot-bubble" onClick={handleToggleChatbot}>
         <img src={chatbot} alt="Chatbot" />
       </div>
-
+      <Leaderboard onClick={handleNavigateToCommunity} />
       {/* Chatbot Component */}
       <DesktopChatbot
         isOpen={isChatbotOpen}

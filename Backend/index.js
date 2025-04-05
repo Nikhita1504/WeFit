@@ -27,6 +27,7 @@ const challengeData = require("./Routes/challengeData");
 const ActiveChallengeRouter = require("./Routes/ActivechallengeRouter.js");
 const flaskRoutes = require("./Routes/flaskRoutes.js");  // Import Flask API routes
 const Historyrouter = require("./Routes/History.js");
+const Communityrouter = require("./Routes/Community.js");
 
 // Use Routes
 app.use("/api/users", userData);
@@ -34,6 +35,7 @@ app.use("/api/challenges", challengeData);
 app.use("/ActiveChallenge", ActiveChallengeRouter);
 app.use("/flask", flaskRoutes); // Mount Flask APIs under `/flask`
 app.use("/history" , Historyrouter)
+app.use("/community" , Communityrouter);
 
 // Socket.IO connection
 io.on("connection", (socket) => {

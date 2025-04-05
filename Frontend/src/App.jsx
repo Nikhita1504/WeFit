@@ -21,6 +21,7 @@ import { ChallengeProvider } from "./context/ChallengeContext";
 import Contractprovider from "./context/Contractprovider";
 import Capture from "./pages/Capture";
 import History from "./pages/History";
+import Community from "./pages/Community";
 
 
 function App() {
@@ -97,6 +98,16 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+               
+              <Route
+                path="/community"
+                element={
+                  <ProtectedRoute>
+                    <Community />
+                  </ProtectedRoute>
+                }
+              />
+              
 
               {/* Add more routes as needed */}
             </Routes>
