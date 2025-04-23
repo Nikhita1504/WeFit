@@ -83,7 +83,7 @@ router.post('/recommendations', async (req, res) => {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    const response = await axios.post('http://127.0.0.1:3002/recommend', req.body, {
+    const response = await axios.post('http://127.0.0.1:5000/recommend', req.body, {
       headers: {
         'Content-Type': 'application/json'
       }

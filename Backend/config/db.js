@@ -42,7 +42,7 @@ const userSchema = new mongoose.Schema({
     //   validator: function (v) {
     //     return /^0x[a-fA-F0-9]{40}$/.test(v);
     //   },
-    //   message: props => `${props.value} is not a valid wallet address!`
+    //   message: props => ${props.value} is not a valid wallet address!
     // }
   },
 

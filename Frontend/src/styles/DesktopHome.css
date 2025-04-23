@@ -1,4 +1,25 @@
 /* Enhanced Desktop Home CSS */
+.leaderboard-bubble {
+  position: fixed;
+  bottom: 120px; /* Position above the chatbot */
+  right: 30px;
+  width: 60px;
+  height: 60px;
+  background-color: #512E8B;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  z-index: 100;
+  transition: all 0.3s ease;
+}
+
+.leaderboard-bubble:hover {
+  transform: scale(1.1);
+  background-color: #3a1d66;
+}
 
 .desktop-home {
   width: 100%;

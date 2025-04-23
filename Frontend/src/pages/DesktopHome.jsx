@@ -2,7 +2,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
 
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 
 import ConnectWallet from "../components/ConnectWallet";
 import DesktopChatbot from "../components/DesktopChatbot";
@@ -20,7 +20,7 @@ import ActiveChallengeCard
   from "../components/ActiveChallengeCard";
 
 
-
+import Leaderboard from "../components/Leaderboard";
 
 
 import { FaHistory } from "react-icons/fa";
@@ -29,8 +29,9 @@ import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import useFitnessData from "../Utils/useStepCount";
 import HealthOverview from "../components/HealthOverview";
-import Leaderboard from "../components/LeaderBoard";
 import { ethers } from "ethers";
+import Contractcontext from "../context/contractcontext";
+import { toast } from "react-toastify";
 
 const DesktopHome = () => {
   const navigate = useNavigate();
@@ -40,11 +41,13 @@ const DesktopHome = () => {
   const { logout, JwtToken } = useAuth();
   const [isCameraOn, setIsCameraOn] = useState(false);
   const { todaySteps } = useFitnessData();
+  const { contract } = useContext(Contractcontext);
   useEffect(() => {
-    console.log(todaySteps);
-  })
+    console.log("1",todaySteps);
+  },[todaySteps])
 
   const [userData, setuserData] = useState();
+  // console.log(userData)
 
 
   const getUserData = async () => {
@@ -59,11 +62,10 @@ const DesktopHome = () => {
 
     }
   }
-  useEffect(() => {
-    if (JwtToken) {
-      getUserData();
-    }
-  }, [JwtToken]);
+  useEffect(()=>{
+    getUserData();
+  },[userData])
+
 
   // useEffect(() => {
   //   console.log('Step Data:', { todaySteps, 
@@ -120,7 +122,7 @@ const DesktopHome = () => {
   const chatMessages = [
     {
       sender: "bot",
-      text: "Hi there! I'm your StakeFit assistant. How can I help you today?",
+      text: "Hi there! I'm your WeFit assistant. How can I help you today?",
       timestamp: new Date().toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
@@ -168,70 +170,169 @@ const DesktopHome = () => {
 
     }
   }
-  
-  
-
-
-  const handleClaimReward = async () => {
-    // handleDeleteChallenge();
+  const handleAddtohistory = async () => {
     try {
-      const ethAmount = userData?.points*1/10;
-      const weiAmount = ethers.parseEther(parseFloat(ethAmount/157669).toFixed(18));
-      const ethReward=ethAmount/157669
-      setIsClaiming(true);
+      const token = localStorage.getItem("JwtToken");
 
+      if (!token) {
+        console.error("No JWT token found in localStorage");
+        alert("You need to be logged in to delete the challenge.");
+        return;
+      }
+
+      // Make the DELETE request using axios
+      const response = await axios.post(
+        `http://localhost:3000/history/create/${token}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // Handle successful response
+      console.log("history created  successfully:", response.data);
+
+      toast.success("history created  successfully!");
+    } catch (error) {
+      console.error("Error history created  challenge:", error);
+      alert("An error occurred while history created  .");
+    }
+  }
+  const handleDecreasePoints = async () => {
+    try {
+      const token = localStorage.getItem("JwtToken");
+      
+      if (!token) {
+        console.error("No JWT token found in localStorage");
+        toast.error("Please log in to update points");
+        return;
+      }
+  
+      const response = await axios.put(
+        `http://localhost:3000/api/users/resetPoints/${token}`,
+        {}, // No body needed since we're resetting to zero
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+  
+      if (response.data.success) {
+        console.log("Points reset to zero successfully");
+        // Optionally update your frontend state here
+      } else {
+        toast.error(response.data.message || "Failed to reset points");
+      }
+  
+    } catch (error) {
+      console.error("Error resetting points:", error);
+      toast.error(error.response?.data?.message || "Error resetting points");
+    }
+  };
+  // const handleClaimReward = async () => {
+  //   // handleDeleteChallenge();
+  //   console.log("hello")
+  //   try {
+  //     const ethAmount = userData?.points*1/10;
+  //     const weiAmount = ethers.parseEther(parseFloat(ethAmount/157669).toFixed(18));
+  //     const ethReward=ethAmount/157669
+  //     setIsClaiming(true);
+
+  //     if (!contract) {
+  //       alert("Contract not connected.");
+  //       return;
+  //     }
+
+  //    console.log("hello")
+
+  //     const tx = await contract.claimReward({value:weiAmount});
+  //     await tx.wait(); // Wait for transaction confirmation
+
+  //     console.log("hello")
+
+
+  //     toast.success("Rewards claimed successfully!");
+
+  //     handleDecreasePoints();
+  //     // handleAddRewardsEarned(ethReward);
+
+  //     handleAddtohistory();
+
+
+
+  //     // Optionally refresh the challenge data
+  //     // fetchActiveChallenge();
+
+  //   } catch (error) {
+  //     console.error("Error claiming reward:", error);
+  //     alert("Failed to claim rewards");
+  //   } finally {
+  //     setIsClaiming(false);
+  //   }
+  // };
+  const handleClaimReward = async () => {
+    try {
+      setIsClaiming(true);
+      
+      // Check if userData and points exist
+      if (!userData || userData.points === undefined || userData.points === null) {
+        alert("User points not available. Please refresh the page.");
+        return;
+      }
+      
       if (!contract) {
         alert("Contract not connected.");
         return;
       }
-
-      // Get the contract balance
-      // const contractBalance = await contract.getContractBalance();
-      // const formattedContractBalance = ethers.formatEther(contractBalance);
-
-      // Get the user's reward amount safely
-      // const userGoal = await contract.getUserGoal(account);
-      // if (!userGoal || userGoal.length < 2) {
-      //   alert("Failed to fetch user goal.");
-      //   return;
-      // }
-
-      // const [stake, reward] = userGoal;
-
-      // const formattedReward = ethers.formatEther(reward);
-
-      // Check if the contract has enough balance to pay the reward
-      // if (parseFloat(formattedContractBalance) < parseFloat(formattedReward)) {
-      //   alert("Insufficient contract balance to claim rewards.");
-      //   return;
-      // }
-
-      // Proceed with claiming reward
-      const tx = await contract.claimReward();
-      await tx.wait(); // Wait for transaction confirmation
-
-
-
+      
+      // Calculate the reward amount with proper checks
+      const points = Number(userData.points);
+      const ethAmount = points * 0.1; // Simplified from points * 1/10
+      
+      // Make sure ethAmount is valid before division
+      if (isNaN(ethAmount) || ethAmount <= 0) {
+        alert("Invalid point value. Cannot claim rewards.");
+        return;
+      }
+      
+      const ethReward = ethAmount / 157669;
+      
+      // Make sure ethReward is a valid number before formatting
+      if (isNaN(ethReward) || ethReward <= 0) {
+        alert("Invalid reward calculation. Cannot claim rewards.");
+        return;
+      }
+      
+      console.log("Points:", points);
+      console.log("ETH Amount:", ethAmount);
+      console.log("ETH Reward:", ethReward);
+      
+      // Format the value with proper checks
+      const ethValue = parseFloat(ethReward).toFixed(18);
+      console.log("ETH Value for parseEther:", ethValue);
+      const weiAmount = ethers.parseEther(ethValue);
+      
+      // Proceed with contract call
+      const tx = await contract.claimReward({value: weiAmount});
+      await tx.wait();
+      
+      console.log("Transaction completed");
+      
+      // Handle success
       toast.success("Rewards claimed successfully!");
-
-
-      handleAddRewardsEarned(ethReward);
-
-      handleAddtohistory();
-
-
-
-      // Optionally refresh the challenge data
-      // fetchActiveChallenge();
-
+      handleDecreasePoints();
+      // handleAddtohistory();
+      
     } catch (error) {
       console.error("Error claiming reward:", error);
-      alert("Failed to claim rewards");
+      alert(`Failed to claim rewards: ${error.message}`);
     } finally {
       setIsClaiming(false);
     }
   };
- 
   return (
     <div className="desktop-home">
       <div className="desktop-home__container">
@@ -242,17 +343,17 @@ const DesktopHome = () => {
               alt="Logo"
               className="desktop-home__logo-image"
             />
-            <div className="desktop-home__logo-text">Stake2Fit</div>
+            <div className="desktop-home__logo-text">WeFit</div>
           </div>
           <div className="flex gap-4 items-center">
             <div className="overflow-hidden">
               <ConnectWallet />
             </div>
             <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button className="connect-wallet px-4 py-2 bg-[#512E8B] text-white rounded-full hover:bg-[#3a1d66] transition-colors max-w-[180px] truncate font-mono">
-          🔥 {userData?.points}
-        </button>
+      <DropdownMenuTrigger >
+      <button className="connect-wallet px-4 py-2 bg-[#512E8B] text-white hover:bg-[#512E8B] hover:text-white rounded-full max-w-[180px] truncate font-mono">
+  🔥 {userData?.points}
+</button>
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="end" className="w-48 bg-[#1A0F2B] border border-[#301F4C] rounded-lg shadow-lg z-50">
@@ -265,14 +366,14 @@ const DesktopHome = () => {
 
           {/* Claim Reward Button */}
           <button
-            className="w-full px-3 py-1.5 rounded-full text-sm font-medium bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 transition-colors"
+            className="w-full px-3 py-1.5 rounded-full text-sm font-medium bg-gradient-to-r from-purple-600 to-pink-600 text-white "
             onClick={handleClaimReward}
           >
             Claim Reward
           </button>
 
           {/* Leaderboard Link */}
-          <button className="w-full px-3 py-1.5 text-sm text-center text-purple-300 hover:text-white hover:bg-[#3a1d66] rounded-full transition-colors">
+          <button className="w-full px-3 py-1.5 text-sm text-center text-purple-300  rounded-full ">
             View Leaderboard
           </button>
         </DropdownMenuItem>
@@ -316,7 +417,7 @@ const DesktopHome = () => {
         <div className="desktop-home__content">
           <div className="desktop-home__left-section">
             <div className="desktop-home__welcome">
-              <div className="desktop-home__title">Welcome To Stake2Fit</div>
+              <div className="desktop-home__title">Welcome To WeFit</div>
               <div className="desktop-home__subtitle">
                 Sweat, hustle, and earn
               </div>
@@ -324,7 +425,7 @@ const DesktopHome = () => {
                 className="herobutton"
                 onClick={() => navigate("/challenge")}
               >
-                Take on next challenge
+Show Recommendations
               </button>{" "}
             </div>
             <div className="flex flex-col flex-1"> {/* Added flex-1 */}
@@ -342,7 +443,27 @@ const DesktopHome = () => {
       <div className="chatbot-bubble" onClick={handleToggleChatbot}>
         <img src={chatbot} alt="Chatbot" />
       </div>
-
+      {/* <Leaderboard onClick={handleNavigateToCommunity} /> */}
+      <div className="leaderboard-bubble" onClick={handleNavigateToCommunity}>
+  <svg 
+    xmlns="http://www.w3.org/2000/svg" 
+    width="24" 
+    height="24" 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round"
+    className="text-white"
+  >
+    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+    <circle cx="9" cy="7" r="4"></circle>
+    <line x1="22" y1="21" x2="16" y2="21"></line>
+    <line x1="19" y1="17" x2="19" y2="21"></line>
+    <line x1="19" y1="13" x2="19" y2="15"></line>
+  </svg>
+</div>
       {/* Chatbot Component */}
       <DesktopChatbot
         isOpen={isChatbotOpen}

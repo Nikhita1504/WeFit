@@ -283,7 +283,42 @@ userData.put('/updateRewardsEarned/:token', authenticateToken, async (req, res) 
     });
   }
 });
+// In your user routes file (e.g., userData.js)
+userData.put('/resetPoints/:token', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId; // From authenticateToken middleware
 
+    // Reset points to zero
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { $set: { points: 0 } }, // Set points to zero
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Points reset to zero successfully",
+      data: {
+        points: updatedUser.points
+      }
+    });
+
+  } catch (error) {
+    console.error("Error resetting points:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message
+    });
+  }
+});
 
 module.exports = userData;
 

@@ -176,7 +176,7 @@ const DetailsCard = ({ challenge }) => {
         const stakeData = {
             challengeId: challenge._id,
             ethStaked: "7",
-            rewardsEarned: "6",
+            rewardsEarned: "50",
             isCompleted: false
         };
 

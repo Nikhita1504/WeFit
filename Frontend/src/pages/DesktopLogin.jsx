@@ -55,10 +55,10 @@ const DesktopLogin = () => {
             alt=""
             className="desktop-login-logo"
           />
-          <div className="desktop-login-brand-name">Stake2Fit</div>
+          <div className="desktop-login-brand-name">WeFit</div>
         </div>
         <div className="desktop-login-welcome-section">
-          <div className="desktop-login-title">Welcome To Stake2Fit</div>
+          <div className="desktop-login-title">Welcome To WeFit</div>
           <div className="desktop-login-subtitle">Sweat, hustle, and earn</div>
         </div>
         <div className="desktop-login-form-container">

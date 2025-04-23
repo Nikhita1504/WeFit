@@ -72,7 +72,7 @@ const ChallengeCard = ({ challenge, isRecommended, onClick }) => {
               {challenge.minStake || 0.01} ETH - {challenge.maxStake || 0.1} ETH
             </p> */}
             <p className="text-white text-lg">
-+5
++50
             </p>
           </div>
         </div>
