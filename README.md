@@ -1,6 +1,6 @@
 # 🏋️ WeFit - Blockchain-Powered Fitness Rewards App  
 
-![WeFit Banner](/assets/logo.png)   
+![WeFit Banner](WeFit/Frontend/src/assets)   
 
 A decentralized fitness app that **rewards users** for completing workouts using **blockchain-based subscriptions, AI-driven exercise recommendations, and live activity verification** via OpenCV.  
 
@@ -36,3 +36,14 @@ git clone https://github.com/your-repo/wefit.git
 cd wefit/frontend
 npm install
 npm start  # Runs on http://localhost:3000
+
+### **Backend (Node.js)
+cd backend
+npm install
+echo "API_KEY=your_google_fit_api_key" > .env
+npm run dev  # Runs on http://localhost:5000
+OpenCV Model (Python)
+bash
+cd model
+pip install -r requirements.txt
+python rep_counter.py  # Starts live rep verification
