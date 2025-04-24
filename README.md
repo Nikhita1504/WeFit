@@ -61,4 +61,8 @@ npm run dev  # Runs on http://localhost:3000
    pip install flask numpy opencv-python mediapipe flask_cors flask_socketio
 
 ![WeFit Banner](Frontend/src/assets/WeFit.png)    
+![WeFit Banner](Frontend/src/assets/2.png)    
+![WeFit Banner](Frontend/src/assets/3.png)    
+![WeFit Banner](Frontend/src/assets/4.png)    
+![WeFit Banner](Frontend/src/assets/5.png)    
   
