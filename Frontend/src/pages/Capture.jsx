@@ -164,9 +164,9 @@ function Capture() {
                 stopVideoStream();
                 const success = await handleCompleteExercise(exerciseId);
                 if (success) {
-                    alert("Exercise completed successfully!");
+                    toast.success("Exercise completed successfully!");
                 } else {
-                    alert("Exercise completed but failed to update server.");
+                    toast.success("Exercise completed but failed to update server.");
                 }
             };
             completeExercise();

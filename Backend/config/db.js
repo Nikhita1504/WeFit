@@ -166,3 +166,7 @@ const Challenge = mongoose.model('Challenge', challengeSchema);
 
 // Export both models
 module.exports = { User, Challenge };
+
+
+
+

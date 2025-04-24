@@ -49,7 +49,7 @@ function App() {
     return children;
   };
 
-  const ResponsiveHome = () => (isMobile ? <MobileHome /> : <DesktopHome />);
+  const ResponsiveHome = () => (isMobile ? <DesktopHome /> : <DesktopHome />);
   const ResponsiveLogin = () => (isMobile ? <MobileLogin /> : <DesktopLogin />);
 
   return (

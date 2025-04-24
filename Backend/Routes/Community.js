@@ -358,7 +358,75 @@ communityData.get('/:communityId/members', async (req, res) => {
   }
 });
 
+communityData.get('/community/:communityId/leaderboard', authenticateToken, async (req, res) => {
+  try {
+    const { communityId } = req.params;
 
+    // Get community members
+    const community = await Community.findById(communityId)
+      .populate({
+        path: 'members.userId',
+        select: 'name walletAddress points'
+      });
+
+    if (!community) {
+      return res.status(404).json({ message: 'Community not found' });
+    }
+
+    // Sort members by points (descending)
+    const sortedMembers = community.members
+      .map(member => ({
+        userId: member.userId,
+        points: member.userId.points || 0
+      }))
+      .sort((a, b) => b.points - a.points);
+
+    res.status(200).json({
+      success: true,
+      leaderboard: sortedMembers
+    });
+  } catch (error) {
+    console.error('Error fetching leaderboard:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+});
+
+// Update user points
+communityData.put('/users/:userId/points', authenticateToken, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { points } = req.body;
+
+    // Verify the requesting user has permission
+    if (req.user.userId !== userId) {
+      return res.status(403).json({ message: 'Unauthorized' });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { $set: { points } },
+      { new: true, select: 'name points' }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.status(200).json({
+      success: true,
+      user: updatedUser
+    });
+  } catch (error) {
+    console.error('Error updating points:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+});
 
 
 

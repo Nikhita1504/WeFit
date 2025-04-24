@@ -100,23 +100,62 @@ const CommunityChallenge = () => {
 
   const fetchCommunityMembers = async () => {
     try {
-      const response = await axios.get(`http://localhost:3000/community/${communityId}/members`);
-      // Filter out the leader from the members list
-      console.log(  "members", response.data)
-      
-      setCommunityMembers(response.data);
+      const token = localStorage.getItem("JwtToken");
+      const response = await axios.get(
+        `http://localhost:3000/community/${communityId}/members`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+  
+      console.log("Members data:", response.data);
+  
+      // Process and sort members by points (descending)
+      const processedMembers = response.data.map(member => ({
+        ...member,
+        points: member.points || 0  // Ensure points has a default value
+      }));
+  
+      const sortedMembers = [...processedMembers].sort((a, b) => b.points - a.points);
+  
+      setCommunityMembers(processedMembers);
+      setLeaderboard(sortedMembers); // Also update leaderboard with sorted data
+  
     } catch (error) {
       console.error("Error fetching community members:", error);
+      // Optional: Add error state handling
+      setCommunityMembers([]);
+      setLeaderboard([]);
     }
   };
-
+  
   const fetchLeaderboard = async () => {
-    // try {
-    //   const response = await axios.get(`http://localhost:3000/community/${communityId}/leaderboard`);
-    //   setLeaderboard(response.data.leaderboard);
-    // } catch (error) {
-    //   console.error("Error fetching leaderboard:", error);
-    // }
+    try {
+      const token = localStorage.getItem("JwtToken");
+      const response = await axios.get(
+        `http://localhost:3000/communityChallenge/community/${communityId}/leaderboard`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+  
+      // Process leaderboard data - ensure points exist and sort
+      const processedLeaderboard = (response.data.leaderboard || []).map(item => ({
+        ...item,
+        points: item.points || 0
+      })).sort((a, b) => b.points - a.points);
+  
+      setLeaderboard(processedLeaderboard);
+  
+    } catch (error) {
+      console.error("Error fetching leaderboard:", error);
+      // Optional: Add error state handling
+      setLeaderboard([]);
+    }
   };
 
   const checkIfUserIsLeader = () => {
@@ -134,6 +173,7 @@ const CommunityChallenge = () => {
         setTodayChallenge(response.data);
       } else {
         setTodayChallenge(null);
+        setShowModal(true)
       }
     } catch (error) {
       console.error("Error fetching today's challenge:", error);
@@ -257,27 +297,31 @@ const CommunityChallenge = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center bg-opacity-90">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-t-blue-500 border-gray-200"></div>
-          <p className="mt-4 text-lg">Loading community data...</p>
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-t-purple-500 border-gray-700"></div>
+          <p className="mt-4 text-lg text-purple-300">Loading community data...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
+    <div className="min-h-screen bg-navy-900 p-6 relative overflow-hidden" style={{ backgroundColor: '#0a1929' }}>
+      {/* Glowing corners */}
+      <div className="absolute top-0 left-0 w-64 h-64 rounded-full bg-purple-600 opacity-20 blur-3xl pointer-events-none"></div>
+      <div className="absolute bottom-0 right-0 w-96 h-96 rounded-full bg-teal-400 opacity-10 blur-3xl pointer-events-none"></div>
+      
       {/* Header with Community Name */}
-      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6 rounded-xl mb-8 shadow-lg">
+      <div className="bg-gradient-to-r from-purple-900 to-indigo-900 text-white p-6 rounded-xl mb-8 shadow-lg border border-purple-500 border-opacity-20">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold">{communityInfo?.name || "Community"}</h1>
-            <p className="text-indigo-100 mt-1">{communityInfo?.description || ""}</p>
+            <h1 className="text-3xl font-bold text-white">{communityInfo?.name || "Community"}</h1>
+            <p className="text-purple-200 mt-1">{communityInfo?.description || ""}</p>
           </div>
           <button
             onClick={() => navigate(-1)}
-            className="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-4 py-2 rounded-lg transition"
+            className="bg-white bg-opacity-10 hover:bg-opacity-20 text-white px-4 py-2 rounded-lg transition border border-white border-opacity-10"
           >
             Back
           </button>
@@ -287,37 +331,37 @@ const CommunityChallenge = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Current Challenge Section */}
         <div className="lg:col-span-2">
-          <div className="bg-white rounded-xl shadow-md p-6 mb-8">
-            <h2 className="text-2xl font-semibold mb-4 text-gray-800">Today's Challenge</h2>
+          <div className="bg-gray-900 bg-opacity-80 rounded-xl shadow-md p-6 mb-8 border border-purple-500 border-opacity-10">
+            <h2 className="text-2xl font-semibold mb-4 text-white">Today's Challenge</h2>
             
             {todayChallenge ? (
-              <div className="bg-gradient-to-r from-green-50 to-blue-50 p-5 rounded-lg">
-                <h3 className="text-xl font-semibold text-indigo-700 mb-2">{todayChallenge.name}</h3>
+              <div className="bg-gradient-to-r from-purple-900 to-indigo-900 p-5 rounded-lg border border-purple-500 border-opacity-20">
+                <h3 className="text-xl font-semibold text-purple-200 mb-2">{todayChallenge.name}</h3>
                 
                 <div className="grid grid-cols-2 gap-4 mb-4">
-                  <div className="bg-white bg-opacity-70 p-3 rounded-lg">
-                    <p className="text-sm text-gray-500">Type</p>
-                    <p className="font-medium capitalize">{todayChallenge.type}</p>
+                  <div className="bg-black bg-opacity-30 p-3 rounded-lg border border-purple-500 border-opacity-10">
+                    <p className="text-sm text-purple-300">Type</p>
+                    <p className="font-medium capitalize text-white">{todayChallenge.type}</p>
                   </div>
-                  <div className="bg-white bg-opacity-70 p-3 rounded-lg">
-                    <p className="text-sm text-gray-500">Difficulty</p>
-                    <p className="font-medium capitalize">{todayChallenge.difficulty}</p>
+                  <div className="bg-black bg-opacity-30 p-3 rounded-lg border border-purple-500 border-opacity-10">
+                    <p className="text-sm text-purple-300">Difficulty</p>
+                    <p className="font-medium capitalize text-white">{todayChallenge.difficulty}</p>
                   </div>
                 </div>
                 
                 {todayChallenge.stepGoal > 0 && (
-                  <div className="bg-white bg-opacity-70 p-3 rounded-lg mb-4">
-                    <p className="text-sm text-gray-500">Step Goal</p>
-                    <p className="font-medium">{todayChallenge.stepGoal.toLocaleString()} steps</p>
+                  <div className="bg-black bg-opacity-30 p-3 rounded-lg mb-4 border border-purple-500 border-opacity-10">
+                    <p className="text-sm text-purple-300">Step Goal</p>
+                    <p className="font-medium text-white">{todayChallenge.stepGoal.toLocaleString()} steps</p>
                   </div>
                 )}
                 
                 {todayChallenge.exercises && todayChallenge.exercises.length > 0 && (
-                  <div className="bg-white bg-opacity-70 p-3 rounded-lg mb-4">
-                    <p className="text-sm text-gray-500 mb-2">Exercises</p>
+                  <div className="bg-black bg-opacity-30 p-3 rounded-lg mb-4 border border-purple-500 border-opacity-10">
+                    <p className="text-sm text-purple-300 mb-2">Exercises</p>
                     <ul className="space-y-2">
                       {todayChallenge.exercises.map((ex, i) => (
-                        <li key={i} className="flex justify-between">
+                        <li key={i} className="flex justify-between text-white">
                           <span>{ex.name}</span>
                           <span className="font-medium">{ex.reps} reps</span>
                         </li>
@@ -327,116 +371,113 @@ const CommunityChallenge = () => {
                 )}
                 
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-white bg-opacity-70 p-3 rounded-lg">
-                    <p className="text-sm text-gray-500">Min Stake</p>
-                    <p className="font-medium">{todayChallenge.minStake} ETH</p>
+                  <div className="bg-black bg-opacity-30 p-3 rounded-lg border border-purple-500 border-opacity-10">
+                    <p className="text-sm text-purple-300">Min Stake</p>
+                    <p className="font-medium text-white">{todayChallenge.minStake} ETH</p>
                   </div>
-                  <div className="bg-white bg-opacity-70 p-3 rounded-lg">
-                    <p className="text-sm text-gray-500">Max Stake</p>
-                    <p className="font-medium">{todayChallenge.maxStake} ETH</p>
+                  <div className="bg-black bg-opacity-30 p-3 rounded-lg border border-purple-500 border-opacity-10">
+                    <p className="text-sm text-purple-300">Max Stake</p>
+                    <p className="font-medium text-white">{todayChallenge.maxStake} ETH</p>
                   </div>
                 </div>
+                
+                <button 
+                  onClick={() => handletakeonchallange(todayChallenge._id)}
+                  className="mt-6 w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-medium py-3 px-4 rounded-lg transition shadow-lg border border-purple-500 border-opacity-30"
+                >
+                  Take On Challenge
+                </button>
               </div>
             ) : (
-              <div className="bg-gray-50 p-5 rounded-lg text-center">
-                <p className="text-gray-600 mb-4">No challenge exists for today.</p>
+              <div className="bg-gray-800 p-5 rounded-lg text-center border border-purple-500 border-opacity-10">
+                <p className="text-gray-300 mb-4">No challenge exists for today.</p>
                 
                 {isUserLeader && (
                   <button
                     onClick={() => setShowModal(true)}
-                    className="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition shadow-md"
+                    className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-6 py-3 rounded-lg transition shadow-md border border-purple-500 border-opacity-30"
                   >
                     + Create Today's Challenge
                   </button>
                 )}
               </div>
             )}
-            <button onClick={()=>{
-              handletakeonchallange(todayChallenge._id)}}>Take on Challange</button>
           </div>
+
+
+          <button onClick={()=>setShowModal(!showModal)} className="text-white text-xl mb-1.5">create Challenge</button>
           
           {/* Community Members Section */}
-          <div className="bg-white rounded-xl shadow-md p-6">
-            <h2 className="text-2xl font-semibold mb-4 text-gray-800">Community Members</h2>
+          <div className="bg-gray-900 bg-opacity-80 rounded-xl shadow-md p-6 border border-purple-500 border-opacity-10">
+            <h2 className="text-2xl font-semibold mb-4 text-white">Community Members</h2>
             
-            {/* {communityMembers.length > 0 ? (
+            {communityMembers.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {communityMembers.map(member => (
-                  <div key={member._id} className="bg-gray-50 p-4 rounded-lg flex items-center">
-                    <div className="bg-gradient-to-r from-indigo-400 to-purple-400 w-10 h-10 rounded-full flex items-center justify-center text-white font-medium mr-3">
-                      {member.name ? member.name.charAt(0).toUpperCase() : "U"}
+                {communityMembers.map((member, index) => (
+                  <div key={index} className="bg-gray-800 bg-opacity-70 p-4 rounded-lg flex items-center border border-purple-500 border-opacity-10">
+                    <div className="bg-gradient-to-r from-purple-600 to-indigo-600 w-10 h-10 rounded-full flex items-center justify-center text-white font-medium mr-3 shadow-lg">
+                      {member.userId?.name ? member.userId.name.charAt(0).toUpperCase() : "U"}
                     </div>
                     <div>
-                      <p className="font-medium">{member.username || "User"}</p>
-                      <p className="text-sm text-gray-500 truncate">{member.walletAddress}</p>
+                      <p className="font-medium text-white">{member.userId?.name || "User"}</p>
+                      <p className="text-sm text-gray-400 truncate">{member.userId?.walletAddress || "No Wallet"}</p>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-gray-600 text-center py-4">No members found in this community.</p>
-            )} */}
-            {communityMembers.length > 0 ? (
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-    {communityMembers.map((member, index) => (
-      <div key={index} className="bg-gray-50 p-4 rounded-lg flex items-center">
-        <div className="bg-gradient-to-r from-indigo-400 to-purple-400 w-10 h-10 rounded-full flex items-center justify-center text-white font-medium mr-3">
-          {member.userId?.name ? member.userId.name.charAt(0).toUpperCase() : "U"}
-        </div>
-        <div>
-          <p className="font-medium">{member.userId?.name || "User"}</p>
-          <p className="text-sm text-gray-500 truncate">{member.userId?.walletAddress || "No Wallet"}</p>
-        </div>
-      </div>
-    ))}
-  </div>
-) : (
-  <p className="text-gray-600 text-center py-4">No members found in this community.</p>
-)}
-
+              <p className="text-gray-400 text-center py-4">No members found in this community.</p>
+            )}
           </div>
         </div>
         
         {/* Leaderboard Section */}
-        <div className="bg-white rounded-xl shadow-md p-6 h-fit">
-          <h2 className="text-2xl font-semibold mb-4 text-gray-800">Leaderboard</h2>
+        <div className="bg-gray-900 bg-opacity-80 rounded-xl shadow-md p-6 h-fit border border-purple-500 border-opacity-10">
+          <h2 className="text-2xl font-semibold mb-4 text-white flex items-center">
+            <span className="mr-2">🏆</span> Leaderboard
+          </h2>
           
           {leaderboard.length > 0 ? (
             <div className="space-y-4">
               {leaderboard.map((user, index) => (
                 <div 
-                  key={user._id} 
-                  className={`p-4 rounded-lg flex items-center justify-between ${
-                    index === 0 ? 'bg-gradient-to-r from-yellow-100 to-yellow-200' :
-                    index === 1 ? 'bg-gradient-to-r from-gray-100 to-gray-200' :
-                    index === 2 ? 'bg-gradient-to-r from-amber-100 to-amber-200' :
-                    'bg-gray-50'
-                  }`}
+                  key={index} 
+                  className={`p-4 rounded-lg flex items-center justify-between border ${
+                    index === 0 ? 'bg-gradient-to-r from-yellow-900 to-yellow-800 border-yellow-600' :
+                    index === 1 ? 'bg-gradient-to-r from-gray-800 to-gray-700 border-gray-500' :
+                    index === 2 ? 'bg-gradient-to-r from-amber-900 to-amber-800 border-amber-700' :
+                    'bg-gray-800 border-purple-500 border-opacity-10'
+                  } border-opacity-30`}
                 >
                   <div className="flex items-center">
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold mr-3 ${
                       index === 0 ? 'bg-yellow-500' :
-                      index === 1 ? 'bg-gray-500' :
-                      index === 2 ? 'bg-amber-700' :
-                      'bg-indigo-500'
+                      index === 1 ? 'bg-gray-400' :
+                      index === 2 ? 'bg-amber-600' :
+                      'bg-purple-600'
                     }`}>
                       {index + 1}
                     </div>
                     <div>
-                      <p className="font-medium">{user.username || "User"}</p>
-                      <p className="text-xs text-gray-500 truncate">{user.walletAddress}</p>
+                      <p className="font-medium text-white">{user.userId?.name || "User"}</p>
+                      <p className="text-xs text-gray-400 truncate">{user.userId?.walletAddress || "-"}</p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="font-bold text-lg">{user.points || 0}</p>
-                    <p className="text-xs text-gray-500">points</p>
+                    <p className={`font-bold text-lg ${
+                      index === 0 ? 'text-yellow-400' :
+                      index === 1 ? 'text-gray-300' :
+                      index === 2 ? 'text-amber-400' :
+                      'text-purple-300'
+                    }`}>{user.points || 0}</p>
+                    <p className="text-xs text-gray-400">points</p>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="bg-gray-50 p-5 rounded-lg text-center">
-              <p className="text-gray-600">No leaderboard data available.</p>
+            <div className="bg-gray-800 p-5 rounded-lg text-center border border-purple-500 border-opacity-10">
+              <p className="text-gray-400">No leaderboard data available.</p>
             </div>
           )}
         </div>
@@ -444,218 +485,227 @@ const CommunityChallenge = () => {
 
       {/* Create Challenge Modal */}
       {showModal && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-60">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-xl shadow-xl overflow-y-auto max-h-[90vh]">
-            <h2 className="text-2xl font-semibold mb-4 text-center text-gray-800">
-              Create Today's Challenge
-            </h2>
+  <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-90">
+    <div className="bg-[#1A0F2B] rounded-2xl p-8 w-full max-w-2xl shadow-xl overflow-y-auto max-h-[90vh] border-2 border-[#512E8B]">
+      <h2 className="text-2xl font-bold mb-6 text-center text-white">
+        Create Today's Challenge
+      </h2>
 
-            {/* Challenge Name */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1 text-gray-700">
-                Challenge Name*
-              </label>
+      <div className="space-y-6">
+        {/* Challenge Name */}
+        <div>
+          <label className="block text-sm font-medium mb-2 text-purple-300">
+            Challenge Name*
+          </label>
+          <input
+            type="text"
+            value={challengeName}
+            onChange={(e) => setChallengeName(e.target.value)}
+            className="w-full px-4 py-3 bg-[#2B1748] text-white rounded-lg border border-[#3A225D] focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            required
+          />
+        </div>
+
+        {/* Challenge Type */}
+        <div>
+          <label className="block text-sm font-medium mb-2 text-purple-300">
+            Challenge Type*
+          </label>
+          <select
+            value={challengeType}
+            onChange={(e) => setChallengeType(e.target.value)}
+            className="w-full px-4 py-3 bg-[#2B1748] text-white rounded-lg border border-[#3A225D] focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+          >
+            <option value="steps">Steps Only</option>
+            <option value="exercise">Exercise Only</option>
+            <option value="combo">Combo (Steps + Exercise)</option>
+          </select>
+        </div>
+
+        {/* Step Goal (conditionally shown) */}
+        {(challengeType === "steps" || challengeType === "combo") && (
+          <div>
+            <label className="block text-sm font-medium mb-2 text-purple-300">
+              Step Goal
+            </label>
+            <input
+              type="number"
+              value={stepGoal}
+              onChange={(e) => setStepGoal(e.target.value)}
+              placeholder="e.g., 6000"
+              className="w-full px-4 py-3 bg-[#2B1748] text-white rounded-lg border border-[#3A225D] focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            />
+          </div>
+        )}
+
+        {/* Exercises Section */}
+        <div className="space-y-4">
+          <label className="block text-sm font-medium text-purple-300">
+            Exercises*
+          </label>
+          
+          {exercises.map((exercise, index) => (
+            <div key={index} className="p-4 bg-[#2B1748] rounded-lg border border-[#3A225D] space-y-3">
               <input
                 type="text"
-                value={challengeName}
-                onChange={(e) => setChallengeName(e.target.value)}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                value={exercise.name}
+                onChange={(e) => updateExercise(index, "name", e.target.value)}
+                placeholder="Exercise Name*"
+                className="w-full px-4 py-2 bg-[#3A225D] text-white rounded-lg border border-[#4A2D7A]"
                 required
               />
-            </div>
-
-            {/* Challenge Type */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1 text-gray-700">
-                Challenge Type*
-              </label>
-              <select
-                value={challengeType}
-                onChange={(e) => setChallengeType(e.target.value)}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              >
-                <option value="steps">Steps Only</option>
-                <option value="exercise">Exercise Only</option>
-                <option value="combo">Combo (Steps + Exercise)</option>
-              </select>
-            </div>
-
-            {/* Step Goal */}
-            {(challengeType === "steps" || challengeType === "combo") && (
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-1 text-gray-700">
-                  Step Goal
-                </label>
-                <input
-                  type="number"
-                  value={stepGoal}
-                  onChange={(e) => setStepGoal(e.target.value)}
-                  placeholder="e.g., 6000"
-                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                />
-              </div>
-            )}
-              {/* Always show exercises for debugging */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-1 text-gray-700">Exercises*</label>
-                {exercises.map((exercise, index) => (
-                  <div key={index} className="flex flex-col gap-2 mb-4 p-3 bg-gray-50 rounded-lg">
-                    <input
-                      type="text"
-                      value={exercise.name}
-                      onChange={(e) => updateExercise(index, "name", e.target.value)}
-                      placeholder="Exercise Name*"
-                      className="w-full px-3 py-2 border rounded-md"
-                      required
-                    />
-                    <input
-                      type="number"
-                      value={exercise.reps}
-                      onChange={(e) => updateExercise(index, "reps", e.target.value)}
-                      placeholder="Required Reps*"
-                      className="w-full px-3 py-2 border rounded-md"
-                      required
-                    />
-                    <div className="flex items-center gap-2 mt-1">
-                      <label className="flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={exercise.isVideoRequired}
-                          onChange={() => toggleVideoRequired(index)}
-                          className="form-checkbox h-4 w-4 text-indigo-600"
-                        />
-                        <span className="ml-2 text-sm">Video Required for Verification</span>
-                      </label>
-                    </div>
-                  </div>
-                ))}
-                <button
-                  type="button"
-                  onClick={addExercise}
-                  className="text-indigo-500 hover:text-indigo-700 text-sm mt-1"
-                >
-                  + Add Exercise
-                </button>
-              </div>
-            {/* Stake Amount - Matches ethStaked in schema */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1 text-gray-700">
-                ETH Stake Amount*
-              </label>
               <input
-                type="text"
-                value={ethStaked}
-                onChange={(e) => setEthStaked(e.target.value.replace(/[^0-9.]/g, ''))}
-                placeholder="Amount to stake (ETH)"
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                pattern="^\d*\.?\d*$"
+                type="number"
+                value={exercise.reps}
+                onChange={(e) => updateExercise(index, "reps", e.target.value)}
+                placeholder="Required Reps*"
+                className="w-full px-4 py-2 bg-[#3A225D] text-white rounded-lg border border-[#4A2D7A]"
                 required
               />
-            </div>
-
-            {/* Stake Range */}
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <div>
-                <label className="block text-sm font-medium mb-1 text-gray-700">
-                  Min Stake (ETH)*
-                </label>
+              <div className="flex items-center">
                 <input
-                  type="text"
-                  value={minStake}
-                  onChange={(e) => setMinStake(e.target.value.replace(/[^0-9.]/g, ''))}
-                  placeholder="0.00001"
-                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  pattern="^\d*\.?\d*$"
-                  required
+                  type="checkbox"
+                  id={`video-required-${index}`}
+                  checked={exercise.isVideoRequired}
+                  onChange={() => toggleVideoRequired(index)}
+                  className="h-4 w-4 rounded border-[#3A225D] bg-[#2B1748] text-purple-500 focus:ring-purple-500"
                 />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1 text-gray-700">
-                  Max Stake (ETH)*
+                <label htmlFor={`video-required-${index}`} className="ml-2 text-sm text-gray-300">
+                  Video Required for Verification
                 </label>
-                <input
-                  type="text"
-                  value={maxStake}
-                  onChange={(e) => setMaxStake(e.target.value.replace(/[^0-9.]/g, ''))}
-                  placeholder="21"
-                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  pattern="^\d*\.?\d*$"
-                  required
-                />
               </div>
             </div>
+          ))}
 
-            {/* Reward Multiplier */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1 text-gray-700">
-                Reward Multiplier*
-              </label>
-              <input
-                type="text"
-                value={rewardMultiplier}
-                onChange={(e) => setRewardMultiplier(e.target.value.replace(/[^0-9.]/g, ''))}
-                placeholder="1.2"
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                pattern="^\d*\.?\d*$"
-                required
-              />
-            </div>
+          <button
+            type="button"
+            onClick={addExercise}
+            className="w-full py-2 bg-[#3A225D] text-purple-300 hover:bg-[#4A2D7A] hover:text-white rounded-lg border border-dashed border-[#512E8B] flex items-center justify-center gap-2"
+          >
+            <span className="text-lg">+</span> Add Exercise
+          </button>
+        </div>
 
-            {/* Difficulty */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1 text-gray-700">
-                Difficulty
-              </label>
-              <select
-                value={difficulty}
-                onChange={(e) => setDifficulty(e.target.value)}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              >
-                <option value="easy">Easy</option>
-                <option value="medium">Medium</option>
-                <option value="hard">Hard</option>
-              </select>
-            </div>
+        {/* Stake Amount */}
+        <div>
+          <label className="block text-sm font-medium mb-2 text-purple-300">
+            ETH Stake Amount*
+          </label>
+          <input
+            type="text"
+            value={ethStaked}
+            onChange={(e) => setEthStaked(e.target.value.replace(/[^0-9.]/g, ''))}
+            placeholder="Amount to stake (ETH)"
+            className="w-full px-4 py-3 bg-[#2B1748] text-white rounded-lg border border-[#3A225D] focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            pattern="^\d*\.?\d*$"
+            required
+          />
+        </div>
 
-            {/* Tags */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1 text-gray-700">
-                Tags (comma-separated)
-              </label>
-              <input
-                type="text"
-                value={tags.join(', ')}
-                onChange={handleTagChange}
-                placeholder="fitness, daily"
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-            </div>
-
-            {/* Buttons */}
-            <div className="flex justify-between mt-6">
-              <button
-                type="button"
-                onClick={() => setShowModal(false)}
-                className="bg-gray-300 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-400 transition"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleCreateChallenge}
-                className={`px-4 py-2 rounded-lg transition ${
-                  !challengeName || (challengeType !== "steps" && exercises.every(ex => !ex.name))
-                    ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-indigo-600 text-white hover:bg-indigo-700"
-                }`}
-                disabled={!challengeName || (challengeType !== "steps" && exercises.every(ex => !ex.name))}
-              >
-                Create Challenge
-              </button>
-            </div>
+        {/* Stake Range */}
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-2 text-purple-300">
+              Min Stake (ETH)*
+            </label>
+            <input
+              type="text"
+              value={minStake}
+              onChange={(e) => setMinStake(e.target.value.replace(/[^0-9.]/g, ''))}
+              placeholder="0.00001"
+              className="w-full px-4 py-3 bg-[#2B1748] text-white rounded-lg border border-[#3A225D] focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              pattern="^\d*\.?\d*$"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-2 text-purple-300">
+              Max Stake (ETH)*
+            </label>
+            <input
+              type="text"
+              value={maxStake}
+              onChange={(e) => setMaxStake(e.target.value.replace(/[^0-9.]/g, ''))}
+              placeholder="21"
+              className="w-full px-4 py-3 bg-[#2B1748] text-white rounded-lg border border-[#3A225D] focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              pattern="^\d*\.?\d*$"
+              required
+            />
           </div>
         </div>
-      )}
+
+        {/* Reward Multiplier */}
+        <div>
+          <label className="block text-sm font-medium mb-2 text-purple-300">
+            Reward Multiplier*
+          </label>
+          <input
+            type="text"
+            value={rewardMultiplier}
+            onChange={(e) => setRewardMultiplier(e.target.value.replace(/[^0-9.]/g, ''))}
+            placeholder="1.2"
+            className="w-full px-4 py-3 bg-[#2B1748] text-white rounded-lg border border-[#3A225D] focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            pattern="^\d*\.?\d*$"
+            required
+          />
+        </div>
+
+        {/* Difficulty */}
+        <div>
+          <label className="block text-sm font-medium mb-2 text-purple-300">
+            Difficulty
+          </label>
+          <select
+            value={difficulty}
+            onChange={(e) => setDifficulty(e.target.value)}
+            className="w-full px-4 py-3 bg-[#2B1748] text-white rounded-lg border border-[#3A225D] focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+          >
+            <option value="easy">Easy</option>
+            <option value="medium">Medium</option>
+            <option value="hard">Hard</option>
+          </select>
+        </div>
+
+        {/* Tags */}
+        <div>
+          <label className="block text-sm font-medium mb-2 text-purple-300">
+            Tags (comma-separated)
+          </label>
+          <input
+            type="text"
+            value={tags.join(', ')}
+            onChange={handleTagChange}
+            placeholder="fitness, daily"
+            className="w-full px-4 py-3 bg-[#2B1748] text-white rounded-lg border border-[#3A225D] focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+          />
+        </div>
+
+        {/* Form Actions */}
+        <div className="flex justify-end gap-4 pt-4">
+          <button
+            type="button"
+            onClick={() => setShowModal(true)}
+            className="px-6 py-2 bg-[#3A225D] text-gray-300 hover:bg-[#4A2D7A] hover:text-white rounded-lg transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={handleCreateChallenge}
+            disabled={!challengeName || (challengeType !== "steps" && exercises.every(ex => !ex.name))}
+            className={`px-6 py-2 rounded-lg transition-colors ${
+              !challengeName || (challengeType !== "steps" && exercises.every(ex => !ex.name))
+                ? "bg-gray-700 text-gray-500 cursor-not-allowed"
+                : "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white"
+            }`}
+          >
+            Create Challenge
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 };

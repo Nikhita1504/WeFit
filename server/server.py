@@ -109,3 +109,5 @@ if __name__ == "__main__":
             pushup_counter.stop()
             if pushup_thread and pushup_thread.is_alive():
                 pushup_thread.join(timeout=2.0)
+
+

@@ -151,5 +151,86 @@ router.post('/complete/:challengeId', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+router.get('/community/:communityId/leaderboard', authenticateToken, async (req, res) => {
+  try {
+    const { communityId } = req.params;
+
+    // 1. Get all completed challenges for this community
+    const challenges = await CommunityChallenge.find({
+      communityId,
+      'participants.completed': true
+    }).lean();
+
+    // 2. Aggregate user points and challenge completions
+    const userStats = {};
+
+    challenges.forEach(challenge => {
+      challenge.participants.forEach(participant => {
+        if (participant.completed) {
+          const userId = participant.userId.toString();
+          
+          if (!userStats[userId]) {
+            userStats[userId] = {
+              userId,
+              points: 0,
+              completedChallenges: 0,
+              lastCompleted: null
+            };
+          }
+
+          userStats[userId].points += challenge.rewardPoints || 10; // Default 10 points per challenge
+          userStats[userId].completedChallenges += 1;
+          userStats[userId].lastCompleted = 
+            new Date(Math.max(
+              new Date(participant.completedAt || challenge.updatedAt),
+              new Date(userStats[userId].lastCompleted || 0)
+            ));
+        }
+      });
+    });
+
+    // 3. Get user details for the leaderboard
+    const userIds = Object.keys(userStats);
+    const users = await User.find(
+      { _id: { $in: userIds } },
+      'name walletAddress avatar points'
+    ).lean();
+
+    // 4. Combine data for leaderboard
+    const leaderboard = users.map(user => {
+      const stats = userStats[user._id.toString()] || {
+        points: 0,
+        completedChallenges: 0
+      };
+      
+      return {
+        userId: {
+          _id: user._id,
+          name: user.name,
+          walletAddress: user.walletAddress,
+          avatar: user.avatar
+        },
+        points: stats.points + (user.points || 0), // Combine challenge points with base points
+        completedChallenges: stats.completedChallenges,
+        lastActivity: stats.lastCompleted
+      };
+    });
+
+    // 5. Sort by points (descending)
+    leaderboard.sort((a, b) => b.points - a.points);
+
+    res.status(200).json({
+      success: true,
+      leaderboard
+    });
+
+  } catch (error) {
+    console.error('Error fetching leaderboard:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+});
 
 module.exports = { router, initializeRouter };
