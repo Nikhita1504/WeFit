@@ -1,7 +1,5 @@
 # 🏋️ WeFit - Blockchain-Powered Fitness Rewards App  
 
-![WeFit Banner](WeFit/Frontend/src/assets)   
-
 A decentralized fitness app that **rewards users** for completing workouts using **blockchain-based subscriptions, AI-driven exercise recommendations, and live activity verification** via OpenCV.  
 
 ## ✨ Features  
@@ -28,7 +26,8 @@ A decentralized fitness app that **rewards users** for completing workouts using
 ### **Prerequisites**  
 - Node.js ≥ v16  
 - Python ≥ 3.8  
-- MetaMask (for blockchain interactions)  
+- MetaMask (for blockchain interactions)
+
 
 ### **Frontend (React)**  
 ```bash
@@ -36,14 +35,28 @@ git clone https://github.com/your-repo/wefit.git
 cd wefit/frontend
 npm install
 npm start  # Runs on http://localhost:3000
-
+```
 ### **Backend (Node.js)
+```bash
 cd backend
 npm install
 echo "API_KEY=your_google_fit_api_key" > .env
 npm run dev  # Runs on http://localhost:5000
-OpenCV Model (Python)
-bash
-cd model
-pip install -r requirements.txt
-python rep_counter.py  # Starts live rep verification
+```
+### **ML model and server**
+
+1. **Set up virtual environment**:
+   - **Mac/Linux**:
+     ```bash
+     python3 -m venv wefit-env
+     source wefit-env/bin/activate
+     ```
+   - **Windows**:
+     ```bash
+     python -m venv wefit-env
+     .\wefit-env\Scripts\activate
+     ```
+
+2. **Install dependencies**:
+   ```bash
+   pip install flask numpy opencv-python mediapipe flask_cors flask_socketio
