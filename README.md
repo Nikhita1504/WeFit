@@ -34,14 +34,13 @@ A decentralized fitness app that **rewards users** for completing workouts using
 git clone https://github.com/your-repo/wefit.git
 cd wefit/frontend
 npm install
-npm start  # Runs on http://localhost:3000
+npm start  # Runs on http://localhost:5173
 ```
-### **Backend (Node.js)
+### **Backend (Node.js)**
 ```bash
 cd backend
 npm install
-echo "API_KEY=your_google_fit_api_key" > .env
-npm run dev  # Runs on http://localhost:5000
+npm run dev  # Runs on http://localhost:3000
 ```
 ### **ML model and server**
 
@@ -60,3 +59,6 @@ npm run dev  # Runs on http://localhost:5000
 2. **Install dependencies**:
    ```bash
    pip install flask numpy opencv-python mediapipe flask_cors flask_socketio
+
+![WeFit Banner](Frontend/src/assets/WeFit.png)    
+  
