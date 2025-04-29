@@ -28,10 +28,22 @@ A decentralized fitness app that **rewards users** for completing workouts using
 - Python ≥ 3.8  
 - MetaMask (for blockchain interactions)
 
+## ** Frontend .env (Vite)**
+```bash
+# .env (frontend)
+VITE_GOOGLE_CLIENT_ID=your-google-client-id
+```
+## ** Backend.env **
+```bash
+# .env (backend)
+PORT=3000
+MONGO_URI=your-mongodb-uri
+JWT_SECRET=your-jwt-secret-key
+```
 
 ### **Frontend (React)**  
 ```bash
-git clone https://github.com/your-repo/wefit.git
+git clone https://github.com/Nikhita1504/wefit.git
 cd wefit/frontend
 npm install
 npm start  # Runs on http://localhost:5173
@@ -57,8 +69,15 @@ npm run dev  # Runs on http://localhost:3000
      ```
 
 2. **Install dependencies**:
+   **OpenCV & Pose Detection model dependencies**
    ```bash
    pip install flask numpy opencv-python mediapipe flask_cors flask_socketio
+   ```
+   **ML Model dependencies:**
+   ```bash
+   pip install flask flask-cors numpy pandas tensorflow scikit-learn
+   ```
+
 
 ![WeFit Banner](Frontend/src/assets/WeFit.png)    
 ![WeFit Banner](Frontend/src/assets/2.png)    
