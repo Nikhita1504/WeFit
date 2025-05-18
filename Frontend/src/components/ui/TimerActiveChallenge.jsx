@@ -1,3 +1,4 @@
+import { Timer } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 
 const TimerActiveChallenge = ({ fetchedData , handleDeleteChallenge }) => {
@@ -80,27 +81,24 @@ const TimerActiveChallenge = ({ fetchedData , handleDeleteChallenge }) => {
 
 
   return (
-    <div className="flex gap-3 items-start w-[225px]">
-      <div className="flex gap-6 items-center py-2 pr-8 pl-4 bg-purple-900 min-h-[74px] rounded-[140px] w-[225px] max-md:pr-5">
-        <img
-          src="https://cdn.builder.io/api/v1/image/assets/TEMP/cff239496af3f485e4fc3d530033b89091c58c13?placeholderIfAbsent=true&apiKey=1455cb398c424e78afe4261a4bb08b71"
-          className="object-contain shrink-0 self-stretch my-auto aspect-[0.98] rounded-[1030px] w-[52px]"
-          alt="Timer icon"
-        />
-        <div className="flex flex-col self-stretch my-auto w-[78px]">
-          <div className="self-start text-sm leading-loose text-center">Time Left</div>
-          <div className="flex gap-1 items-center w-full whitespace-nowrap">
-            <div className="self-stretch my-auto text-xl">
-              {timeLeft.hours}:{timeLeft.minutes}:{timeLeft.seconds}
-            </div>
-            <div className="self-stretch my-auto text-base font-medium leading-none text-center">sec</div>
-          </div>
-          {/* <div className="text-xs text-gray-300 mt-1">
-            Created: {creationDate} at {creationTime}
-          </div> */}
+    <div className="flex justify-center w-full">
+  <div className="flex gap-3 items-center py-2 px-4 bg-purple-900 min-h-[60px] rounded-full w-full max-w-[400px]">
+  <div className="bg-[#3A225D] p-1 text-center rounded-full  flex gap-3 items-center flex-1">
+  <Timer className="w-8 h-8" />
+  <div className="text-sm text-gray-300">Time Left</div>
+
+              </div>
+    <div className="flex gap-3 items-center flex-1">
+      <div className="flex items-baseline gap-1">
+        <div className="text-md font-medium">
+          {timeLeft.hours}:{timeLeft.minutes}:{timeLeft.seconds}
         </div>
+        <div className="text-sm text-gray-300">sec</div>
       </div>
     </div>
+  </div>
+</div>
+
   );
 };
 

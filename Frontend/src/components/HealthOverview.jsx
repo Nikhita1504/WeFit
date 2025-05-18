@@ -29,68 +29,11 @@ const HealthOverview = () => {
   }, [todaySteps, todayCalories, targets]);
 
   return (
-    <div className="p-6 bg-gradient-to-br from-gray-900 to-gray-950 rounded-2xl w-full shadow-lg border border-gray-800">
+    <div className="p-6 bg-gradient-to-br  from-gray-900 to-gray-950 rounded-2xl w-full shadow-lg border border-gray-800 flex items-center justify-center">
       
-      <div className="flex flex-row gap-6 items-center">
+
         {/* Left Column with Metrics */}
-        <div className="w-3/5 space-y-4">
-          {/* Steps Metric */}
-          <div className="p-3 bg-gray-800/50 rounded-lg border border-gray-700">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
-                <IoFootsteps className="text-emerald-400" size={18} />
-              </div>
-              <div className="flex-1">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-400">Steps</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-lg font-medium text-white">
-                    {todaySteps}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Calories Metric */}
-          <div className="p-3 bg-gray-800/50 rounded-lg border border-gray-700">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-red-500/10 border border-red-500/20">
-                <FaFire className="text-red-400" size={18} />
-              </div>
-              <div className="flex-1">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-400">Calories</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-lg font-medium text-white">
-                    {Math.floor( todayCalories) }
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Distance Metric */}
-          <div className="p-3 bg-gray-800/50 rounded-lg border border-gray-700">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-amber-500/10 border border-amber-500/20">
-                <RiPinDistanceFill className="text-amber-400" size={18} />
-              </div>
-              <div className="flex-1">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-400">Distance (km)</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-lg font-medium text-white">
-                    {3} {/* Placeholder distance */}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        
 
         {/* Right Column with Concentric Circles */}
         <div className="relative flex items-center justify-center w-3/5">
@@ -148,7 +91,7 @@ const HealthOverview = () => {
             </svg>
           </div>
         </div>
-      </div>
+
     </div>
   );
 };

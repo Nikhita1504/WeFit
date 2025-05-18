@@ -197,9 +197,11 @@ const Input = () => {
 
     return (
         <main className="p-8 w-full text-white bg-gray-950 min-h-screen">
-         
-            <div className="relative mx-auto max-w-[600px]">
-            <ConnectWallet/>
+        <div className="max-w-[600px] mx-auto">
+          <div className="flex justify-between mb-6">
+            <ConnectWallet />
+          </div>
+
                 <div className="absolute bg-indigo-700 rounded-full blur-[37.5px] h-[500px] opacity-15 w-[500px]" />
                 <div className="absolute right-0 bottom-0 bg-teal-400 rounded-full blur-[37.5px] h-[500px] opacity-15 w-[500px]" />
                 <h1 className="mb-8 text-3xl font-bold">Personal Details</h1>

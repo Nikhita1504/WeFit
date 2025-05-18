@@ -1,0 +1,75 @@
+version: '3'
+
+services:
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    environment:
+      - VITE_API_URL=http://backend:3000
+      - VITE_MODEL_URL=http://model:5000
+    networks:
+      - wefit-network
+
+  admin:
+    build:
+      context: ./Admin
+      dockerfile: Dockerfile
+    ports:
+      - "5174:5173"
+    depends_on:
+      - backend
+    environment:
+      - VITE_API_URL=http://backend:3000
+    networks:
+      - wefit-network
+
+  backend:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - MODEL_URL=http://model:5000
+      - SERVER_URL=http://server:3001
+    networks:
+      - wefit-network
+    volumes:
+      - backend_data:/app/data
+
+  model:
+    build:
+      context: ./model
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    networks:
+      - wefit-network
+    volumes:
+      - model_data:/app/data
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    networks:
+      - wefit-network
+    volumes:
+      - server_data:/app/data
+
+networks:
+  wefit-network:
+    driver: bridge
+
+volumes:
+  backend_data:
+  model_data:
+  server_data:
