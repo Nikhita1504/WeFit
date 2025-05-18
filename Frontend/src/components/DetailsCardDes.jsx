@@ -1,7 +1,4 @@
-import React, { useState } from "react";
-import { ArrowRight } from "lucide-react";
-import "../styles/DesktopHome.css";
-import { Button } from "./ui/button";
+import React from "react";
 import { cn } from "../lib/utils";
 
 const DetailsCardDes = ({
@@ -9,40 +6,38 @@ const DetailsCardDes = ({
   description1,
   description2,
   description3,
-
 }) => {
-
-
   return (
-    <div className="bg-[#1A0F2B] border-2 border-[#301F4C] mb-5 rounded-[11px] p-6">
-      <div className="flex justify-between items-start mb-5">
-        <div>
-          <h3 className="text-white text-2xl font-medium mb-7">{title}</h3>
-          <p className="text-[#CDCDCD] text-lg mb-2">{description1}</p>
-          <p className="text-[#CDCDCD] text-lg mb-2">{description2}</p>
-          <p className="text-[#CDCDCD] text-lg ">{description3}</p>
-
-
-        </div>
+    <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-[#2A1B3D] to-[#231634] border border-[#3A2C50] p-4 shadow-lg transition-all hover:shadow-purple-500/10">
+      {/* Decorative elements */}
+      <div className="absolute top-0 right-0 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
+      <div className="absolute bottom-0 left-0 w-16 h-16 bg-pink-500/10 rounded-full blur-xl -ml-6 -mb-6"></div>
+      
+      {/* Title section with accent */}
+      <div className="relative mb-3 pb-2 border-b border-purple-500/30">
+        <h3 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-pink-300">
+          {title}
+        </h3>
+        <div className="absolute bottom-0 left-0 h-[2px] w-16 bg-gradient-to-r from-purple-500 to-pink-500"></div>
       </div>
-      <div className="flex justify-between items-start mb-5">
-        <div>
-          <h3 className="text-white text-2xl font-medium mb-7">How is it beneficial for you</h3>
-          <ul>
-            <li>Increased Calorie Burn & Muscle Engagement
-Squats and push-ups engage multiple large muscle groups, increasing the intensity of the workout and leading to higher calorie burn compared to walking alone.</li>
-<br />
- <li>Muscle Building & Metabolism Boost
-These exercises help build lean muscle mass, which boosts your metabolism and allows you to burn more calories even at rest, leading to more efficient weight loss over time.</li>
-<br />
-<li> Enhanced Body Composition & Afterburn Effect
-Squats and push-ups create an afterburn effect (EPOC), keeping your metabolism elevated after exercise. This helps you burn more calories even after the workout ends, while improving body composition by reducing fat and building muscle</li>
-          </ul>
-          
-
-        </div>
+      
+      {/* Descriptions with improved visual hierarchy */}
+      <div className="space-y-2.5 text-sm">
+        <p className="text-gray-200 flex items-start">
+          <span className=" w-5 h-5 mr-2 flex-shrink-0 bg-purple-500/20 text-purple-300 rounded-full text-xs flex items-center justify-center">1</span>
+          <span>{description1}</span>
+        </p>
+        
+        <p className="text-gray-200 flex items-start">
+          <span className=" w-5 h-5 mr-2 flex-shrink-0 bg-purple-500/20 text-purple-300 rounded-full text-xs flex items-center justify-center">2</span>
+          <span>{description2}</span>
+        </p>
+        
+        <p className="text-gray-200 flex items-start">
+          <span className=" w-5 h-5 mr-2 flex-shrink-0 bg-purple-500/20 text-purple-300 rounded-full text-xs flex items-center justify-center">3</span>
+          <span>{description3}</span>
+        </p>
       </div>
-
     </div>
   );
 };

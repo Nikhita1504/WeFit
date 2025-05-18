@@ -1,11 +1,41 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/MobileLogin.css";
 import { useGoogleAuth } from "../utils/useGoogleAuth";
+import { useAuth } from "../context/AuthContext";
+import { jwtDecode } from "jwt-decode";
 
 const MobileLogin = ({ setIsLoggedIn }) => {
   const navigate = useNavigate();
+  const { token ,JwtToken} = useAuth();
   const { handleAuth } = useGoogleAuth();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (token && JwtToken) {
+      try {
+        const decoded = jwtDecode(JwtToken);
+        const email = decoded?.email;
+  
+        if (email) {
+          // Check if the user is new or not from the response
+          const isNewUser = decoded?.isNewUser;
+  
+          if (isNewUser) {
+            navigate("/input", {
+              state: {
+                email: email,
+              },
+            });
+          } else {
+            navigate("/");  // Returning user
+          }
+        }
+      } catch (err) {
+        console.error("JWT decode error:", err);
+      }
+    }
+  }, [token, JwtToken, navigate]);
 
   const handleGoogleLogin = async () => {
     console.log("Logging in with Google...");
@@ -31,7 +61,7 @@ const MobileLogin = ({ setIsLoggedIn }) => {
           <div className="mobile-login__form">
             <button 
               className="mobile-login__google-button"
-              onClick={handleGoogleLogin}
+              onClick={handleAuth}
             >
               <img
                 src="https://cdn.builder.io/api/v1/image/assets/TEMP/4f682fc250d802a3e05699a64f855ed2d67bede6"

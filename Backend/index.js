@@ -19,7 +19,7 @@ const httpServer = http.createServer(app);
 // Configure Socket.io
 const io = new Server(httpServer, {
   cors: {
-    origin: ["http://localhost:5173", "http://localhost:3000"],
+    origin: ["http://localhost:5173", "http://localhost:3000","https://fd57-2405-201-3001-2a-7d21-894a-45ab-8370.ngrok-free.app","http://localhost:4173/"],
     methods: ["GET", "POST"],
     credentials: true
   }
@@ -82,7 +82,9 @@ app.use("/communityChallenge", initializedCommunityChallengeRouter);
 app.use("/notifications" , NotificationRouter);
 app.use("/todaychallenge" , todayChallengeRouter);
 
-
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
 // Start server
 const PORT = process.env.PORT || 3000;
 httpServer.listen(PORT, () => {

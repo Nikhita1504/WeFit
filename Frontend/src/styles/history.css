@@ -141,13 +141,13 @@ select:focus {
   transform: scale(1.05);
 }
 
-.border-4.border-[#512E8B] {
+/* .border-4.border-[#512E8B] {
   transition: border-color 0.3s ease;
 }
 
 .border-4.border-[#512E8B]:hover {
   border-color: #6d4c9e;
-}
+} */
 
 /* Animations */
 @keyframes float {

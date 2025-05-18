@@ -1,329 +1,651 @@
-@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Inter:wght@400;500&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500&display=swap");
 
+/* Base styles */
 .mobile-home {
-  background-image: url("../assets/mobilebg.png");
+  background-color: #171926;
   margin: 0 auto;
-  
   width: 100%;
-  padding: 14px 15px 94px;
+  min-height: 100vh;
+  padding: 16px 16px 80px;
   overflow: hidden;
   position: relative;
+  color: #ffffff;
+  font-family: Poppins, -apple-system, Roboto, Helvetica, sans-serif;
 }
 
+/* Header styles */
 .mobile-home__header {
   display: flex;
-  min-height: 59px;
+  min-height: 50px;
   width: 100%;
-  align-items: flex-start;
-  gap: 100px;
-  font-family:
-    Poppins,
-    -apple-system,
-    Roboto,
-    Helvetica,
-    sans-serif;
-  font-size: 17px;
-  color: #ffffff;
-  font-weight: 500;
-  text-align: center;
-  line-height: 1;
+  align-items: center;
   justify-content: space-between;
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1;
+  position: relative;
 }
 
 .mobile-home__logo {
-  aspect-ratio: 0.57;
-  object-fit: contain;
-  object-position: center;
-  width: 33px;
-  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.connect-wallet {
-  border-radius: 21px;
-  background:linear-gradient(270deg, #8A2387 0%, #E94057 100%);  
-  min-height: 59px;
-  padding: 19px 22px;
-  width: 176px;
+.logo-circle {
+  width: 40px;
+  height: 40px;
+  background-color: #9c86e2;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #171926;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.logo-text {
+  font-size: 24px;
+  font-weight: 700;
   color: #ffffff;
-  font-family:
-    Poppins,
-    -apple-system,
-    Roboto,
-    Helvetica,
-    sans-serif;
-  font-size: 17px;
-  font-weight: 500;
-  border: none;
+}
+
+.logo-text span {
+  color: #e474a8;
+}
+
+/* Currency indicators */
+.currency-indicators {
+  display: flex;
+  gap: 12px;
+  position: relative;
+}
+
+.currency-pill {
+  background-color: #252837;
+  border-radius: 24px;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* User avatar and profile dropdown */
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
+  transition: transform 0.2s;
 }
 
-.mobile-home__title {
-  color: #ffffff;
-  font-size: 35px;
-  font-family:
-    Poppins,
-    -apple-system,
-    Roboto,
-    Helvetica,
-    sans-serif;
-  font-weight: 600;
-  margin-top: 17px;
+.user-avatar:hover {
+  transform: scale(1.05);
 }
 
-.mobile-home__stats {
+.profile-dropdown {
+  position: absolute;
+  top: 60px;
+  right: 0;
+  width: 180px;
+  background-color: #252837;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  z-index: 20;
+}
+
+.profile-option {
   display: flex;
-  margin-top: 17px;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
   width: 100%;
-  gap: 17px;
-  font-family:
-    Poppins,
-    -apple-system,
-    Roboto,
-    Helvetica,
-    sans-serif;
-  color: #ffffff;
+  border: none;
+  background-color: transparent;
+  color: white;
+  font-size: 16px;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.2s;
 }
 
-.mobile-home__stats-column {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
+.profile-option:hover {
+  background-color: #3a3c4e;
 }
 
-.stats-card {
-  border-radius: 23px;
-  background-color: rgba(48, 31, 76, 1);
-  padding: 10px 22px;
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  overflow: hidden;
-}
-.stats-cardd {
-  border-radius: 23px;
-  background-color: rgba(48, 31, 76, 1);
-  padding: 10px 22px;
-  display: flex;
-  justify-content:center ;
-  flex-direction: column;
-  align-items: center;
-  gap: 20px;
-  overflow: hidden;
+/* Welcome section */
+.welcome-section {
+  margin-top: 40px;
+  margin-bottom: 30px;
 }
 
-.stats-card--large {
-  flex-direction: column;
-  padding: 24px 32px;
-  align-items: center;
-  flex: 1;
+.welcome-section h1 {
+  font-size: 60px;
+  font-weight: 700;
+  margin: 0;
+  background: linear-gradient(to right, #9c86e2, #e474a8);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  line-height: 1;
 }
 
-.stats-card__icon {
-  width: 56px;
-  aspect-ratio: 0.98;
-  object-fit: contain;
-  object-position: center;
-}
-
-.stats-card--large .stats-card__icon {
-  width: 66px;
-  aspect-ratio: 1.03;
-}
-
-.stats-card__content {
-  flex: 1;
-}
-
-
-.stats-card__label {
-  font-size: 12px;
-  line-height: 22px;
-  font-weight: 400;
-}
-
-.stats-card__value-container {
-  display: flex;
-  align-items: center;
-  gap: 3px;
-}
-
-.stats-card__value {
-  font-size: 35px;
-  font-weight: 400;
-}
-
-.stats-card__suffix {
-  font-size: 12px;
+.welcome-section p {
+  font-size: 24px;
+  color: #9a9ba7;
+  margin-top: 8px;
   font-weight: 500;
 }
 
-.stake-section {
-  position: relative;
-  border-radius: 23px;
-  margin-top: 17px;
+/* Action Button */
+.action-button {
   width: 100%;
-  height: fit-content;
-  
-  padding: 19px 20px;
-  overflow: hidden;
-}
-
-.stake-section__background {
-  position: absolute;
-  inset: 0;
-  height: 100%;
-  width: 100%;
-  object-fit: cover;
-  object-position: center;
-}
-
-.stake-section__content {
-  position: relative;
-  z-index: 1;
-}
-
-.stake-section__title {
-  color: #ffffff;
-  font-size: 21px;
-  font-family:
-    Poppins,
-    -apple-system,
-    Roboto,
-    Helvetica,
-    sans-serif;
+  padding: 18px;
+  border-radius: 16px;
+  border: none;
+  font-size: 18px;
   font-weight: 600;
+  color: white;
+  background: linear-gradient(to right, #9c86e2, #e474a8);
+  cursor: pointer;
+  margin-bottom: 20px;
 }
 
-.stake-section__controls {
+/* Stats hint */
+.stats-hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #9a9ba7;
+  font-size: 16px;
+  margin-bottom: 20px;
+  padding: 10px;
+  border-radius: 12px;
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Progress Card */
+.progress-card {
+  background-color: #1e202d;
+  border-radius: 24px;
+  /* padding: 36px 16px; */
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.progress-percentage {
+  font-size: 56px;
+  font-weight: 700;
+  margin-bottom: 24px;
+}
+
+/* Stats Section */
+.stats-section {
+  transition: all 0.3s ease;
+}
+
+.slide-in {
+  animation: slideIn 0.3s forwards;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stats-section h2 {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.stat-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.stat-card {
+  background-color: #1e202d;
+  border-radius: 24px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+}
+
+.stat-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 16px;
+}
+
+.steps-icon {
+  background-color: #7ee5d1;
+}
+
+.calories-icon {
+  background-color: #f9917b;
+}
+
+.distance-icon {
+  background-color: #fedb67;
+}
+
+.stat-info {
+  flex: 1;
+}
+
+.stat-label {
+  font-size: 18px;
+  color: #9a9ba7;
+  margin-bottom: 4px;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+/* Challenge section */
+.challenge-section {
+  border-radius: 24px;
+  background-color: #1e202d;
+  margin: 24px 0;
+  padding: 24px;
+}
+
+.challenge-section h3 {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.challenge-empty {
+  color: #9a9ba7;
+  text-align: center;
+  padding: 24px 0;
+}
+
+.active-challenge {
+  background-color: #252837;
+  border-radius: 16px;
+  padding: 16px;
   margin-top: 16px;
 }
 
-.stake-section__input {
-  border-radius: 11px;
-  background-color: rgba(58, 31, 103, 1);
-  border: 1px solid rgba(115, 115, 115, 1);
+.challenge-header {
   display: flex;
-  padding: 12px 16px;
   align-items: center;
-  justify-content: space-between;
-  font-family:
-    Inter,
-    -apple-system,
-    Roboto,
-    Helvetica,
-    sans-serif;
-  font-size: 16px;
-  color: #fff;
-  font-weight: 400;
+  gap: 12px;
+  margin-bottom: 12px;
 }
 
-.stake-section__input-icon {
-  width: 16px;
-  aspect-ratio: 1;
-  object-fit: contain;
+.challenge-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #7ee5d1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.stake-section__button {
+.challenge-title {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.challenge-progress {
   width: 100%;
-  margin-top: 14px;
-  border-radius: 14px;
-  background-color: rgba(231, 64, 88, 1);
-  padding: 11px;
-  text-align: center;
-  font-family:
-    Poppins,
-    -apple-system,
-    Roboto,
-    Helvetica,
-    sans-serif;
-  font-size: 17px;
-  color: #ffffff;
-  font-weight: 500;
+  height: 8px;
+  background-color: #171926;
+  border-radius: 4px;
+  margin: 12px 0;
+  overflow: hidden;
+}
+
+.challenge-progress-bar {
+  height: 100%;
+  background: linear-gradient(to right, #9c86e2, #e474a8);
+  border-radius: 4px;
+  width: 30%; /* Adjustable based on actual progress */
+}
+
+.challenge-stats {
+  display: flex;
+  justify-content: space-between;
+  color: #9a9ba7;
+  font-size: 14px;
+}
+
+/* Floating action buttons */
+.floating-actions {
+  position: fixed;
+  bottom: 90px;
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  z-index: 50;
+}
+
+.floating-button {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background-color: #9c86e2;
   border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 24px;
+  box-shadow: 0 4px 12px rgba(156, 134, 226, 0.4);
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.floating-button:hover {
+  transform: scale(1.05);
+}
+
+.add-button {
+  background-color: #e474a8;
+  box-shadow: 0 4px 12px rgba(228, 116, 168, 0.4);
+}
+
+.leaderboard-button {
+  background-color: #9c86e2;
+}
+
+/* Chat input at bottom */
+.chat-input-container {
+  position: fixed;
+  bottom: 24px;
+  left: 16px;
+  right: 16px;
+  background-color: #252837;
+  border-radius: 24px;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  z-index: 10;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.chat-input-placeholder {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #9a9ba7;
+  font-size: 16px;
+}
+
+/* Chatbot styles */
+.chatbot {
+  position: fixed;
+  bottom: 24px;
+  left: 16px;
+  right: 16px;
+  height: 60vh;
+  background-color: #1e202d;
+  border-radius: 24px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.chatbot-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background: linear-gradient(to right, #9c86e2, #e474a8);
+  color: white;
+  font-weight: 600;
+}
+
+.chatbot-header button {
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 18px;
   cursor: pointer;
 }
 
-.mobile-home__info-box {
-  border-radius: 23px;
-  background-color: rgba(26, 15, 43, 1);
-  border: 2px solid rgba(48, 31, 76, 1);
-  margin-top: 17px;
-  padding: 21px 22px;
-  font-family:
-    Poppins,
-    -apple-system,
-    Roboto,
-    Helvetica,
-    sans-serif;
-}
-
-.mobile-home__info-title {
-  font-size: 17px;
-  font-weight: 500;
-  color: #ffffff;
-}
-
-.mobile-home__info-content {
-  color: rgba(173, 173, 173, 1);
-  font-size: 15px;
-  font-weight: 400;
-  line-height: 37px;
-  margin-top: 9px;
-}
-
-.mobile-home__chat-bar {
-  border-radius: 53px;
-  background-color: rgba(26, 15, 43, 1);
-  border: 2px solid rgba(48, 31, 76, 1);
-  display: flex;
-  min-height: 66px;
-  padding: 11px 10px;
-  align-items: center;
-  gap: 8px;
-  font-family:
-    Poppins,
-    -apple-system,
-    Roboto,
-    Helvetica,
-    sans-serif;
-  position: fixed;
-  bottom: 14px;
-  left: 15px;
-  right: 15px;
-  max-width: 450px;
-  margin: 0 auto;
-  z-index: 100;
-}
-
-.mobile-home__action-icon {
-  width: 45px;
-  aspect-ratio: 1;
-  object-fit: contain;
-  object-position: center;
-}
-
-.mobile-home__action-input {
+.chatbot-messages {
   flex: 1;
-  border-radius: 53px;
-  background-color: rgba(26, 15, 43, 1);
-  border: 2px solid rgba(48, 31, 76, 1);
+  overflow-y: auto;
+  padding: 16px;
   display: flex;
-  min-height: 45px;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.chatbot-message {
+  padding: 12px 16px;
+  border-radius: 18px;
+  max-width: 80%;
+  word-break: break-word;
+}
+
+.message-user {
+  align-self: flex-end;
+  background-color: #e474a8;
+  border-bottom-right-radius: 4px;
+}
+
+.message-bot {
+  align-self: flex-start;
+  background-color: #9c86e2;
+  border-bottom-left-radius: 4px;
+}
+
+.message-timestamp {
+  font-size: 12px;
+  opacity: 0.7;
+  margin-top: 4px;
+  text-align: right;
+}
+
+.chatbot-input {
+  display: flex;
+  padding: 12px 16px;
+  border-top: 1px solid #252837;
+  background-color: #1e202d;
+}
+
+.chatbot-input input {
+  flex: 1;
+  background-color: #252837;
+  border: none;
+  outline: none;
+  padding: 12px 16px;
+  border-radius: 20px;
   color: white;
-  padding: 12px 10px 12px 18px;
+  font-size: 16px;
+}
+
+.chatbot-input button {
+  width: 40px;
+  height: 40px;
+  margin-left: 10px;
+  background-color: #9c86e2;
+  border: none;
+  border-radius: 50%;
+  display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
+  cursor: pointer;
+  color: white;
 }
 
-.mobile-home__action-text {
-  color: rgba(171, 171, 171, 1);
-  font-size: 14px;
-  font-weight: 400;
+/* Media Queries */
+@media (max-width: 360px) {
+  .welcome-section h1 {
+    font-size: 48px;
+  }
+  
+  .welcome-section p {
+    font-size: 20px;
+  }
+  
+  .currency-pill {
+    padding: 6px 12px;
+    font-size: 16px;
+  }
+  
+  .floating-button {
+    width: 48px;
+    height: 48px;
+  }
+}
+/* Add these to your existing MobileHome.css */
+
+/* Action buttons container */
+.action-buttons {
+  margin-bottom: 24px;
 }
 
-.mobile-home__action-arrow {
-  width: 22px;
-  aspect-ratio: 1;
-  object-fit: contain;
+/* Connect Wallet button */
+.connect-button {
+  background: linear-gradient(to right, #9c86e2, #7ee5d1);
+}
+
+/* Show Recommendations button */
+.recommend-button {
+  background: linear-gradient(to right, #e474a8, #fedb67);
+}
+
+/* Section toggle buttons */
+.section-toggle {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.toggle-button {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 24px;
+  background-color: #252837;
+  color: #9a9ba7;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.toggle-button.active {
+  background: linear-gradient(to right, #9c86e2, #e474a8);
+  color: white;
+}
+
+/* Update currency indicators to hide/show based on connection */
+.currency-pill {
+  transition: opacity 0.3s ease;
+}
+
+.currency-pill.hidden {
+  opacity: 0;
+  width: 0;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+}
+.balance-pill {
+  position: relative;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.balance-pill:hover::after {
+  content: attr(title);
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: #171926;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 10;
+  margin-top: 5px;
+}
+
+/* Active Challenge Card Styles for Mobile */
+.challenge-section {
+  width: 100%;
+  padding: 0;
+  margin: 0 auto;
+  max-width: 100%;
+}
+
+.active-challenge {
+  background: #1A0F2B;
+  border: 1px solid #301F4C;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .challenge-section {
+    padding: 0 8px;
+  }
+  
+  .active-challenge {
+    padding: 12px;
+  }
+}
+
+/* If you want a tooltip effect instead */
+/* 
+.balance-pill:hover::after {
+  content: attr(title);
+  position: absolute;
+  top: -30px;
+  right: 0;
+  background: rgba(0,0,0,0.8);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 10;
+} */
+
+@media (min-width: 768px) {
+  .mobile-home {
+    max-width: 450px;
+    margin: 0 auto;
+  }
 }
